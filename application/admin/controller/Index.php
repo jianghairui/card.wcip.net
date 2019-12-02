@@ -2,9 +2,6 @@
 namespace app\admin\controller;
 use my\Auth;
 use think\Db;
-use think\Exception;
-use EasyWeChat\Factory;
-
 class Index extends Base
 {
     //首页
@@ -13,10 +10,6 @@ class Index extends Base
         $authlist = $auth->getAuthList(session('admin_id'));
         $this->assign('authlist',$authlist);
         return $this->fetch();
-    }
-    //查看需求详情
-    public function reqDetail() {
-
     }
 
     //上传图片限制512KB

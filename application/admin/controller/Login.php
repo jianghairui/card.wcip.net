@@ -7,23 +7,22 @@
  */
 namespace app\admin\controller;
 use think\Db;
-use think\Loader;
 class Login extends Base {
 
     public function index() {
-        if(session('username') && session('mploginstatus') && session('mploginstatus') == md5(session('username') . config('login_key'))) {
+        if(session('username') && session('loginstatus') && session('loginstatus') == md5(session('username') . config('login_key'))) {
             $this->redirect('Index/index');
             exit();
         }
 
-        $cookie = cookie('mp_password');
+        $cookie = cookie('password');
         if(isset($cookie) && $cookie != '') {
-            $data['mp_username'] = cookie('mp_username');
-            $data['mp_password'] = cookie('mp_password');
+            $data['username'] = cookie('username');
+            $data['password'] = cookie('password');
             $data['remember_pwd'] = 1;
         }else {
-            $data['mp_username'] = '';
-            $data['mp_password'] = '';
+            $data['username'] = '';
+            $data['password'] = '';
             $data['remember_pwd'] = 0;
         }
         $this->assign('data',$data);
@@ -39,7 +38,7 @@ class Login extends Base {
             $where['username'] = input('post.username');
             $where['password'] = md5(input('post.password') . config('login_key'));
             try {
-                $result = Db::table('mp_admin')->where($where)->find();
+                $result = Db::table('admin')->where($where)->find();
 
             }catch (\Exception $e) {
                 $this->error($e->getMessage(),url('Login/index'));
@@ -51,12 +50,12 @@ class Login extends Base {
                     exit($this->fetch('frozen'));
                 }
                 try {
-                    Db::table('mp_admin')->where($where)->setInc('login_times');
-                    Db::table('mp_admin')->where($where)->update(['last_login_time'=>time(),'last_login_ip'=>$this->getip()]);
+                    Db::table('admin')->where($where)->setInc('login_times');
+                    Db::table('admin')->where($where)->update(['last_login_time'=>time(),'last_login_ip'=>$this->getip()]);
                 }catch (\Exception $e) {
                     $this->error($e->getMessage(),url('Login/index'));
                 }
-                session('mploginstatus',md5(input('post.username') . config('login_key')));
+                session('loginstatus',md5(input('post.username') . config('login_key')));
                 session('admin_id',$result['id']);
                 session('username',$result['username']);
                 session('realname',$result['realname']);
@@ -65,11 +64,11 @@ class Login extends Base {
                 session('last_login_ip',$result['last_login_ip']);
 
                 if(input('post.remember_pwd') == 1) {
-                    cookie('mp_username',input('post.username'),3600*24*7);
-                    cookie('mp_password',input('post.password'),3600*24*7);
+                    cookie('username',input('post.username'),3600*24*7);
+                    cookie('password',input('post.password'),3600*24*7);
                 }else {
-                    cookie('mp_username',null);
-                    cookie('mp_password',null);
+                    cookie('username',null);
+                    cookie('password',null);
                 }
                 $this->log('登录账号',0);
             }else {
@@ -82,13 +81,7 @@ class Login extends Base {
     }
 
     public function logout() {
-        session('mploginstatus',null);
-        session('admin_id',null);
-        session('username',null);
-        session('realname',null);
-        session('login_times',null);
-        session('last_login_time',null);
-        session('last_login_ip',null);
+        session(null);
         $this->redirect('Login/index');
     }
 
@@ -99,31 +92,52 @@ class Login extends Base {
 
     public function personal() {
         $id = session('admin_id');
-        $info = Db::table('mp_admin')->where('id','=',$id)->find();
+        try {
+            $info = Db::table('admin')->where('id','=',$id)->find();
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
         $this->assign('info',$info);
         return $this->fetch();
     }
 
     public function modifyInfo() {
         $id = session('admin_id');
-        $val['realname'] = input('post.realname');
-        $val['gender'] = input('post.gender');
-        $val['tel'] = input('post.tel');
-        $val['email'] = input('post.email');
-        checkInput($val);
-        $val['password'] = input('post.password');
-        $val['desc'] = input('post.desc');
+        $val['password'] = input('post.password','');
         if($val['password']) {
             $val['password'] = md5($val['password'] . config('login_key'));
         }else {
-            unset($val['password']);
+            return ajax();
         }
         try {
-            Db::table('mp_admin')->where('id','=',$id)->update($val);
+            Db::table('admin')->where('id','=',$id)->update($val);
         }catch (\Exception $e) {
             return ajax($e->getMessage(),-1);
         }
-        return ajax($val,1);
+        return ajax();
+    }
+
+    protected function log($detail = '', $type = 0) {
+        $insert['detail'] = $detail;
+        $insert['admin_id'] = session('admin_id');
+        $insert['create_time'] = time();
+        $insert['ip'] = $this->getip();
+        $insert['type'] = $type;
+        Db::table('syslog')->insert($insert);
+    }
+
+
+    //获取访问来源IP
+    private function getip() {
+        $unknown = 'unknown';
+        if ( isset($_SERVER['HTTP_X_FORWARDED_FOR']) && $_SERVER['HTTP_X_FORWARDED_FOR'] && strcasecmp($_SERVER['HTTP_X_FORWARDED_FOR'], $unknown) ) {
+            $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+        } elseif ( isset($_SERVER['REMOTE_ADDR']) && $_SERVER['REMOTE_ADDR'] && strcasecmp($_SERVER['REMOTE_ADDR'], $unknown) ) {
+            $ip = $_SERVER['REMOTE_ADDR'];
+        }
+        if (false !== strpos($ip, ','))
+            $ip = reset(explode(',', $ip));
+        return $ip;
     }
 
 
