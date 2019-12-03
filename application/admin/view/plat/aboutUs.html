@@ -1,0 +1,252 @@
+<style>
+    .thumbnail{ width:200px}
+</style>
+<nav class="breadcrumb"><i class="Hui-iconfont">&#xe67f;</i> 首页 <span class="c-gray en">&gt;</span> 公司简介  <a class="btn btn-success radius r" style="line-height:1.6em;margin-top:3px" href="javascript:location.replace(location.href);" title="刷新" ><i class="Hui-iconfont">&#xe68f;</i></a></nav>
+<article class="page-container" style="width: 100%">
+    <form class="form form-horizontal" id="form-article-add">
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">
+                <span class="btn btn-primary btn-upload radius ml-10" title="logo">单位logo</span>
+            </label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <div class="uploader-thum-container">
+                    <div class="uploader-list">
+                        <img class="thumbnail" src="/{$info.logo}">
+                        <input type="file" name="file" id="logo" style="display: none;">
+                        <input type="hidden" name="logo" value="{$info.logo}">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2"><span class="c-red">*</span>单位名称：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <input type="text" class="input-text" value="{$info.name}" placeholder="" id="name" name="name" maxlength="30">
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">联系人：</label>
+            <div class="formControls col-xs-4 col-sm-4">
+                <input type="text" class="input-text" value="{$info.linkman}" placeholder="" id="linkman" name="linkman" maxlength="20">
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">联系人电话：</label>
+            <div class="formControls col-xs-4 col-sm-4">
+                <input type="text" class="input-text" value="{$info.tel}" placeholder="" id="tel" name="tel" maxlength="15">
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">QQ号：</label>
+            <div class="formControls col-xs-4 col-sm-4">
+                <input type="text" class="input-text" value="{$info.qq}" placeholder="" id="qq" name="qq" maxlength="15">
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2"></label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <span style="color:#ff4c4c">此QQ号将用于在线客服的客服QQ，请点击“<a href="https://shang.qq.com/v3/widget.html"><span style="color:#5a98de;">https://shang.qq.com/v3/widget.html</span></a>”前往登录此QQ并启用“QQ在线状态”服务</span>
+            </div>
+        </div>
+
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">联系邮箱：</label>
+            <div class="formControls col-xs-4 col-sm-4">
+                <input type="email" class="input-text" value="{$info.email}" placeholder="" id="email" name="email" maxlength="50">
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2"><span class="c-red">*</span>地址：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <input type="text" class="input-text" value="{$info.address}" placeholder="" id="address" name="address" maxlength="255">
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">
+                <span class="btn btn-primary btn-upload radius ml-10" title="qrcode1">公众号二维码</span>
+            </label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <div class="uploader-thum-container">
+                    <div class="uploader-list">
+                        <img class="thumbnail" src="/{$info.qrcode1}">
+                        <input type="file" name="file" id="qrcode1" style="display: none;">
+                        <input type="hidden" name="qrcode1" value="{$info.qrcode1}">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">
+                <span class="btn btn-primary btn-upload radius ml-10" title="qrcode2">微博二维码</span>
+            </label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <div class="uploader-thum-container">
+                    <div class="uploader-list">
+                        <img class="thumbnail" src="/{$info.qrcode2}">
+                        <input type="file" name="file" id="qrcode2" style="display: none;">
+                        <input type="hidden" name="qrcode2" value="{$info.qrcode2}">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">公司简介：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <textarea name="desc" cols="" rows="" class="textarea" maxlength="255" placeholder="" oninput="this.value.length<=255?$('#textlen1').text(this.value.length):$('#textlen1').text(255)" >{$info.desc}</textarea>
+                <p class="textarea-numberbar"><em class="textarea-length" id="textlen1">0</em>/255</p>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">公司详情：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <textarea id="editor" type="text/plain" name="intro" style="width:100%;height:400px;">{$info.intro|htmlspecialchars_decode}</textarea>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">战略规划：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <textarea id="editor1" type="text/plain" name="plan" style="width:100%;height:400px;">{$info.plan|htmlspecialchars_decode}</textarea>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">公司荣誉：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <textarea id="editor2" type="text/plain" name="honor" style="width:100%;height:400px;">{$info.honor|htmlspecialchars_decode}</textarea>
+            </div>
+        </div>
+        <div class="row cl">
+            <div class="col-xs-8 col-sm-9 col-xs-offset-4 col-sm-offset-2">
+                <button class="btn btn-primary radius" type="submit"><i class="Hui-iconfont">&#xe632;</i> 保存</button>
+            </div>
+        </div>
+        <input type="file" name="file" id="file" style="display: none;">
+    </form>
+</article>
+
+<script type="text/javascript" src="/lib/My97DatePicker/4.8/WdatePicker.js"></script>
+<script type="text/javascript" src="/lib/jquery.validation/1.14.0/jquery.validate.js"></script>
+<script type="text/javascript" src="/lib/jquery.validation/1.14.0/validate-methods.js"></script>
+<script type="text/javascript" src="/lib/jquery.validation/1.14.0/messages_zh.js"></script>
+
+<script type="text/javascript" src="/lib/ueditor/1.4.3/ueditor.config.js"></script>
+<script type="text/javascript" src="/lib/ueditor/1.4.3/ueditor.all.min.js"> </script>
+<script type="text/javascript" src="/lib/ueditor/1.4.3/lang/zh-cn/zh-cn.js"></script>
+<script type="text/javascript" src="/lib/checkfile.js"></script>
+<script type="text/javascript" src="/lib/ajaxfileupload.js"></script>
+
+<script type="text/javascript">
+    $(function(){
+
+        UE.getEditor('editor');
+        UE.getEditor('editor1');
+        UE.getEditor('editor2');
+
+        $('.skin-minimal input').iCheck({
+            checkboxClass: 'icheckbox-blue',
+            radioClass: 'iradio-blue',
+            increaseArea: '20%'
+        });
+
+        var isclick = true;
+        //表单验证
+        $("#form-article-add").validate({
+            rules:{
+                name: {
+                    required:true
+                },
+                linkman: {
+                    required:true
+                },
+                tel: {
+                    required:true
+                },
+                qq: {
+                    required:true
+                },
+                email: {
+                    required:true
+                },
+                address: {
+                    required:true
+                },
+                desc: {
+                    required:true
+                }
+            },
+            focusCleanup:false,
+            success:"valid",
+            submitHandler:function(form){
+                if(isclick === true) {
+                    isclick = false;
+                    $(form).ajaxSubmit({
+                        type: 'post',
+                        url: "{:url('Banner/home')}" ,
+                        success: function(data){
+                            // console.log(data);isclick=true;return;
+                            if(data.code == 1) {
+                                layer.msg('保存成功!',{icon:1,time:1000},function () {
+                                    window.location.reload();
+                                });
+                            }else {
+                                layer.msg(data.data,{icon:2,time:1000});
+                            }
+                            isclick = true
+
+                        },
+                        error: function(XmlHttpRequest, textStatus, errorThrown){
+                            layer.msg('接口请求失败!',{icon:5,time:1000});
+                            isclick = true
+                        }
+                    });
+                }
+
+            }
+        });
+
+        $(".btn-upload").click(function () {
+            var fileid = $(this).attr('title');
+            $(document).on("change","#"+fileid,function(){
+                if($("#"+fileid).val() != '') {
+                    ajaxFileUpload(fileid);
+                }else {
+                    console.log('未选择图片')
+                }
+            });
+            $("#"+fileid).click();
+        });
+
+
+
+        function ajaxFileUpload(fileId) {
+            if(checkfile(fileId,128) !== true) {
+                $("#"+fileId).val('');
+                return false;
+            }
+            $.ajaxFileUpload({
+                url: '{:url("Index/uploadImage")}', //用于文件上传的服务器端请求地址
+                secureuri: false, //是否需要安全协议，一般设置为false
+                fileElementId: fileId, //文件上传域的ID
+                dataType: 'json', //返回值类型 一般设置为json
+                success: function (data)  //服务器成功响应处理函数
+                {
+                    // console.log(data.data);
+                    var src = data.data.path;
+                    $("#"+fileId).next().val(src);
+                    $("#"+fileId).prev().attr("src","/"+src)
+                    $("#"+fileId).val('');
+                },
+                error: function (e) {
+                    console.log(e);
+                }
+            });
+            return false;
+        }
+
+
+
+        var textlen1 = $("textarea[name='desc']").val().length;
+        $("#textlen1").text(textlen1);
+
+
+    });
+</script>

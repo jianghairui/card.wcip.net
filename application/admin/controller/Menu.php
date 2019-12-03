@@ -21,7 +21,7 @@ class Menu extends Common {
         halt($obj);
 //        echo json_encode($obj);
 //        try {
-//            $list = Db::table('menu')->select();
+//            $list = Db::table('mp_menu')->select();
 //        } catch (\Exception $e) {
 //            die($e->getMessage());
 //        }

@@ -1,91 +1,61 @@
 <aside class="Hui-aside">
     <div class="menu_dropdown bk_2">
     {if session('username')===config('superman')}
-        <dl id="menu-member">
-            <dt><i class="Hui-iconfont">&#xe60d;</i> 设备管理<i class="Hui-iconfont menu_dropdown-arrow">&#xe6d5;</i></dt>
+        <dl id="menu-plat">
+            <dt><i class="iconfont">&#xe606;</i> 平台设置<i class="Hui-iconfont menu_dropdown-arrow">&#xe6d5;</i></dt>
             <dd>
                 <ul>
-                    <li><a data-href="{:url('Tissue/deviceList')}" data-title="设备列表" href="javascript:void(0);">设备列表</a></li>
-                    <li><a data-href="{:url('Tissue/orderList')}" data-title="订单列表" href="javascript:void(0);">订单列表</a></li>
+                    <li><a data-href="{:url('Plat/slideList')}" data-title="轮播图" href="javascript:void(0);">轮播图</a></li>
+                    <li><a data-href="{:url('Plat/aboutUs')}" data-title="关于我们" href="javascript:void(0);">关于我们</a></li>
+                </ul>
+            </dd>
+        </dl>
+        <dl id="menu-card">
+            <dt><i class="iconfont">&#xe607;</i> 卡牌管理<i class="Hui-iconfont menu_dropdown-arrow">&#xe6d5;</i></dt>
+            <dd>
+                <ul>
+                    <li><a data-href="{:url('Card/cardList')}" data-title="卡牌列表" href="javascript:void(0);">卡牌列表</a></li>
+                    <li><a data-href="{:url('Card/orderList')}" data-title="订单列表" href="javascript:void(0);">订单列表</a></li>
                 </ul>
             </dd>
         </dl>
         <dl id="menu-weixin">
-            <dt><i class="Hui-iconfont">&#xe60d;</i> 公众号<i class="Hui-iconfont menu_dropdown-arrow">&#xe6d5;</i></dt>
+            <dt><i class="iconfont">&#xe60d;</i> 公众号<i class="Hui-iconfont menu_dropdown-arrow">&#xe6d5;</i></dt>
             <dd>
                 <ul>
                     <li><a data-href="{:url('Menu/menuList')}" data-title="菜单设置" href="javascript:void(0);">菜单设置</a></li>
+                    <li><a data-href="{:url('Menu/menuList1')}" data-title="菜单设置" href="javascript:void(0);">菜单设置</a></li>
+                    <li><a data-href="{:url('Menu/menuList2')}" data-title="菜单设置" href="javascript:void(0);">菜单设置</a></li>
+                    <li><a data-href="{:url('Menu/menuList3')}" data-title="菜单设置" href="javascript:void(0);">菜单设置</a></li>
+                    <li><a data-href="{:url('Menu/menuList4')}" data-title="菜单设置" href="javascript:void(0);">菜单设置</a></li>
+                    <li><a data-href="{:url('Menu/menuList5')}" data-title="菜单设置" href="javascript:void(0);">菜单设置</a></li>
+                    <li><a data-href="{:url('Menu/menuList6')}" data-title="菜单设置" href="javascript:void(0);">菜单设置</a></li>
+                    <li><a data-href="{:url('Menu/menuList7')}" data-title="菜单设置" href="javascript:void(0);">菜单设置</a></li>
                 </ul>
             </dd>
         </dl>
-        <dl id="menu-admin">
-            <dt><i class="Hui-iconfont">&#xe62d;</i> 管理员管理<i class="Hui-iconfont menu_dropdown-arrow">&#xe6d5;</i></dt>
-            <dd>
-                <ul>
-                    <li><a data-href="{:url('Admin/adminlist')}" data-title="管理员列表" href="javascript:void(0)">管理员列表</a></li>
-                    <li><a data-href="{:url('Admin/grouplist')}" data-title="角色管理" href="javascript:void(0)">角色管理</a></li>
-                    <li><a data-href="{:url('Admin/rulelist')}" data-title="权限管理" href="javascript:void(0)">权限管理</a></li>
-                </ul>
-            </dd>
-        </dl>
-        <dl id="menu-system">
-            <dt><i class="Hui-iconfont">&#xe62e;</i> 系统管理<i class="Hui-iconfont menu_dropdown-arrow">&#xe6d5;</i></dt>
-            <dd>
-                <ul>
-                    <li><a data-href="{:url('System/syslog')}" data-title="系统日志" href="javascript:void(0)">系统日志</a></li>
-                </ul>
-            </dd>
-        </dl>
+        <!--<dl id="menu-admin">-->
+            <!--<dt><i class="Hui-iconfont">&#xe62d;</i> 管理员管理<i class="Hui-iconfont menu_dropdown-arrow">&#xe6d5;</i></dt>-->
+            <!--<dd>-->
+                <!--<ul>-->
+                    <!--<li><a data-href="{:url('Admin/adminlist')}" data-title="管理员列表" href="javascript:void(0)">管理员列表</a></li>-->
+                    <!--<li><a data-href="{:url('Admin/grouplist')}" data-title="角色管理" href="javascript:void(0)">角色管理</a></li>-->
+                    <!--<li><a data-href="{:url('Admin/rulelist')}" data-title="权限管理" href="javascript:void(0)">权限管理</a></li>-->
+                <!--</ul>-->
+            <!--</dd>-->
+        <!--</dl>-->
+        <!--<dl id="menu-system">-->
+            <!--<dt><i class="Hui-iconfont">&#xe62e;</i> 系统管理<i class="Hui-iconfont menu_dropdown-arrow">&#xe6d5;</i></dt>-->
+            <!--<dd>-->
+                <!--<ul>-->
+                    <!--<li><a data-href="{:url('System/syslog')}" data-title="系统日志" href="javascript:void(0)">系统日志</a></li>-->
+                <!--</ul>-->
+            <!--</dd>-->
+        <!--</dl>-->
 
     {else /}
 
-        {if in_array(strtolower('Tissue'),$authlist)}
-        <dl id="member">
-            <dt><i class="Hui-iconfont">&#xe60d;</i> 设备管理<i class="Hui-iconfont menu_dropdown-arrow">&#xe6d5;</i></dt>
-            <dd>
-                <ul>
-                    {if in_array(strtolower('Tissue/deviceList'),$authlist)}
-                    <li><a data-href="{:url('Tissue/deviceList')}" data-title="设备列表" href="javascript:void(0);">设备列表</a></li>
-                    {/if}
-                    {if in_array(strtolower('Tissue/orderList'),$authlist)}
-                    <li><a data-href="{:url('Tissue/orderList')}" data-title="订单列表" href="javascript:void(0);">订单列表</a></li>
-                    {/if}
-                </ul>
-            </dd>
-        </dl>
-        {/if}
 
-        {if in_array(strtolower('Admin'),$authlist)}
-        <dl id="admin">
-            <dt><i class="Hui-iconfont">&#xe62d;</i> 管理员管理<i class="Hui-iconfont menu_dropdown-arrow">&#xe6d5;</i></dt>
-            <dd>
-                <ul>
-                    {if in_array(strtolower('Admin/adminlist'),$authlist)}
-                    <li><a data-href="{:url('Admin/adminlist')}" data-title="管理员列表" href="javascript:void(0)">管理员列表</a></li>
-                    {/if}
-                    {if in_array(strtolower('Admin/grouplist'),$authlist)}
-                    <li><a data-href="{:url('Admin/grouplist')}" data-title="角色管理" href="javascript:void(0)">角色管理</a></li>
-                    {/if}
-                    {if in_array(strtolower('Admin/rulelist'),$authlist)}
-                    <li><a data-href="{:url('Admin/rulelist')}" data-title="权限管理" href="javascript:void(0)">权限管理</a></li>
-                    {/if}
-                </ul>
-            </dd>
-        </dl>
-        {/if}
-
-        {if in_array(strtolower('System'),$authlist)}
-        <dl id="system">
-            <dt><i class="Hui-iconfont">&#xe62e;</i> 系统管理<i class="Hui-iconfont menu_dropdown-arrow">&#xe6d5;</i></dt>
-            <dd>
-                <ul>
-                    {if in_array(strtolower('System/syslog'),$authlist)}
-                    <li><a data-href="{:url('System/syslog')}" data-title="系统日志" href="javascript:void(0);">系统日志</a></li>
-                    {/if}
-                </ul>
-            </dd>
-        </dl>
-        {/if}
     {/if}
 
     </div>

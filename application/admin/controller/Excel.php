@@ -24,19 +24,19 @@ class Excel extends Base {
             }
 
             if(session('username') !== config('superman')) {
-                $device_id = Db::table('admin')->where('id','=',session('admin_id'))->value('device_id');
+                $device_id = Db::table('mp_admin')->where('id','=',session('admin_id'))->value('device_id');
                 $device_ids = explode(',',$device_id);
                 $where[] = ['id','in',$device_ids];
                 if(empty($device_id)) {
                     $list = [];
                     $total_sum = 0;
                 }else {
-                    $list = Db::table('device')->where($where)->select();
-                    $total_sum = Db::table('device')->where($where)->sum('total_price');
+                    $list = Db::table('mp_device')->where($where)->select();
+                    $total_sum = Db::table('mp_device')->where($where)->sum('total_price');
                 }
             }else {
-                $list = Db::table('device')->where($where)->select();
-                $total_sum = Db::table('device')->where($where)->sum('total_price');
+                $list = Db::table('mp_device')->where($where)->select();
+                $total_sum = Db::table('mp_device')->where($where)->sum('total_price');
             }
 
             if($param['datemin'] || $param['datemax']) {
@@ -53,7 +53,7 @@ class Excel extends Base {
                 foreach ($list as &$vv) {
                     $mapMoney = $whereMoney;
                     $mapMoney[] = ['device_num','=',$vv['device_num']];
-                    $vv['total_price'] = Db::table('order')->where($mapMoney)->sum('total_price');
+                    $vv['total_price'] = Db::table('mp_order')->where($mapMoney)->sum('total_price');
                     $total_sum += $vv['total_price'];
                     unset($mapMoney);
                 }

@@ -51,7 +51,7 @@ class Api extends Common {
 
                             $device_id = $data['EventKey'];
                             try {
-                                $device = Db::table('device')->where('id','=',$device_id)->find();
+                                $device = Db::table('mp_device')->where('id','=',$device_id)->find();
                                 //$this->weixinLog($this->cmd,var_export($device,true));
                             } catch (\Exception $e) {
                                 $this->excep($this->cmd,$e->getMessage());
@@ -82,7 +82,7 @@ class Api extends Common {
                             if($data['EventKey']) {
                                 try {
                                     $device_id = explode('_',$data['EventKey'])[1];
-                                    $device = Db::table('device')->where('id','=',$device_id)->find();
+                                    $device = Db::table('mp_device')->where('id','=',$device_id)->find();
                                 } catch (\Exception $e) {
                                     $this->excep($this->cmd,$e->getMessage());
                                     exit('success');

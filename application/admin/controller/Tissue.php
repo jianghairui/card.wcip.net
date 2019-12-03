@@ -28,19 +28,19 @@ class Tissue extends Base {
             }
 
             if(session('username') !== config('superman')) {
-                $device_id = Db::table('admin')->where('id','=',session('admin_id'))->value('device_id');
+                $device_id = Db::table('mp_admin')->where('id','=',session('admin_id'))->value('device_id');
                 $device_ids = explode(',',$device_id);
                 $where[] = ['id','in',$device_ids];
                 if(empty($device_id)) {
                     $count = 0;
                     $list = [];
                 }else {
-                    $count = Db::table('device')->where($where)->count();
-                    $list = Db::table('device')->where($where)->limit(($curr_page - 1)*$perpage,$perpage)->select();
+                    $count = Db::table('mp_device')->where($where)->count();
+                    $list = Db::table('mp_device')->where($where)->limit(($curr_page - 1)*$perpage,$perpage)->select();
                 }
             }else {
-                $count = Db::table('device')->where($where)->count();
-                $list = Db::table('device')->where($where)->limit(($curr_page - 1)*$perpage,$perpage)->select();
+                $count = Db::table('mp_device')->where($where)->count();
+                $list = Db::table('mp_device')->where($where)->limit(($curr_page - 1)*$perpage,$perpage)->select();
             }
 
             if($param['datemin'] || $param['datemax']) {
@@ -56,7 +56,7 @@ class Tissue extends Base {
                 foreach ($list as &$v) {
                     $mapMoney = $whereMoney;
                     $mapMoney[] = ['device_num','=',$v['device_num']];
-                    $v['total_price'] = Db::table('order')->where($mapMoney)->sum('total_price');
+                    $v['total_price'] = Db::table('mp_order')->where($mapMoney)->sum('total_price');
                     unset($mapMoney);
                 }
             }
@@ -93,7 +93,7 @@ class Tissue extends Base {
             }
             try {
                 if(session('username') !== config('superman')) {
-                    $device_id = Db::table('admin')->where('id','=',session('admin_id'))->value('device_id');
+                    $device_id = Db::table('mp_admin')->where('id','=',session('admin_id'))->value('device_id');
                     $device_ids = explode(',',$device_id);
                     $whereDev = [
                         ['id','in',$device_ids]
@@ -102,16 +102,16 @@ class Tissue extends Base {
                         $count = 0;
                         $list = [];
                     }else {
-                        $device_nums = Db::table('device')->where($whereDev)->column('device_num');
+                        $device_nums = Db::table('mp_device')->where($whereDev)->column('device_num');
                         $where[] = ['device_num','in',$device_nums];
-                        $count = Db::table('order')->where($where)->count();
-                        $list = Db::table('order')
+                        $count = Db::table('mp_order')->where($where)->count();
+                        $list = Db::table('mp_order')
                             ->order(['id'=>'DESC'])
                             ->where($where)->limit(($curr_page - 1)*$perpage,$perpage)->select();
                     }
                 }else {
-                    $count = Db::table('order')->where($where)->count();
-                    $list = Db::table('order')
+                    $count = Db::table('mp_order')->where($where)->count();
+                    $list = Db::table('mp_order')
                         ->order(['id'=>'DESC'])
                         ->where($where)->limit(($curr_page - 1)*$perpage,$perpage)->select();
                 }
@@ -142,7 +142,7 @@ class Tissue extends Base {
                 ['status','=',1],
                 ['refund_apply','in',[0,1]],
             ];
-            $exist = Db::table('order')->where($where)->find();
+            $exist = Db::table('mp_order')->where($where)->find();
             if(!$exist) {
                 return ajax('订单不存在或状态已改变',-1);
             }
@@ -174,11 +174,11 @@ class Tissue extends Base {
                         'refund_apply' => 2,
                         'refund_time' => time()
                     ];
-                    Db::table('order')->where($where)->update($update_data);
+                    Db::table('mp_order')->where($where)->update($update_data);
                     $whereDevice = [
                         ['device_num','=',$exist['device_num']]
                     ];
-                    Db::table('device')->where($whereDevice)->setDec('total_price',$exist['total_price']);
+                    Db::table('mp_device')->where($whereDevice)->setDec('total_price',$exist['total_price']);
                     return ajax();
                 }else {
                     return ajax($res['err_code_des'],-1);
@@ -197,7 +197,7 @@ class Tissue extends Base {
             $where = [
                 ['id','=',$id]
             ];
-            $exist = Db::table('device')->where($where)->find();
+            $exist = Db::table('mp_device')->where($where)->find();
             if(!$exist) {
                 die('非法参数');
             }
@@ -217,11 +217,11 @@ class Tissue extends Base {
             $where = [
                 ['id','=',$val['id']]
             ];
-            $exist = Db::table('device')->where($where)->find();
+            $exist = Db::table('mp_device')->where($where)->find();
             if(!$exist) {
                 return ajax('非法参数',-1);
             }
-            Db::table('device')->where($where)->update($val);
+            Db::table('mp_device')->where($where)->update($val);
 
             $tissue = new Token();
             $access_token = $tissue->getAccessToken();
@@ -283,7 +283,7 @@ class Tissue extends Base {
 //        $deviceCode = '103602';
 //        $totalCount = 3;
 //        try {
-//            $device_exist = Db::table('device')->where('device_num',$deviceCode)->find();
+//            $device_exist = Db::table('mp_device')->where('device_num',$deviceCode)->find();
 //            if(!$device_exist) {
 //                return ajax('操作异常',-1);
 //            }
