@@ -6,7 +6,9 @@
  * Time: 15:49
  */
 namespace app\admin\controller;
+
 use wx\Jssdk;
+
 class Qrcode extends Common {
 
     public function sceneList() {
