@@ -48,12 +48,11 @@ class Plat extends Base {
     //添加轮播图POST
     public function slideAddPost() {
         $val['title'] = input('post.title');
-        $val['type'] = input('post.type',1);
         $val['status'] = input('post.status');
         checkInput($val);
         $val['url'] = input('post.url');
         if(isset($_FILES['file'])) {
-            $info = upload('file',$this->upload_base_path);
+            $info = upload('file',$this->upload_base_path . 'slide/');
             if($info['error'] === 0) {
                 $val['pic'] = $info['data'];
             }else {
@@ -101,7 +100,6 @@ class Plat extends Base {
     public function slideMod() {
         if(request()->isPost()) {
             $val['title'] = input('post.title');
-            $val['type'] = input('post.type');
             $val['id'] = input('post.slideid');
             $val['status'] = input('post.status');
             checkInput($val);
@@ -112,7 +110,7 @@ class Plat extends Base {
                     return ajax('非法操作',-1);
                 }
                 if(isset($_FILES['file'])) {
-                    $info = upload('file',$this->upload_base_path);
+                    $info = upload('file',$this->upload_base_path . 'slide/');
                     if($info['error'] === 0) {
                         $val['pic'] = $info['data'];
                     }else {
@@ -245,7 +243,7 @@ class Plat extends Base {
 
                 foreach ($pic as $k=>$v) {
                     if ($v != $exist[$k]) {
-                        $val[$k] = rename_file($v,$this->upload_base_path);
+                        $val[$k] = rename_file($v,$this->upload_base_path . 'plat/');
                     }else {
                         $val[$k] = $v;
                     }
@@ -328,7 +326,7 @@ class Plat extends Base {
 
                 foreach ($pic as $k=>$v) {
                     if ($v != $exist[$k]) {
-                        $val[$k] = rename_file($v,$this->upload_base_path);
+                        $val[$k] = rename_file($v,$this->upload_base_path . 'plat/');
                     }else {
                         $val[$k] = $v;
                     }

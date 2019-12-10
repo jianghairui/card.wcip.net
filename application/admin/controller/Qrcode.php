@@ -9,6 +9,22 @@ namespace app\admin\controller;
 use wx\Jssdk;
 class Qrcode extends Common {
 
+    public function sceneList() {
+
+    }
+
+    public function sceneAdd() {
+
+    }
+
+    public function sceneDetail() {
+
+    }
+
+    public function sceneMod() {
+
+    }
+
     //生成带参数的二维码
     public function getQrcodeWithParams() {
         $data = [

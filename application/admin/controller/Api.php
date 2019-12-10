@@ -9,7 +9,7 @@ namespace  app\admin\controller;
 use function Couchbase\defaultDecoder;
 use think\Db;
 use wx\Jssdk;
-class Api extends Common {
+class Api extends Base {
 
     public function index() {
         //验证第三方服务器

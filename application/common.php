@@ -330,9 +330,10 @@ function arr2xml($data, $root = true){
 }
 
 //后台上传图片
-function upload($k,$base_path = 'upload/admin/') {
-    if(checkfile($k) !== true) {
-        return array('error'=>1,'msg'=>checkfile($k));
+function upload($k,$base_path = 'upload/admin/',$limitSize = 512) {
+    $checkResult = checkfile($k,$limitSize);
+    if($checkResult !== true) {
+        return array('error'=>1,'msg'=>$checkResult);
     }
     $filename_array = explode('.',$_FILES[$k]['name']);
     $ext = array_pop($filename_array);
@@ -347,7 +348,7 @@ function upload($k,$base_path = 'upload/admin/') {
     return array('error'=>0,'data'=>$filepath);
 }
 //检验格式大小
-function checkfile($file) {
+function checkfile($file,$limitSize = 512) {
     $allowType = array(
         "image/gif",
         "image/jpeg",
@@ -362,8 +363,8 @@ function checkfile($file) {
     if(!in_array($_FILES[$file]["type"],$allowType)) {
         return '图片格式无效';
     }
-    if($_FILES[$file]["size"] > 1024*512) {
-        return '图片大小不超过512Kb';
+    if($_FILES[$file]["size"] > 1024*$limitSize) {
+        return '图片大小不超过'.$limitSize.'Kb';
     }
     if ($_FILES[$file]["error"] > 0) {
         return "error: " . $_FILES[$file]["error"];
