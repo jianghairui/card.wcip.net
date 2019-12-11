@@ -8,10 +8,10 @@
 namespace app\admin\controller;
 use think\Db;
 use my\Kuaidiniao;
+
 class Shop extends Base {
 //商品列表
     public function goodsList() {
-        $param['shop_id'] = input('param.shop_id','');
         $param['search'] = input('param.search');
         $page['query'] = http_build_query(input('param.'));
 
@@ -20,35 +20,24 @@ class Shop extends Base {
         $where = [];
 
         if($param['search']) {
-            $where[] = ['g.name','like',"%{$param['search']}%"];
-        }
-        if($param['shop_id'] !== '') {
-            $where[] = ['g.shop_id','=',$param['shop_id']];
+            $where[] = ['name','like',"%{$param['search']}%"];
         }
 
         try {
-            $count = Db::table('mp_goods')->alias('g')->where($where)->count();
+            $count = Db::table('mp_goods')->where($where)->count();
 
             $page['count'] = $count;
             $page['curr'] = $curr_page;
             $page['totalPage'] = ceil($count/$perpage);
-            $list = Db::table('mp_goods')->alias('g')
-                ->join('mp_user_role r','g.shop_id=r.uid','left')
+            $list = Db::table('mp_goods')
                 ->where($where)
-                ->field('g.*,r.name AS role_name,r.org,r.role')
                 ->limit(($curr_page - 1)*$perpage,$perpage)
-                ->order(['g.id'=>'DESC'])
+                ->order(['id'=>'DESC'])
                 ->select();
-            $whereFake = [
-                ['role_check','=',2],
-                ['role','>',0]
-            ];
-            $shoplist = Db::table('mp_user')->where($whereFake)->field('id,nickname,org,role,fake')->select();
         }catch (\Exception $e) {
             die('SQL错误: ' . $e->getMessage());
         }
 
-        $this->assign('shoplist',$shoplist);
         $this->assign('list',$list);
         $this->assign('param',$param);
         $this->assign('page',$page);
@@ -59,81 +48,37 @@ class Shop extends Base {
         try {
             $where = [
                 ['pid','=',0],
-                ['del','=',0],
-                ['status','=',1]
+                ['del','=',0]
             ];
-            $list = Db::table('mp_goods_cate')->where($where)->select();
-            $whereFake = [
-                ['role_check','=',2],
-                ['role','>',0]
-            ];
-            $fake_list = Db::table('mp_user')->where($whereFake)->field('id,nickname,org,role,fake')->select();
+            $cate_list = Db::table('mp_goods_cate')->where($where)->select();
         }catch (\Exception $e) {
             die($e->getMessage());
         }
-        $this->assign('list',$list);
-        $this->assign('fake_list',$fake_list);
+        $this->assign('cate_list',$cate_list);
         return $this->fetch();
-    }
-//添加修改商品时获取分类列表
-    public function getCateList() {
-        $pid = input('post.pid');
-        $where = [
-            ['pid','=',$pid],
-            ['del','=',0],
-            ['status','=',1]
-        ];
-        try {
-            $list = Db::table('mp_goods_cate')->where($where)->select();
-        }catch (\Exception $e) {
-            return ajax($e->getMessage(),-1);
-        }
-        return ajax($list);
     }
 //商品详情
     public function goodsDetail() {
         $id = input('param.id');
         try {
-            $wherecate = [
-                ['pid','=',0],
-                ['del','=',0]
-            ];
             $info = Db::table('mp_goods')->where('id','=',$id)->find();
             if(!$info) {
                 die('非法参数');
             }
-
-            $list = Db::table('mp_goods_cate')->where($wherecate)->select();
-
-            $wherepcate = [
-                ['pid','=',$info['pcate_id']],
+            $where = [
+                ['pid','=',0],
                 ['del','=',0]
             ];
-            $child = Db::table('mp_goods_cate')->where($wherepcate)->select();
-            $where_attr = [
-                ['goods_id','=',$id],
-                ['del','=',0]
-            ];
-            $attr_list = Db::table('mp_goods_attr')->where($where_attr)->select();
-            $whereFake = [
-                ['role_check','=',2],
-                ['role','>',0]
-            ];
-            $fake_list = Db::table('mp_user')->where($whereFake)->field('id,nickname,org,role,fake')->select();
+            $cate_list = Db::table('mp_goods_cate')->where($where)->select();
         }catch (\Exception $e) {
             die($e->getMessage());
         }
-        $this->assign('list',$list);
-        $this->assign('attr_list',$attr_list);
-        $this->assign('child',$child);
+        $this->assign('cate_list',$cate_list);
         $this->assign('info',$info);
-        $this->assign('qiniu_weburl',config('qiniu_weburl'));
-        $this->assign('fake_list',$fake_list);
         return $this->fetch();
     }
 //添加商品POST
     public function goodsAddPost() {
-        $val['pcate_id'] = input('post.pcate_id');
         $val['cate_id'] = input('post.cate_id');
         $val['name'] = input('post.name');
         $val['origin_price'] = input('post.origin_price');
@@ -147,84 +92,34 @@ class Shop extends Base {
         $val['carriage'] = input('post.carriage');
         $val['service'] = input('post.service');
         $val['status'] = input('post.status');
-        $val['shop_id'] = input('post.shop_id',0);
-        $val['create_time'] = time();
         checkInput($val);
-        $val['check'] = 1;
+        $val['create_time'] = time();
         $val['detail'] = input('post.detail');
-        $val['use_attr'] = input('post.use_attr','');
-        if($val['use_attr']) {
-            $attr1 = input('post.attr1',[]);
-            $attr2 = input('post.attr2',[]);
-            $attr3 = input('post.attr3',[]);
-
-            $val['attr'] = input('post.attr','');
-            if(!$val['attr'] || empty($attr1)) {
-                return ajax('至少添加一个规格',-1);
-            }
-            if(count($attr1) !== count($attr2) || count($attr1) !== count($attr3)) {
-                return ajax('属性规格异常',-1);
-            }
-            foreach ($attr1 as $v) {
-                if(!$v) {
-                    return ajax('属性规格值不能为空',-1);
-                }
-            }
-            foreach ($attr2 as $v) {
-                if(!is_currency($v)) {
-                    return ajax('属性金额格式不合法',-1);
-                }
-            }
-            foreach ($attr3 as $v) {
-                if(!if_int($v)) {
-                    return ajax('规格库存必须为数字',-1);
-                }
-            }
-        }
         $image = input('post.pic_url',[]);
 
         try {
+            $limit = 6;
             $image_array = [];
-            $limit = 9;
             if(is_array($image) && !empty($image)) {
                 if(count($image) > $limit) {
                     return ajax('最多上传'.$limit.'张图片',-1);
                 }
                 foreach ($image as $v) {
-                    $qiniu_exist = $this->qiniuFileExist($v);
-                    if($qiniu_exist !== true) {
-                        return ajax('图片已失效请重新上传',-1);
+                    if(!file_exists($v)) {
+                        return ajax('请重新上传图片',-1);
                     }
                 }
-            }else {
-                return ajax('请上传商品图片',-1);
-            }
-            foreach ($image as $v) {
-                $qiniu_move = $this->moveFile($v,'upload/goods/');
-                if($qiniu_move['code'] == 0) {
-                    $image_array[] = $qiniu_move['path'];
-                }else {
-                    return ajax($qiniu_move['msg'],-2);
+                foreach ($image as $v) {
+                    $image_array[] = rename_file($v,$this->upload_base_path . 'goods/');
                 }
+            }else {
+                return ajax('请上传图片',-1);
             }
             $val['pics'] = serialize($image_array);
-
-            $new_id = Db::table('mp_goods')->insertGetId($val);
-            if($val['use_attr']) {
-                $attr_insert = [];
-                foreach ($attr1 as $k=>$v) {
-                    $data['goods_id'] = $new_id;
-                    $data['value'] = $attr1[$k];
-                    $data['price'] = $attr2[$k];
-                    $data['stock'] = $attr3[$k];
-                    $data['create_time'] = time();
-                    $attr_insert[] = $data;
-                }
-                Db::table('mp_goods_attr')->insertAll($attr_insert);
-            }
+            Db::table('mp_goods')->insert($val);
         }catch (\Exception $e) {
             foreach ($image_array as $v) {
-                $this->rs_delete($v);
+                @unlink($v);
             }
             return ajax($e->getMessage(),-1);
         }
