@@ -416,6 +416,17 @@ function rename_file($tmp,$path = '') {
     return $path . $filename;
 }
 
+function create_dir($file_path = '') {
+    $position =  strripos($file_path,'/');
+    $dirname = substr($file_path,0,$position);
+    if(!$dirname) {
+        exit(json_encode(['msg'=>'invalid directory']));
+    }
+    if(!is_dir($file_path)) {
+        @mkdir($dirname,0755,true);
+    }
+}
+
 function checkInput($postArray) {
     if(empty($postArray)) {
         throw new HttpResponseException(ajax('数据不能为空',-3));

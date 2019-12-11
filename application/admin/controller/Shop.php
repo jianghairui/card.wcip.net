@@ -94,6 +94,7 @@ class Shop extends Base {
         $val['status'] = input('post.status');
         checkInput($val);
         $val['create_time'] = time();
+        $val['desc'] = input('post.desc');
         $val['detail'] = input('post.detail');
         $image = input('post.pic_url',[]);
 
@@ -127,7 +128,6 @@ class Shop extends Base {
     }
 //修改商品POST
     public function goodsModPost() {
-        $val['pcate_id'] = input('post.pcate_id');
         $val['cate_id'] = input('post.cate_id');
         $val['name'] = input('post.name');
         $val['origin_price'] = input('post.origin_price');
@@ -141,35 +141,11 @@ class Shop extends Base {
         $val['carriage'] = input('post.carriage');
         $val['service'] = input('post.service');
         $val['status'] = input('post.status');
-        $val['shop_id'] = input('post.shop_id',0);
         $val['id'] = input('post.id');
-        $val['create_time'] = time();
         checkInput($val);
+        $val['desc'] = input('post.desc');
         $val['detail'] = input('post.detail');
-        $val['use_attr'] = input('post.use_attr','');
-        if($val['use_attr']) {
-            $attr0 = input('post.attr0',[]);//attr_ids
-            $attr1 = input('post.attr1',[]);//属性值
-            $attr2 = input('post.attr2',[]);//金额
-            $attr3 = input('post.attr3',[]);//库存
-
-            $val['attr'] = input('post.attr','');//属性名
-            if(!$val['attr'] || empty($attr1)) {
-                return ajax('至少添加一个规格',-1);
-            }
-            if(count($attr1) !== count($attr2) || count($attr1) !== count($attr3)) {
-                return ajax('属性规格异常',-1);
-            }
-            foreach ($attr1 as $v) {
-                if(!$v) {return ajax('属性规格值不能为空',-1);}
-            }
-            foreach ($attr2 as $v) {
-                if(!is_currency($v)) {return ajax('属性金额格式不合法',-1);}
-            }
-            foreach ($attr3 as $v) {
-                if(!if_int($v)) {return ajax('规格库存必须为数字'.$v,-1);}
-            }
-        }
+        $val['create_time'] = time();
         $image = input('post.pic_url',[]);
 
         try {
@@ -183,72 +159,37 @@ class Shop extends Base {
             }
             $old_pics = unserialize($exist['pics']);
 
+            $limit = 6;
             $image_array = [];
-            $limit = 9;
             if(is_array($image) && !empty($image)) {
                 if(count($image) > $limit) {
                     return ajax('最多上传'.$limit.'张图片',-1);
                 }
                 foreach ($image as $v) {
-                    $qiniu_exist = $this->qiniuFileExist($v);
-                    if($qiniu_exist !== true) {
-                        return ajax('图片已失效请重新上传',-1);
+                    if(!file_exists($v)) {
+                        return ajax('请重新上传图片',-1);
                     }
+                }
+                foreach ($image as $v) {
+                    $image_array[] = rename_file($v,$this->upload_base_path . 'goods/');
                 }
             }else {
-                return ajax('请上传商品图片',-1);
-            }
-            foreach ($image as $v) {
-                $qiniu_move = $this->moveFile($v,'upload/goods/');
-                if($qiniu_move['code'] == 0) {
-                    $image_array[] = $qiniu_move['path'];
-                }else {
-                    return ajax($qiniu_move['msg'],-2);
-                }
+                return ajax('请上传图片',-1);
             }
             $val['pics'] = serialize($image_array);
-
             Db::table('mp_goods')->where($map)->update($val);
             //如果使用了规格
-            if($val['use_attr']) {
-                $whereAttr = [
-                    ['goods_id','=',$val['id']],
-                    ['del','=',0]
-                ];
-                $attr_ids = Db::table('mp_goods_attr')->where($whereAttr)->column('id');//原有规格
-                $attr_insert = [];
-                foreach ($attr1 as $k=>$v) {
-                    $data['goods_id'] = $val['id'];
-                    $data['value'] = $attr1[$k];
-                    $data['price'] = $attr2[$k];
-                    $data['stock'] = $attr3[$k];
-                    if($attr0[$k] == '') {
-                        $data['create_time'] = time();
-                        $attr_insert[] = $data;
-                    }else {
-                        Db::table('mp_goods_attr')->where('id','=',$attr0[$k])->update($data);
-                    }
-                }
-                Db::table('mp_goods_attr')->insertAll($attr_insert);
-                $whereDelete = [];
-                foreach ($attr_ids as $v) {
-                    if(!in_array($v,$attr0)) {$whereDelete[] = $v;}
-                }
-                if(!empty($whereDelete)) {
-                    Db::table('mp_goods_attr')->where('id','in',$whereDelete)->update(['del'=>1]);
-                }
-            }
         }catch (\Exception $e) {
             foreach ($image_array as $v) {
                 if(!in_array($v,$old_pics)) {
-                    $this->rs_delete($v);
+                    @unlink($v);
                 }
             }
-            return ajax($e->getMessage(),-1111);
+            return ajax($e->getMessage(),-1);
         }
         foreach ($old_pics as $v) {
             if(!in_array($v,$image_array)) {
-                $this->rs_delete($v);
+                @unlink($v);
             }
         }
         return ajax([],1);

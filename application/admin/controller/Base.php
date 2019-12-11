@@ -73,7 +73,7 @@ class Base extends Controller {
         }
     }
 
-    //
+    //公众号开发检验签名
     protected function checkSignature($param)
     {
         $token = $this->token;
@@ -88,10 +88,10 @@ class Base extends Controller {
         }
     }
 
-    //
-    protected function weixinLog($cmd = '',$msg = '') {
-        $file= ROOT_PATH . '/wechat.log';
-        $text='[Time ' . date('Y-m-d H:i:s') ."]  cmd:".$cmd."\n".$msg."\n---END---" . "\n";
+    //微信日志
+    protected function weixinlog($cmd = '',$msg = '') {
+        $file= LOG_PATH . '/wechat.log';
+        $text='[Time ' . date('Y-m-d H:i:s') ."]\ncmd:".$cmd."\n".$msg."\n---END---" . "\n";
         if(false !== fopen($file,'a+')){
             file_put_contents($file,$text,FILE_APPEND);
         }else{
@@ -99,10 +99,10 @@ class Base extends Controller {
         }
     }
 
-    //
+    //xml数据日志
     protected function xmllog($cmd = '',$msg = '') {
-        $file= ROOT_PATH . '/xmllog.txt';
-        $text='[Time ' . date('Y-m-d H:i:s') ."]  cmd:".$cmd."\n".$msg."\n---END---" . "\n";
+        $file= LOG_PATH . '/xml.log';
+        $text='[Time ' . date('Y-m-d H:i:s') ."]\ncmd:".$cmd."\n".$msg."\n---END---" . "\n";
         if(false !== fopen($file,'a+')){
             file_put_contents($file,$text,FILE_APPEND);
         }else{
@@ -112,7 +112,8 @@ class Base extends Controller {
 
     //Exception日志
     protected function excep($cmd,$str) {
-        $file= ROOT_PATH . '/exception.txt';
+        $file= LOG_PATH . '/exception.log';
+        create_dir($file);
         $text='[Time ' . date('Y-m-d H:i:s') ."]\ncmd:" .$cmd. "\n" .$str. "\n---END---" . "\n";
         if(false !== fopen($file,'a+')){
             file_put_contents($file,$text,FILE_APPEND);
@@ -121,9 +122,8 @@ class Base extends Controller {
         }
     }
 
-    public function pmkdir() {
 
-    }
+
 
 
 }

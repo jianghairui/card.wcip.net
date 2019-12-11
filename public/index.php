@@ -13,6 +13,7 @@
 namespace think;
 define('APP_PATH',__DIR__);
 define('ROOT_PATH',dirname(__DIR__));
+define('LOG_PATH',ROOT_PATH . '/log');
 // 加载基础文件
 
 require __DIR__ . '/../thinkphp/base.php';

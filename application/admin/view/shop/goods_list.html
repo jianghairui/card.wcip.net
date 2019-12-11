@@ -38,7 +38,7 @@
                 <td>{$li.sort}</td>
                 <td>
                     <?php $image = unserialize($li['pics'])[0];?>
-                    <div style="width: 80px;height: 80px;background-image: url('<?php echo config('qiniu_weburl');?>{$image}');background-position: center;background-repeat: no-repeat;background-size: 100%"></div>
+                    <div style="width: 80px;height: 80px;background-image: url('/{$image}');background-position: center;background-repeat: no-repeat;background-size: 100%"></div>
                 </td>
                 <td>{$li.name}</td>
                 <td>{$li.price}</td>

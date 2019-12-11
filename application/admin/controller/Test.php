@@ -13,11 +13,8 @@ class Test extends Controller {
 
 
     public function index() {
-        $path = ROOT_PATH . '/log/aaaa.jpg';
-        $position =  strripos($path,'/');
-        echo substr($path,0,$position);
-//        var_dump($place);
-//        echo strrchr($path,'/');
+        $arr = range('');
+        echo 'SUCCESS' . date('Y-m-d H:i:s');
 
     }
 

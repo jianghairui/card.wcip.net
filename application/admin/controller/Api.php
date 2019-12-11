@@ -15,7 +15,7 @@ class Api extends Base {
         //验证第三方服务器
         $param = input('param.');
         if(isset($param['echostr'])){
-            $this->weixinLog($this->cmd,var_export($param,true));
+            $this->weixinlog($this->cmd,var_export($param,true));
 //            $this->xmllog($this->cmd,var_export($param,true));
             $token = $this->token;
             $tmpArr = array($token,$param["timestamp"], $param["nonce"]);
@@ -47,12 +47,12 @@ class Api extends Base {
 //                            ];
 //                            exit(arr2xml($response_data));
 
-                            $this->weixinLog($this->cmd . '.SCAN',var_export($data,true));
+                            $this->weixinlog($this->cmd . '.SCAN',var_export($data,true));
 
                             $device_id = $data['EventKey'];
                             try {
                                 $device = Db::table('mp_device')->where('id','=',$device_id)->find();
-                                //$this->weixinLog($this->cmd,var_export($device,true));
+                                //$this->weixinlog($this->cmd,var_export($device,true));
                             } catch (\Exception $e) {
                                 $this->excep($this->cmd,$e->getMessage());
                                 exit('success');
@@ -78,7 +78,7 @@ class Api extends Base {
                         case 'subscribe':
                             //带参数关注
 
-                            $this->weixinLog($this->cmd . '.subscribe',var_export($data,true));
+                            $this->weixinlog($this->cmd . '.subscribe',var_export($data,true));
                             if($data['EventKey']) {
                                 try {
                                     $device_id = explode('_',$data['EventKey'])[1];
