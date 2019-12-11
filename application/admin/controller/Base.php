@@ -50,6 +50,7 @@ class Base extends Controller {
             'Login/vcode',
             'Login/login',
             'Api',
+            'Test',
         ];
         if (in_array($this->cmd, $noNeedSession) || in_array($this->controller, $noNeedSession)) {
             return true;

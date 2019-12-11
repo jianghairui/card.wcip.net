@@ -7,13 +7,13 @@
  */
 namespace app\admin\controller;
 
-use think\Controller;
-
-class Test extends Controller {
+class Test extends Base {
 
 
     public function index() {
-        $arr = range('');
+        $arr = range('a','e');
+        $this->excep($this->cmd,var_export($arr,true));
+//        halt($arr);
         echo 'SUCCESS' . date('Y-m-d H:i:s');
 
     }
