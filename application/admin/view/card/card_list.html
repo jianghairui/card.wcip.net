@@ -22,14 +22,14 @@
         <thead>
         <tr class="text-c">
             <th width="25">#</th>
-            <th>卡牌名</th>
-            <th width="80">卡牌名称</th>
+            <th width="80">图片</th>
+            <th width="150">卡牌名</th>
             <th width="120">资源值</th>
             <th width="80">阵营</th>
             <th width="80">类型</th>
             <th width="80">能力</th>
             <th width="80">属性</th>
-            <th width="80">版本</th>
+            <th width="150">版本</th>
             <th width="80">状态</th>
             <th width="130">操作</th>
         </tr>
@@ -39,14 +39,23 @@
             {foreach $list as $li}
             <tr class="text-c userinfo">
                 <td>{$li.id}</td>
+                <td>
+                    <div style="width: 80px;height: 120px;background-image: url('/{$li.pic}');background-position: center;background-repeat: no-repeat;background-size: 100%"></div>
+                </td>
                 <td>{$li.card_name}</td>
-                <td>{$li.resource}</td>
-                <td>{$li.camp_id}</td>
-                <td>{$li.type_id}</td>
-                <td>{$li.ability_id}</td>
-                <td>{$li.attr_id}</td>
-                <td>{$li.version_id}</td>
-                <td>{$li.stock}</td>
+                <td>
+                    {switch $li['resource']}
+                    {case -2}无{/case}
+                    {case -1}x{/case}
+                    {default /}{$li['resource']}
+                    {/switch}
+                </td>
+                <td>{if isset($camp[$li['camp_id']])}{$camp[$li['camp_id']]}{/if}</td>
+                <td>{if isset($type[$li['type_id']])}{$type[$li['type_id']]}{/if}</td>
+                <td>{if isset($ability[$li['ability_id']])}{$ability[$li['ability_id']]}{/if}</td>
+                <td>{if isset($attr[$li['attr_id']])}{$attr[$li['attr_id']]}{/if}</td>
+                <td>{if isset($version[$li['version_id']])}{$version[$li['version_id']]}{/if}</td>
+                <td>{$li.status}</td>
                 <td>
                     <span>
                         <a title="编辑" href="javascript:;" class="ml-5" style="text-decoration:none" onclick="pagefull('卡牌详情','{:url("Card/cardDetail",array("id"=>$li["id"]))}')">

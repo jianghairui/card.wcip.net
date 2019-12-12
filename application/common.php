@@ -429,11 +429,11 @@ function create_dir($file_path = '') {
 
 function checkInput($postArray) {
     if(empty($postArray)) {
-        throw new HttpResponseException(ajax('数据不能为空',-3));
+        throw new HttpResponseException(ajax('数据不能为空',-2));
     }
     foreach ($postArray as $value) {
         if (is_null($value) || $value === '') {
-            throw new HttpResponseException(ajax('数据不能为空',-3));
+            throw new HttpResponseException(ajax('数据不能为空',-2));
         }
     }
     return true;

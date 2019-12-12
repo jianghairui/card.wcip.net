@@ -36,7 +36,7 @@ class Base extends Controller {
 
         if(!$this->needSession()) {
             if(request()->isPost()) {
-                throw new HttpResponseException(ajax([],-2));
+                throw new HttpResponseException(ajax([],-5));
             }else {
                 $this->error('请登录后操作',url('Login/index'));
             }
