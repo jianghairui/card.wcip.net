@@ -289,69 +289,42 @@ class Shop extends Base {
     }
 
 
-
-
-
-
-
-
-
-
-
 //分类列表
     public function cateList() {
-        $pid = input('param.pid',0);
         $where = [
-            ['pid','=',$pid],
             ['del','=',0]
         ];
         try {
             $list = Db::table('mp_goods_cate')->where($where)->select();
-            $pcate_name = Db::table('mp_goods_cate')->where('id',$pid)->value('cate_name');
         }catch (\Exception $e) {
             die($e->getMessage());
         }
-        $this->assign('pcate_name',$pcate_name);
-        $this->assign('pid',$pid);
         $this->assign('list',$list);
-        $this->assign('qiniu_weburl',config('qiniu_weburl'));
         return $this->fetch();
     }
 //添加分类
     public function cateAdd() {
-        $pid = input('param.pid',0);
-        try {
-            $list = Db::table('mp_goods_cate')->where('pid',0)->select();
-        }catch (\Exception $e) {
-            die($e->getMessage());
-        }
-        $this->assign('list',$list);
-        $this->assign('pid',$pid);
         return $this->fetch();
     }
 //添加分类POST
     public function cateAddPost() {
         $val['cate_name'] = input('post.cate_name');
-        $val['pid'] = input('post.pid',0);
         checkInput($val);
-        $icon = input('post.icon');
         try {
-            if($icon) {
-                $qiniu_exist = $this->qiniuFileExist($icon);
-                if($qiniu_exist !== true) {
-                    return ajax($qiniu_exist['msg'],-1);
-                }
-                $qiniu_move = $this->moveFile($icon,'upload/goodscate/');
-                if($qiniu_move['code'] == 0) {
-                    $val['icon'] = $qiniu_move['path'];
+            if(isset($_FILES['file'])) {
+                $info = upload('file',$this->upload_base_path . 'goodscate/');
+                if($info['error'] === 0) {
+                    $val['icon'] = $info['data'];
                 }else {
-                    return ajax($qiniu_move['msg'],-2);
+                    return ajax($info['msg'],-1);
                 }
+            }else {
+                return ajax('请上传ICON',-1);
             }
             Db::table('mp_goods_cate')->insert($val);
         }catch (\Exception $e) {
             if(isset($val['icon'])) {
-                $this->rs_delete($val['icon']);
+                @unlink($val['icon']);
             }
             return ajax($e->getMessage(),-1);
         }
@@ -361,53 +334,47 @@ class Shop extends Base {
     public function cateDetail() {
         $id = input('param.id');
         try {
-            $info = Db::table('mp_goods_cate')->where('id',$id)->find();
-            $list = Db::table('mp_goods_cate')->where('pid',0)->select();
+            $whereCate = [
+                ['id','=',$id]
+            ];
+            $info = Db::table('mp_goods_cate')->where($whereCate)->find();
+            if(!$info) {die('非法参数');}
         }catch (\Exception $e) {
             die($e->getMessage());
         }
         $this->assign('info',$info);
-        $this->assign('list',$list);
-        $this->assign('qiniu_weburl',config('qiniu_weburl'));
         return $this->fetch();
     }
 //修改分类POST
-    public function cateModPost() {
+    public function cateMod() {
         $val['cate_name'] = input('post.cate_name');
-        $val['pid'] = input('post.pid',0);
-        $val['id'] = input('post.id',0);
+        $val['id'] = input('post.id');
         checkInput($val);
-        $icon = input('post.icon');
-
         try {
-            $where = [
+            $whereCate = [
                 ['id','=',$val['id']]
             ];
-            $exist = Db::table('mp_goods_cate')->where($where)->find();
-            if(!$exist) {
+            $cate_exist = Db::table('mp_goods_cate')->where($whereCate)->find();
+            if(!$cate_exist) {
                 return ajax('非法参数',-1);
             }
-            if($icon) {
-                $qiniu_exist = $this->qiniuFileExist($icon);
-                if($qiniu_exist !== true) {
-                    return ajax($qiniu_exist['msg'],-1);
-                }
-                $qiniu_move = $this->moveFile($icon,'upload/goodscate/');
-                if($qiniu_move['code'] == 0) {
-                    $val['icon'] = $qiniu_move['path'];
+            if(isset($_FILES['file'])) {
+                $info = upload('file',$this->upload_base_path . 'goodscate/');
+                if($info['error'] === 0) {
+                    $val['icon'] = $info['data'];
                 }else {
-                    return ajax($qiniu_move['msg'],-2);
+                    return ajax($info['msg'],-1);
                 }
             }
-            Db::table('mp_goods_cate')->where($where)->update($val);
+            Db::table('mp_goods_cate')->where($whereCate)->update($val);
         }catch (\Exception $e) {
-            if(isset($val['icon']) && $val['icon'] != $exist['icon']) {
-                $this->rs_delete($val['icon']);
+            if(isset($val['icon'])) {
+                @unlink($val['icon']);
             }
             return ajax($e->getMessage(),-1);
         }
-        if(isset($val['icon']) && $val['icon'] != $exist['icon']) {
-            $this->rs_delete($exist['icon']);
+        if(isset($val['icon'])) {
+            @unlink($cate_exist['icon']);
         }
         return ajax([]);
     }
@@ -443,11 +410,14 @@ class Shop extends Base {
     public function cateDel() {
         $id = input('post.id');
         try {
-            $exist = Db::table('mp_goods_cate')->where('id',$id)->find();
+            $whereCate = [
+                ['id','=',$id]
+            ];
+            $exist = Db::table('mp_goods_cate')->where($whereCate)->find();
             if(!$exist) {
                 return ajax('非法参数',-1);
             }
-            Db::table('mp_goods_cate')->where('id',$id)->update(['del'=>1]);
+            Db::table('mp_goods_cate')->where($whereCate)->update(['del'=>1]);
         }catch (\Exception $e) {
             return ajax($e->getMessage(),-1);
         }
