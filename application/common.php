@@ -408,6 +408,10 @@ function ajaxUpload($k,$maxsize=512) {
 }
 
 function rename_file($tmp,$path = '') {
+    $prefix = substr($tmp,0,strpos($tmp,'/'));
+    if($prefix != 'tmp') {
+        return $tmp;
+    }
     $filename = substr(strrchr($tmp,"/"),1);
     $path = $path ? $path : 'upload/api/';
     $path.= date('Y-m-d') . '/';

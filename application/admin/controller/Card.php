@@ -212,16 +212,196 @@ class Card extends Base {
 
     }
 
+    /*------ 卡牌属性 ------*/
 
-    //卡牌属性
+    //属性列表
     public function attrList() {
-
+        $curr_page = input('param.page',1);
+        $perpage = input('param.perpage',10);
+        $page['query'] = http_build_query(input('param.'));
+        $whereAttr = [];
+        try {
+            $count = Db::table('mp_card_attr')->where($whereAttr)->count();
+            $page['count'] = $count;
+            $page['curr'] = $curr_page;
+            $page['totalPage'] = ceil($count/$perpage);
+            $list = Db::table('mp_card_attr')->where($whereAttr)->limit(($curr_page-1)*$perpage,$perpage)->select();
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+        $this->assign('list',$list);
+        $this->assign('page',$page);
+        return $this->fetch();
+    }
+    //添加属性
+    public function attrAdd() {
+        if(request()->isPost()) {
+            $val['attr_name'] = input('post.attr_name');
+            checkInput($val);
+            try {
+                Db::table('mp_card_attr')->insert($val);
+            } catch (\Exception $e) {
+                return ajax($e->getMessage(), -1);
+            }
+            return ajax();
+        }
+        return $this->fetch();
+    }
+    //属性详情
+    public function attrDetail() {
+        $val['id'] = input('param.id');
+        checkInput($val);
+        try {
+            $whereAttr = [
+                ['id','=',$val['id']]
+            ];
+            $attr_exist = Db::table('mp_card_attr')->where($whereAttr)->find();
+            if(!$attr_exist) {
+                die('非法参数');
+            }
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+        $this->assign('info',$attr_exist);
+        return $this->fetch();
+    }
+    //编辑属性
+    public function attrMod() {
+        if(request()->isPost()) {
+            $val['attr_name'] = input('post.attr_name');
+            $val['id'] = input('post.id');
+            checkInput($val);
+            try {
+                $whereAttr = [
+                    ['id','=',$val['id']]
+                ];
+                $attr_exist = Db::table('mp_card_attr')->where($whereAttr)->find();
+                if(!$attr_exist) {
+                    return ajax('非法参数',-1);
+                }
+                Db::table('mp_card_attr')->where($whereAttr)->update($val);
+            } catch (\Exception $e) {
+                return ajax($e->getMessage(), -1);
+            }
+            return ajax();
+        }
+    }
+    //删除属性
+    public function attrDel() {
+        if(request()->isPost()) {
+            $val['id'] = input('post.id');
+            checkInput($val);
+            try {
+                $whereAttr = [
+                    ['id','=',$val['id']]
+                ];
+                $attr_exist = Db::table('mp_card_attr')->where($whereAttr)->find();
+                if(!$attr_exist) {
+                    return ajax('非法参数',-1);
+                }
+                Db::table('mp_card_attr')->where($whereAttr)->delete();
+            } catch (\Exception $e) {
+                return ajax($e->getMessage(), -1);
+            }
+            return ajax();
+        }
     }
 
-    //卡牌能力
+    /*------ 卡牌能力 ------*/
+
+    //能力列表
     public function abilityList() {
-
+        $curr_page = input('param.page',1);
+        $perpage = input('param.perpage',10);
+        $page['query'] = http_build_query(input('param.'));
+        $whereAttr = [];
+        try {
+            $count = Db::table('mp_card_ability')->where($whereAttr)->count();
+            $page['count'] = $count;
+            $page['curr'] = $curr_page;
+            $page['totalPage'] = ceil($count/$perpage);
+            $list = Db::table('mp_card_ability')->where($whereAttr)->limit(($curr_page-1)*$perpage,$perpage)->select();
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+        $this->assign('list',$list);
+        $this->assign('page',$page);
+        return $this->fetch();
     }
+    //添加能力
+    public function abilityAdd() {
+        if(request()->isPost()) {
+            $val['ability_name'] = input('post.ability_name');
+            checkInput($val);
+            try {
+                Db::table('mp_card_ability')->insert($val);
+            } catch (\Exception $e) {
+                return ajax($e->getMessage(), -1);
+            }
+            return ajax();
+        }
+        return $this->fetch();
+    }
+    //能力详情
+    public function abilityDetail() {
+        $val['id'] = input('param.id');
+        checkInput($val);
+        try {
+            $whereAttr = [
+                ['id','=',$val['id']]
+            ];
+            $ability_exist = Db::table('mp_card_ability')->where($whereAttr)->find();
+            if(!$ability_exist) {
+                die('非法参数');
+            }
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+        $this->assign('info',$ability_exist);
+        return $this->fetch();
+    }
+    //编辑能力
+    public function abilityMod() {
+        if(request()->isPost()) {
+            $val['ability_name'] = input('post.ability_name');
+            $val['id'] = input('post.id');
+            checkInput($val);
+            try {
+                $whereAttr = [
+                    ['id','=',$val['id']]
+                ];
+                $ability_exist = Db::table('mp_card_ability')->where($whereAttr)->find();
+                if(!$ability_exist) {
+                    return ajax('非法参数',-1);
+                }
+                Db::table('mp_card_ability')->where($whereAttr)->update($val);
+            } catch (\Exception $e) {
+                return ajax($e->getMessage(), -1);
+            }
+            return ajax();
+        }
+    }
+    //删除能力
+    public function abilityDel() {
+        if(request()->isPost()) {
+            $val['id'] = input('post.id');
+            checkInput($val);
+            try {
+                $whereAttr = [
+                    ['id','=',$val['id']]
+                ];
+                $ability_exist = Db::table('mp_card_ability')->where($whereAttr)->find();
+                if(!$ability_exist) {
+                    return ajax('非法参数',-1);
+                }
+                Db::table('mp_card_ability')->where($whereAttr)->delete();
+            } catch (\Exception $e) {
+                return ajax($e->getMessage(), -1);
+            }
+            return ajax();
+        }
+    }
+
 
     //卡牌阵营
     public function campList() {

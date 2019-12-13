@@ -11,10 +11,10 @@ class Test extends Base {
 
 
     public function index() {
-        $arr = range('a','e');
-        $this->excep($this->cmd,var_export($arr,true));
+
+        echo strrchr("I love hello how are you! hello world!","he");
 //        halt($arr);
-        echo 'SUCCESS' . date('Y-m-d H:i:s');
+//        echo 'SUCCESS' . date('Y-m-d H:i:s');
 
     }
 

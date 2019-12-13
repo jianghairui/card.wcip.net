@@ -127,7 +127,7 @@ class Shop extends Base {
         return ajax([],1);
     }
 //修改商品POST
-    public function goodsModPost() {
+    public function goodsMod() {
         $val['cate_id'] = input('post.cate_id');
         $val['name'] = input('post.name');
         $val['origin_price'] = input('post.origin_price');
@@ -147,7 +147,6 @@ class Shop extends Base {
         $val['detail'] = input('post.detail');
         $val['create_time'] = time();
         $image = input('post.pic_url',[]);
-
         try {
             $map = [
                 ['id','=',$val['id']],

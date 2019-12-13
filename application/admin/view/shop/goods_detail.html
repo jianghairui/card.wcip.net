@@ -147,6 +147,7 @@
                 <button onClick="layer_close();" class="btn btn-default radius" type="button">&nbsp;&nbsp;取消&nbsp;&nbsp;</button>
             </div>
         </div>
+        <input type="hidden" name="id" value="{$info.id}">
     </form>
     <input type="file"  id="multi-file" name="multi-file" style="display:none;">
 
@@ -164,6 +165,7 @@
 <script type="text/javascript" src="/lib/checkfile.js"></script>
 <script type="text/javascript" src="/lib/ajaxfileupload.js"></script>
 <script type="text/javascript">
+
     $(function(){
         var ue = UE.getEditor('editor'),isclick=true;
 
@@ -217,11 +219,11 @@
                     isclick = false;
                     $(form).ajaxSubmit({
                         type: 'post',
-                        url: "{:url('Shop/goodsMod')}" ,
+                        url: "{:url('Shop/goodsMod')}",
                         success: function(data){
                             // console.log(data);isclick=true;return;
                             if(data.code == 1) {
-                                layer.msg('添加成功!',{icon:1,time:1000},function () {
+                                layer.msg('保存成功!',{icon:1,time:1000},function () {
                                     window.parent.location.reload();
                                 });
                             }else {
