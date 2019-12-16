@@ -6,7 +6,7 @@
     <form class="form form-horizontal" id="form-article-add">
         <div class="row cl">
             <label class="form-label col-xs-4 col-sm-2">
-                <span class="btn btn-primary btn-upload radius ml-10" title="logo">单位logo</span>
+                <span class="btn btn-primary btn-upload radius ml-10" title="logo">公司logo</span>
             </label>
             <div class="formControls col-xs-8 col-sm-9">
                 <div class="uploader-thum-container">
@@ -37,18 +37,11 @@
             </div>
         </div>
         <div class="row cl">
-            <label class="form-label col-xs-4 col-sm-2">QQ号：</label>
+            <label class="form-label col-xs-4 col-sm-2">微信号：</label>
             <div class="formControls col-xs-4 col-sm-4">
-                <input type="text" class="input-text" value="{$info.qq}" placeholder="" id="qq" name="qq" maxlength="15">
+                <input type="text" class="input-text" value="{$info.weixin}" placeholder="" id="weixin" name="weixin" maxlength="50">
             </div>
         </div>
-        <div class="row cl">
-            <label class="form-label col-xs-4 col-sm-2"></label>
-            <div class="formControls col-xs-8 col-sm-9">
-                <span style="color:#ff4c4c">此QQ号将用于在线客服的客服QQ，请点击“<a href="https://shang.qq.com/v3/widget.html"><span style="color:#5a98de;">https://shang.qq.com/v3/widget.html</span></a>”前往登录此QQ并启用“QQ在线状态”服务</span>
-            </div>
-        </div>
-
         <div class="row cl">
             <label class="form-label col-xs-4 col-sm-2">联系邮箱：</label>
             <div class="formControls col-xs-4 col-sm-4">
@@ -62,34 +55,6 @@
             </div>
         </div>
         <div class="row cl">
-            <label class="form-label col-xs-4 col-sm-2">
-                <span class="btn btn-primary btn-upload radius ml-10" title="qrcode1">公众号二维码</span>
-            </label>
-            <div class="formControls col-xs-8 col-sm-9">
-                <div class="uploader-thum-container">
-                    <div class="uploader-list">
-                        <img class="thumbnail" src="/{$info.qrcode1}">
-                        <input type="file" name="file" id="qrcode1" style="display: none;">
-                        <input type="hidden" name="qrcode1" value="{$info.qrcode1}">
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="row cl">
-            <label class="form-label col-xs-4 col-sm-2">
-                <span class="btn btn-primary btn-upload radius ml-10" title="qrcode2">微博二维码</span>
-            </label>
-            <div class="formControls col-xs-8 col-sm-9">
-                <div class="uploader-thum-container">
-                    <div class="uploader-list">
-                        <img class="thumbnail" src="/{$info.qrcode2}">
-                        <input type="file" name="file" id="qrcode2" style="display: none;">
-                        <input type="hidden" name="qrcode2" value="{$info.qrcode2}">
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="row cl">
             <label class="form-label col-xs-4 col-sm-2">公司简介：</label>
             <div class="formControls col-xs-8 col-sm-9">
                 <textarea name="desc" cols="" rows="" class="textarea" maxlength="255" placeholder="" oninput="this.value.length<=255?$('#textlen1').text(this.value.length):$('#textlen1').text(255)" >{$info.desc}</textarea>
@@ -100,18 +65,6 @@
             <label class="form-label col-xs-4 col-sm-2">公司详情：</label>
             <div class="formControls col-xs-8 col-sm-9">
                 <textarea id="editor" type="text/plain" name="intro" style="width:100%;height:400px;">{$info.intro|htmlspecialchars_decode}</textarea>
-            </div>
-        </div>
-        <div class="row cl">
-            <label class="form-label col-xs-4 col-sm-2">战略规划：</label>
-            <div class="formControls col-xs-8 col-sm-9">
-                <textarea id="editor1" type="text/plain" name="plan" style="width:100%;height:400px;">{$info.plan|htmlspecialchars_decode}</textarea>
-            </div>
-        </div>
-        <div class="row cl">
-            <label class="form-label col-xs-4 col-sm-2">公司荣誉：</label>
-            <div class="formControls col-xs-8 col-sm-9">
-                <textarea id="editor2" type="text/plain" name="honor" style="width:100%;height:400px;">{$info.honor|htmlspecialchars_decode}</textarea>
             </div>
         </div>
         <div class="row cl">
@@ -138,8 +91,6 @@
     $(function(){
 
         UE.getEditor('editor');
-        UE.getEditor('editor1');
-        UE.getEditor('editor2');
 
         $('.skin-minimal input').iCheck({
             checkboxClass: 'icheckbox-blue',
@@ -160,7 +111,7 @@
                 tel: {
                     required:true
                 },
-                qq: {
+                weixin: {
                     required:true
                 },
                 email: {
@@ -180,7 +131,7 @@
                     isclick = false;
                     $(form).ajaxSubmit({
                         type: 'post',
-                        url: "{:url('Banner/home')}" ,
+                        url: "{:url('Plat/aboutUs')}" ,
                         success: function(data){
                             // console.log(data);isclick=true;return;
                             if(data.code == 1) {

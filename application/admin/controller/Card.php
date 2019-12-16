@@ -13,8 +13,12 @@ class Card extends Base {
     //卡牌列表
     public function cardList() {
 
-        $param['datemin'] = input('param.datemin');
-        $param['datemax'] = input('param.datemax');
+        $param['attr_id'] = input('param.attr_id','');
+        $param['resource'] = input('param.resource','');
+        $param['type_id'] = input('param.type_id','');
+        $param['camp_id'] = input('param.camp_id','');
+        $param['ability_id'] = input('param.ability_id','');
+        $param['version_id'] = input('param.version_id','');
         $param['search'] = input('param.search');
         $page['query'] = http_build_query(input('param.'));
 
@@ -25,18 +29,21 @@ class Card extends Base {
             ['status','=',1],
             ['del','=',0]
         ];
-
-        if($param['search']) {
-            $whereCard[] = ['card_name','like',"%{$param['search']}%"];
+        if($param['attr_id'] !== '') { $whereCard[] = ['attr_id','=',$param['attr_id']]; }
+        if($param['type_id'] !== '') { $whereCard[] = ['type_id','=',$param['type_id']]; }
+        if($param['camp_id'] !== '') { $whereCard[] = ['camp_id','=',$param['camp_id']]; }
+        if($param['ability_id'] !== '') { $whereCard[] = ['ability_id','=',$param['ability_id']]; }
+        if($param['version_id'] !== '') { $whereCard[] = ['version_id','=',$param['version_id']]; }
+        if($param['resource'] !== '') {
+            if(intval($param['resource']) == 7) {
+                $whereCard[] = ['resource','>=',$param['resource']];
+            }else {
+                $whereCard[] = ['resource','=',$param['resource']];
+            }
         }
+        if($param['search']) { $whereCard[] = ['card_name','like',"%{$param['search']}%"]; }
 
-        if($param['datemin']) {
-            $whereCard[] = ['create_time','>=',strtotime(date('Y-m-d 00:00:00',strtotime($param['datemin'])))];
-        }
-        if($param['datemax']) {
-            $whereCard[] = ['create_time','<=',strtotime(date('Y-m-d 23:59:59',strtotime($param['datemax'])))];
-        }
-
+//        halt($whereCard);
         try {
             $count = Db::table('mp_card')->where($whereCard)->count();
             $page['count'] = $count;
@@ -74,6 +81,7 @@ class Card extends Base {
         $this->assign('ability',$ability);
         $this->assign('version',$version);
         $this->assign('page',$page);
+        $this->assign('param',$param);
         return $this->fetch();
 
     }
@@ -89,6 +97,7 @@ class Card extends Base {
             $val['version_id'] = input('post.version_id');
             checkInput($val);
             $val['desc'] = input('post.desc');
+            $val['origin'] = input('post.origin');
             $val['create_time'] = time();
             $val['update_time'] = $val['create_time'];
 
@@ -168,6 +177,7 @@ class Card extends Base {
         $val['id'] = input('post.id');
         checkInput($val);
         $val['desc'] = input('post.desc');
+        $val['origin'] = input('post.origin');
         $val['create_time'] = time();
         $val['update_time'] = $val['create_time'];
 
@@ -402,20 +412,290 @@ class Card extends Base {
         }
     }
 
+    /*------ 卡牌阵营 ------*/
 
-    //卡牌阵营
+    //阵营列表
     public function campList() {
-
+        $curr_page = input('param.page',1);
+        $perpage = input('param.perpage',10);
+        $page['query'] = http_build_query(input('param.'));
+        $whereAttr = [];
+        try {
+            $count = Db::table('mp_card_camp')->where($whereAttr)->count();
+            $page['count'] = $count;
+            $page['curr'] = $curr_page;
+            $page['totalPage'] = ceil($count/$perpage);
+            $list = Db::table('mp_card_camp')->where($whereAttr)->limit(($curr_page-1)*$perpage,$perpage)->select();
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+        $this->assign('list',$list);
+        $this->assign('page',$page);
+        return $this->fetch();
+    }
+    //添加阵营
+    public function campAdd() {
+        if(request()->isPost()) {
+            $val['camp_name'] = input('post.camp_name');
+            checkInput($val);
+            try {
+                Db::table('mp_card_camp')->insert($val);
+            } catch (\Exception $e) {
+                return ajax($e->getMessage(), -1);
+            }
+            return ajax();
+        }
+        return $this->fetch();
+    }
+    //阵营详情
+    public function campDetail() {
+        $val['id'] = input('param.id');
+        checkInput($val);
+        try {
+            $whereAttr = [
+                ['id','=',$val['id']]
+            ];
+            $camp_exist = Db::table('mp_card_camp')->where($whereAttr)->find();
+            if(!$camp_exist) {
+                die('非法参数');
+            }
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+        $this->assign('info',$camp_exist);
+        return $this->fetch();
+    }
+    //编辑阵营
+    public function campMod() {
+        if(request()->isPost()) {
+            $val['camp_name'] = input('post.camp_name');
+            $val['id'] = input('post.id');
+            checkInput($val);
+            try {
+                $whereAttr = [
+                    ['id','=',$val['id']]
+                ];
+                $camp_exist = Db::table('mp_card_camp')->where($whereAttr)->find();
+                if(!$camp_exist) {
+                    return ajax('非法参数',-1);
+                }
+                Db::table('mp_card_camp')->where($whereAttr)->update($val);
+            } catch (\Exception $e) {
+                return ajax($e->getMessage(), -1);
+            }
+            return ajax();
+        }
+    }
+    //删除阵营
+    public function campDel() {
+        if(request()->isPost()) {
+            $val['id'] = input('post.id');
+            checkInput($val);
+            try {
+                $whereAttr = [
+                    ['id','=',$val['id']]
+                ];
+                $camp_exist = Db::table('mp_card_camp')->where($whereAttr)->find();
+                if(!$camp_exist) {
+                    return ajax('非法参数',-1);
+                }
+                Db::table('mp_card_camp')->where($whereAttr)->delete();
+            } catch (\Exception $e) {
+                return ajax($e->getMessage(), -1);
+            }
+            return ajax();
+        }
     }
 
-    //卡牌类型
+
+    /*------ 卡牌类型 ------*/
+
+    //类型列表
     public function typeList() {
-
+        $curr_page = input('param.page',1);
+        $perpage = input('param.perpage',10);
+        $page['query'] = http_build_query(input('param.'));
+        $whereAttr = [];
+        try {
+            $count = Db::table('mp_card_type')->where($whereAttr)->count();
+            $page['count'] = $count;
+            $page['curr'] = $curr_page;
+            $page['totalPage'] = ceil($count/$perpage);
+            $list = Db::table('mp_card_type')->where($whereAttr)->limit(($curr_page-1)*$perpage,$perpage)->select();
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+        $this->assign('list',$list);
+        $this->assign('page',$page);
+        return $this->fetch();
+    }
+    //添加类型
+    public function typeAdd() {
+        if(request()->isPost()) {
+            $val['type_name'] = input('post.type_name');
+            checkInput($val);
+            try {
+                Db::table('mp_card_type')->insert($val);
+            } catch (\Exception $e) {
+                return ajax($e->getMessage(), -1);
+            }
+            return ajax();
+        }
+        return $this->fetch();
+    }
+    //类型详情
+    public function typeDetail() {
+        $val['id'] = input('param.id');
+        checkInput($val);
+        try {
+            $whereAttr = [
+                ['id','=',$val['id']]
+            ];
+            $type_exist = Db::table('mp_card_type')->where($whereAttr)->find();
+            if(!$type_exist) {
+                die('非法参数');
+            }
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+        $this->assign('info',$type_exist);
+        return $this->fetch();
+    }
+    //编辑类型
+    public function typeMod() {
+        if(request()->isPost()) {
+            $val['type_name'] = input('post.type_name');
+            $val['id'] = input('post.id');
+            checkInput($val);
+            try {
+                $whereAttr = [
+                    ['id','=',$val['id']]
+                ];
+                $type_exist = Db::table('mp_card_type')->where($whereAttr)->find();
+                if(!$type_exist) {
+                    return ajax('非法参数',-1);
+                }
+                Db::table('mp_card_type')->where($whereAttr)->update($val);
+            } catch (\Exception $e) {
+                return ajax($e->getMessage(), -1);
+            }
+            return ajax();
+        }
+    }
+    //删除类型
+    public function typeDel() {
+        if(request()->isPost()) {
+            $val['id'] = input('post.id');
+            checkInput($val);
+            try {
+                $whereAttr = [
+                    ['id','=',$val['id']]
+                ];
+                $type_exist = Db::table('mp_card_type')->where($whereAttr)->find();
+                if(!$type_exist) {
+                    return ajax('非法参数',-1);
+                }
+                Db::table('mp_card_type')->where($whereAttr)->delete();
+            } catch (\Exception $e) {
+                return ajax($e->getMessage(), -1);
+            }
+            return ajax();
+        }
     }
 
-    //卡牌版本
-    public function versionList() {
+    /*------ 卡牌版本 ------*/
 
+    //版本列表
+    public function versionList() {
+        $curr_page = input('param.page',1);
+        $perpage = input('param.perpage',10);
+        $page['query'] = http_build_query(input('param.'));
+        $whereAttr = [];
+        try {
+            $count = Db::table('mp_card_version')->where($whereAttr)->count();
+            $page['count'] = $count;
+            $page['curr'] = $curr_page;
+            $page['totalPage'] = ceil($count/$perpage);
+            $list = Db::table('mp_card_version')->where($whereAttr)->limit(($curr_page-1)*$perpage,$perpage)->select();
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+        $this->assign('list',$list);
+        $this->assign('page',$page);
+        return $this->fetch();
+    }
+    //添加版本
+    public function versionAdd() {
+        if(request()->isPost()) {
+            $val['version_name'] = input('post.version_name');
+            checkInput($val);
+            try {
+                Db::table('mp_card_version')->insert($val);
+            } catch (\Exception $e) {
+                return ajax($e->getMessage(), -1);
+            }
+            return ajax();
+        }
+        return $this->fetch();
+    }
+    //版本详情
+    public function versionDetail() {
+        $val['id'] = input('param.id');
+        checkInput($val);
+        try {
+            $whereAttr = [
+                ['id','=',$val['id']]
+            ];
+            $version_exist = Db::table('mp_card_version')->where($whereAttr)->find();
+            if(!$version_exist) {
+                die('非法参数');
+            }
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+        $this->assign('info',$version_exist);
+        return $this->fetch();
+    }
+    //编辑版本
+    public function versionMod() {
+        if(request()->isPost()) {
+            $val['version_name'] = input('post.version_name');
+            $val['id'] = input('post.id');
+            checkInput($val);
+            try {
+                $whereAttr = [
+                    ['id','=',$val['id']]
+                ];
+                $version_exist = Db::table('mp_card_version')->where($whereAttr)->find();
+                if(!$version_exist) {
+                    return ajax('非法参数',-1);
+                }
+                Db::table('mp_card_version')->where($whereAttr)->update($val);
+            } catch (\Exception $e) {
+                return ajax($e->getMessage(), -1);
+            }
+            return ajax();
+        }
+    }
+    //删除版本
+    public function versionDel() {
+        if(request()->isPost()) {
+            $val['id'] = input('post.id');
+            checkInput($val);
+            try {
+                $whereAttr = [
+                    ['id','=',$val['id']]
+                ];
+                $version_exist = Db::table('mp_card_version')->where($whereAttr)->find();
+                if(!$version_exist) {
+                    return ajax('非法参数',-1);
+                }
+                Db::table('mp_card_version')->where($whereAttr)->delete();
+            } catch (\Exception $e) {
+                return ajax($e->getMessage(), -1);
+            }
+            return ajax();
+        }
     }
 
 

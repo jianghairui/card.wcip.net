@@ -36,6 +36,7 @@ class Login extends Base {
                 $uid = $exist['id'];
             }else {
                 $insert = [
+                    'nickname' => randname(10),
                     'create_time' => time(),
                     'last_login_time' => time(),
                     'openid' => $ret['openid'],

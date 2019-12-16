@@ -12,7 +12,7 @@ class Test extends Base {
 
     public function index() {
 
-        echo strrchr("I love hello how are you! hello world!","he");
+        echo randname(10);
 //        halt($arr);
 //        echo 'SUCCESS' . date('Y-m-d H:i:s');
 

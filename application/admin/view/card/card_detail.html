@@ -118,6 +118,13 @@
             </div>
         </div>
         <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">卡牌简介：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <textarea name="origin" cols="" rows="" class="textarea" maxlength="255" placeholder="" oninput="this.value.length<=255?$('#textlen2').text(this.value.length):$('#textlen2').text(255)" >{$info.origin}</textarea>
+                <p class="textarea-numberbar"><em class="textarea-length" id="textlen2">0</em>/255</p>
+            </div>
+        </div>
+        <div class="row cl">
             <label class="form-label col-xs-4 col-sm-2"><span class="c-red">*</span>状态：</label>
             <div class="formControls col-xs-8 col-sm-9 skin-minimal">
                 <div class="radio-box">
@@ -225,7 +232,10 @@
         });
 
         var textlen1 = $("textarea[name='desc']").val().length;
+        var textlen2 = $("textarea[name='origin']").val().length;
+
         $("#textlen1").text(textlen1);
+        $("#textlen2").text(textlen2);
 
     });
 </script>

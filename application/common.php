@@ -193,6 +193,15 @@ function randomkeys($length) {
     return $returnStr;
 }
 
+function randname($length) {
+    $returnStr='';
+    $pattern = 'abcdefghijklmnopqrstuvwxyz';
+    for($i = 0; $i < $length; $i ++) {
+        $returnStr .= $pattern {mt_rand ( 0, 25 )};
+    }
+    return $returnStr;
+}
+
 function gen_unique_number($letter = '')
 {
     $time = explode (" ", microtime ());
