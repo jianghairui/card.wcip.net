@@ -61,7 +61,10 @@ class Card extends Base {
             $ability = [];
             $version = [];
             foreach ($card_type as $v) {$type[$v['id']] = $v['type_name'];}
-            foreach ($card_camp as $v) {$camp[$v['id']] = $v['camp_name'];}
+            foreach ($card_camp as $v) {$camp[$v['id']] = [
+                'camp_name' => $v['camp_name'],
+                'icon' => $v['icon']
+            ];}
             foreach ($card_attr as $v) {$attr[$v['id']] = [
                 'attr_name' => $v['attr_name'],
                 'icon' => $v['icon']

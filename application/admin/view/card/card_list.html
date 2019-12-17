@@ -76,9 +76,9 @@
             <th width="44">属性</th>
             <th width="120">资源值</th>
             <th width="80">类型</th>
-            <th width="80">阵营</th>
+            <th width="44">阵营</th>
             <th width="130">能力</th>
-            <th width="150">版本</th>
+            <th>版本</th>
             <th width="80">状态</th>
             <th width="130">操作</th>
         </tr>
@@ -105,7 +105,11 @@
                     {/switch}
                 </td>
                 <td>{if isset($type[$li['type_id']])}{$type[$li['type_id']]}{/if}</td>
-                <td>{if isset($camp[$li['camp_id']])}{$camp[$li['camp_id']]}{/if}</td>
+                <td>
+                    {if isset($camp[$li['camp_id']])}
+                    <div style="width: 44px;height: 44px;background-image: url('/{$camp[$li['camp_id']]['icon']}');background-position: center;background-repeat: no-repeat;background-size: 100%"></div>
+                    {/if}
+                </td>
                 <td>
                     {if isset($ability[$li['ability_id']])}
                     <div style="width: 130px;height: 49px;background-image: url('/{$ability[$li['ability_id']]['icon']}');background-position: center;background-repeat: no-repeat;background-size: 100%"></div>

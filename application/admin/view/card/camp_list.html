@@ -2,7 +2,7 @@
 <div class="page-container">
     <div class="cl pd-5 bg-1 bk-gray mt-20">
         <span class="l">
-            <a class="btn btn-primary radius" data-title="添加阵营" data-href="article-add.html" onclick="layeropen('添加阵营','{:url("Card/campAdd")}',600,300)" href="javascript:;"><i class="Hui-iconfont">&#xe600;</i> 添加阵营
+            <a class="btn btn-primary radius" data-title="添加阵营" data-href="article-add.html" onclick="layeropen('添加阵营','{:url("Card/campAdd")}',600,400)" href="javascript:;"><i class="Hui-iconfont">&#xe600;</i> 添加阵营
             </a>
         </span>
         <span class="r">共有数据：<strong>{$page.count}</strong> 条</span> </div>
@@ -10,6 +10,7 @@
         <thead>
         <tr class="text-c">
             <th width="25">#</th>
+            <th width="44">ICON</th>
             <th>阵营名</th>
             <th width="130">操作</th>
         </tr>
@@ -19,10 +20,13 @@
             {foreach $list as $li}
             <tr class="text-c userinfo">
                 <td>{$li.id}</td>
+                <td>
+                    <div style="width: 44px;height: 44px;background-image: url('/{$li.icon}');background-position: center;background-repeat: no-repeat;background-size: 100%"></div>
+                </td>
                 <td>{$li.camp_name}</td>
                 <td>
                     <span>
-                        <a title="编辑" href="javascript:;" class="ml-5" style="text-decoration:none" onclick="layeropen('阵营详情','{:url("Card/campDetail",array("id"=>$li["id"]))}',600,300)">
+                        <a title="编辑" href="javascript:;" class="ml-5" style="text-decoration:none" onclick="layeropen('阵营详情','{:url("Card/campDetail",array("id"=>$li["id"]))}',600,400)">
                             <i class="Hui-iconfont">&#xe6df;</i>
                         </a>
                     </span>
@@ -81,7 +85,7 @@
                         $(obj).parents("tr").remove();
                         layer.msg('已删除!',{icon:1,time:1000});
                     }else {
-                        layer.msg('删除失败!',{icon:2,time:1000});
+                        layer.msg(data.data,{icon:2,time:1000});
                     }
                 },
                 error:function(data) {

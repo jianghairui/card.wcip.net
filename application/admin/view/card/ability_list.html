@@ -2,7 +2,7 @@
 <div class="page-container">
     <div class="cl pd-5 bg-1 bk-gray mt-20">
         <span class="l">
-            <a class="btn btn-primary radius" data-title="添加能力" data-href="article-add.html" onclick="layeropen('添加能力','{:url("Card/abilityAdd")}',600,300)" href="javascript:;"><i class="Hui-iconfont">&#xe600;</i> 添加能力
+            <a class="btn btn-primary radius" data-title="添加能力" data-href="article-add.html" onclick="layeropen('添加能力','{:url("Card/abilityAdd")}',600,400)" href="javascript:;"><i class="Hui-iconfont">&#xe600;</i> 添加能力
             </a>
         </span>
         <span class="r">共有数据：<strong>{$page.count}</strong> 条</span> </div>
@@ -26,7 +26,7 @@
                 <td>{$li.ability_name}</td>
                 <td>
                     <span>
-                        <a title="编辑" href="javascript:;" class="ml-5" style="text-decoration:none" onclick="layeropen('能力详情','{:url("Card/abilityDetail",array("id"=>$li["id"]))}',600,300)">
+                        <a title="编辑" href="javascript:;" class="ml-5" style="text-decoration:none" onclick="layeropen('能力详情','{:url("Card/abilityDetail",array("id"=>$li["id"]))}',600,400)">
                             <i class="Hui-iconfont">&#xe6df;</i>
                         </a>
                     </span>
