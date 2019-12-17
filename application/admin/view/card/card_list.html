@@ -73,7 +73,7 @@
             <th width="25">#</th>
             <th width="80">图片</th>
             <th width="150">卡牌名</th>
-            <th width="80">属性</th>
+            <th width="44">属性</th>
             <th width="120">资源值</th>
             <th width="80">类型</th>
             <th width="80">阵营</th>
@@ -92,7 +92,11 @@
                     <div style="width: 80px;height: 120px;background-image: url('/{$li.pic}');background-position: center;background-repeat: no-repeat;background-size: 100%"></div>
                 </td>
                 <td>{$li.card_name}</td>
-                <td>{if isset($attr[$li['attr_id']])}{$attr[$li['attr_id']]}{/if}</td>
+                <td>
+                    {if isset($attr[$li['attr_id']])}
+                    <div style="width: 44px;height: 44px;background-image: url('/{$attr[$li['attr_id']]['icon']}');background-position: center;background-repeat: no-repeat;background-size: 100%"></div>
+                    {/if}
+                </td>
                 <td>
                     {switch $li['resource']}
                     {case -2}无{/case}

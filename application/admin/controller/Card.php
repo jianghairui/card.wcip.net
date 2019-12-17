@@ -62,7 +62,10 @@ class Card extends Base {
             $version = [];
             foreach ($card_type as $v) {$type[$v['id']] = $v['type_name'];}
             foreach ($card_camp as $v) {$camp[$v['id']] = $v['camp_name'];}
-            foreach ($card_attr as $v) {$attr[$v['id']] = $v['attr_name'];}
+            foreach ($card_attr as $v) {$attr[$v['id']] = [
+                'attr_name' => $v['attr_name'],
+                'icon' => $v['icon']
+            ];}
             foreach ($card_ability as $v) {$ability[$v['id']] = $v['ability_name'];}
             foreach ($card_version as $v) {$version[$v['id']] = $v['version_name'];}
         } catch (\Exception $e) {
@@ -249,8 +252,21 @@ class Card extends Base {
             $val['attr_name'] = input('post.attr_name');
             checkInput($val);
             try {
+                if(isset($_FILES['file'])) {
+                    $info = upload('file',$this->upload_base_path . 'card/');
+                    if($info['error'] === 0) {
+                        $val['icon'] = $info['data'];
+                    }else {
+                        return ajax($info['msg'],-1);
+                    }
+                }else {
+                    return ajax('请上传图片',-1);
+                }
                 Db::table('mp_card_attr')->insert($val);
             } catch (\Exception $e) {
+                if(isset($val['icon'])) {
+                    @unlink($val['icon']);
+                }
                 return ajax($e->getMessage(), -1);
             }
             return ajax();
@@ -289,9 +305,23 @@ class Card extends Base {
                 if(!$attr_exist) {
                     return ajax('非法参数',-1);
                 }
+                if(isset($_FILES['file'])) {
+                    $info = upload('file',$this->upload_base_path . 'card/');
+                    if($info['error'] === 0) {
+                        $val['icon'] = $info['data'];
+                    }else {
+                        return ajax($info['msg'],-1);
+                    }
+                }
                 Db::table('mp_card_attr')->where($whereAttr)->update($val);
             } catch (\Exception $e) {
+                if(isset($val['icon'])) {
+                    @unlink($val['icon']);
+                }
                 return ajax($e->getMessage(), -1);
+            }
+            if(isset($val['icon'])) {
+                @unlink($attr_exist['icon']);
             }
             return ajax();
         }
