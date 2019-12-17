@@ -66,7 +66,10 @@ class Card extends Base {
                 'attr_name' => $v['attr_name'],
                 'icon' => $v['icon']
             ];}
-            foreach ($card_ability as $v) {$ability[$v['id']] = $v['ability_name'];}
+            foreach ($card_ability as $v) {$ability[$v['id']] = [
+                'ability_name' => $v['ability_name'],
+                'icon' => $v['icon']
+            ];}
             foreach ($card_version as $v) {$version[$v['id']] = $v['version_name'];}
         } catch (\Exception $e) {
             return ajax($e->getMessage(), -1);
@@ -339,10 +342,18 @@ class Card extends Base {
                 if(!$attr_exist) {
                     return ajax('非法参数',-1);
                 }
+                $whereCard = [
+                    ['attr_id','=',$attr_exist['id']]
+                ];
+                $card_exist = Db::table('mp_card')->where($whereCard)->find();
+                if($card_exist) {
+                    return ajax('此属性下有卡牌,无法删除',-1);
+                }
                 Db::table('mp_card_attr')->where($whereAttr)->delete();
             } catch (\Exception $e) {
                 return ajax($e->getMessage(), -1);
             }
+            @unlink($attr_exist['icon']);
             return ajax();
         }
     }
@@ -374,8 +385,21 @@ class Card extends Base {
             $val['ability_name'] = input('post.ability_name');
             checkInput($val);
             try {
+                if(isset($_FILES['file'])) {
+                    $info = upload('file',$this->upload_base_path . 'card/');
+                    if($info['error'] === 0) {
+                        $val['icon'] = $info['data'];
+                    }else {
+                        return ajax($info['msg'],-1);
+                    }
+                }else {
+                    return ajax('请上传图片',-1);
+                }
                 Db::table('mp_card_ability')->insert($val);
             } catch (\Exception $e) {
+                if(isset($val['icon'])) {
+                    @unlink($val['icon']);
+                }
                 return ajax($e->getMessage(), -1);
             }
             return ajax();
@@ -414,9 +438,23 @@ class Card extends Base {
                 if(!$ability_exist) {
                     return ajax('非法参数',-1);
                 }
+                if(isset($_FILES['file'])) {
+                    $info = upload('file',$this->upload_base_path . 'card/');
+                    if($info['error'] === 0) {
+                        $val['icon'] = $info['data'];
+                    }else {
+                        return ajax($info['msg'],-1);
+                    }
+                }
                 Db::table('mp_card_ability')->where($whereAttr)->update($val);
             } catch (\Exception $e) {
+                if(isset($val['icon'])) {
+                    @unlink($val['icon']);
+                }
                 return ajax($e->getMessage(), -1);
+            }
+            if(isset($val['icon'])) {
+                @unlink($ability_exist['icon']);
             }
             return ajax();
         }
@@ -434,10 +472,18 @@ class Card extends Base {
                 if(!$ability_exist) {
                     return ajax('非法参数',-1);
                 }
+                $whereCard = [
+                    ['ability_id','=',$ability_exist['id']]
+                ];
+                $card_exist = Db::table('mp_card')->where($whereCard)->find();
+                if($card_exist) {
+                    return ajax('此能力下有卡牌,无法删除',-1);
+                }
                 Db::table('mp_card_ability')->where($whereAttr)->delete();
             } catch (\Exception $e) {
                 return ajax($e->getMessage(), -1);
             }
+            @unlink($ability_exist['icon']);
             return ajax();
         }
     }
@@ -469,8 +515,21 @@ class Card extends Base {
             $val['camp_name'] = input('post.camp_name');
             checkInput($val);
             try {
+                if(isset($_FILES['file'])) {
+                    $info = upload('file',$this->upload_base_path . 'card/');
+                    if($info['error'] === 0) {
+                        $val['icon'] = $info['data'];
+                    }else {
+                        return ajax($info['msg'],-1);
+                    }
+                }else {
+                    return ajax('请上传图片',-1);
+                }
                 Db::table('mp_card_camp')->insert($val);
             } catch (\Exception $e) {
+                if(isset($val['icon'])) {
+                    @unlink($val['icon']);
+                }
                 return ajax($e->getMessage(), -1);
             }
             return ajax();
@@ -509,9 +568,23 @@ class Card extends Base {
                 if(!$camp_exist) {
                     return ajax('非法参数',-1);
                 }
+                if(isset($_FILES['file'])) {
+                    $info = upload('file',$this->upload_base_path . 'card/');
+                    if($info['error'] === 0) {
+                        $val['icon'] = $info['data'];
+                    }else {
+                        return ajax($info['msg'],-1);
+                    }
+                }
                 Db::table('mp_card_camp')->where($whereAttr)->update($val);
             } catch (\Exception $e) {
+                if(isset($val['icon'])) {
+                    @unlink($val['icon']);
+                }
                 return ajax($e->getMessage(), -1);
+            }
+            if(isset($val['icon'])) {
+                @unlink($camp_exist['icon']);
             }
             return ajax();
         }
@@ -529,10 +602,18 @@ class Card extends Base {
                 if(!$camp_exist) {
                     return ajax('非法参数',-1);
                 }
+                $whereCard = [
+                    ['ability_id','=',$camp_exist['id']]
+                ];
+                $card_exist = Db::table('mp_card')->where($whereCard)->find();
+                if($card_exist) {
+                    return ajax('此阵营下有卡牌,无法删除',-1);
+                }
                 Db::table('mp_card_camp')->where($whereAttr)->delete();
             } catch (\Exception $e) {
                 return ajax($e->getMessage(), -1);
             }
+            @unlink($camp_exist['icon']);
             return ajax();
         }
     }
