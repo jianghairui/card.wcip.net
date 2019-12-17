@@ -1,3 +1,6 @@
+<style>
+    .thumbnail{ width:130px;}
+</style>
 <article class="page-container">
     <form class="form form-horizontal" id="form-article-add">
         <div class="row cl">
@@ -6,17 +9,39 @@
                 <input type="text" class="input-text" value="" placeholder="" id="ability_name" name="ability_name" maxlength="50">
             </div>
         </div>
+        <div class="row cl" id="picsize">
+            <label class="form-label col-xs-4 col-sm-2"><span class="c-red">*</span></label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <span style="font-size: 16px">
+                    (建议尺寸: 130*49)
+                </span>
+            </div>
+        </div>
+        <div class="row cl" id="pic">
+            <label class="form-label col-xs-4 col-sm-2">
+                <span id="btn-star" class="btn btn-primary btn-uploadstar radius ml-10">能力图标</span>
+            </label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <div class="uploader-thum-container">
+                    <div id="fileList" class="uploader-list">
+
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="row cl">
             <div class="col-xs-8 col-sm-9 col-xs-offset-4 col-sm-offset-2">
                 <button class="btn btn-primary radius" type="submit"><i class="Hui-iconfont">&#xe632;</i> 添加</button>
                 <button onClick="layer_close();" class="btn btn-default radius" type="button">&nbsp;&nbsp;取消&nbsp;&nbsp;</button>
             </div>
         </div>
+        <input type="file" name="file" id="file" value="" style="display: none">
     </form>
 </article>
 <script type="text/javascript" src="/lib/jquery.validation/1.14.0/jquery.validate.js"></script>
 <script type="text/javascript" src="/lib/jquery.validation/1.14.0/validate-methods.js"></script>
 <script type="text/javascript" src="/lib/jquery.validation/1.14.0/messages_zh.js"></script>
+<script type="text/javascript" src="/lib/checkfile.js"></script>
 <script type="text/javascript">
 
     $(function(){
@@ -57,6 +82,24 @@
                     });
                 }
 
+            }
+        });
+
+        $("#btn-star").click(function(){
+            $("#file").click();
+        });
+        $("#file").change(function(e){
+            if ($("#file").val()) {
+                if(checkfile('file',20) !== true) {
+                    $("#file").val('');
+                    $("#fileList").html('');
+                    return false
+                }
+                var img = e.target.files[0];
+                var src = window.URL.createObjectURL(img);
+                $("#fileList").html('<img class="thumbnail" src="'+src+'">');
+            }else {
+                $("#fileList").html('');
             }
         });
 
