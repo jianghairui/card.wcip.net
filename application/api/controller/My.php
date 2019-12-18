@@ -13,56 +13,42 @@ class My extends Base {
 
     //获取个人信息
     public function mydetail() {
-        $map = [
-            ['u.id','=',$this->myinfo['id']]
-        ];
-        try {
-            $info = Db::table('mp_user')->alias('u')
-                ->join('mp_user_role r','u.id=r.uid','left')
-                ->field('u.*,r.cover')
-                ->where($map)->find();
-        }catch (\Exception $e) {
-            return ajax($e->getMessage(),-1);
-        }
-        return ajax($info);
+        return ajax($this->myinfo);
     }
     //修改头像
     public function modAvatar() {
         $user = $this->myinfo;
+        $val['nickname'] = input('post.nickname');
+        $val['sex'] = input('post.sex');
+        $val['age'] = input('post.age');
+        $val['tel'] = input('post.tel');
+        checkPost($val);
+        $val['realname'] = input('post.realname');
+        $val['desc'] = input('post.desc','');
+        $val['id'] = $this->myinfo['uid'];
+        if(!is_tel($val['tel'])) {
+            return ajax('无效的手机号',6);
+        }
         try {
             $avatar = input('post.avatar');
-            $val['avatar'] = $avatar;
             if($avatar) {
                 if (substr($avatar,0,4) == 'http') {
                     $val['avatar'] = $avatar;
                 }else {
-                    $qiniu_exist = $this->qiniuFileExist($avatar);
-                    if($qiniu_exist !== true) {
-                        return ajax($qiniu_exist['msg'] . ' :'.$avatar,5);
-                    }
-                    $img_check = $this->imgSecCheck(config('qiniu_weburl') . $avatar);
-                    if(!$img_check) {
-                        return ajax('图片包含违规内容',82);
-                    }
-                    $qiniu_move = $this->moveFile($avatar,'upload/avatar/');
-                    if($qiniu_move['code'] == 0) {
-                        $val['avatar'] = $qiniu_move['path'];
-                    }else {
-                        return ajax($qiniu_move['msg'],101);
-                    }
+                    $val['avatar'] = rename_file($avatar,$this->rename_base_path);
                 }
             }else {
-                return ajax('请上传头像',61);
+                return ajax('',3);
             }
-            Db::table('mp_user')->where('id','=',$user['id'])->update($val);
+            Db::table('mp_user')->where('id',$val['id'])->update($val);
         } catch (\Exception $e) {
-            if ($val['avatar'] != $user['avatar'] &&  substr($val['avatar'],0,4) != 'http') {
-                $this->rs_delete($val['avatar']);
+            if ($val['avatar'] != $user['avatar']) {
+                @unlink($val['avatar']);
             }
             return ajax($e->getMessage(), -1);
         }
-        if ($val['avatar'] != $user['avatar'] && substr($user['avatar'],0,4) != 'http') {
-            $this->rs_delete($user['avatar']);
+        if ($val['avatar'] != $user['avatar']) {
+            @unlink($user['avatar']);
         }
         return ajax();
 

@@ -46,7 +46,7 @@ class Api extends Base {
                                 "FromUserName" => $data['ToUserName'],
                                 "CreateTime" => time(),
                                 "MsgType" => "text",
-                                "Content" => "掌控的历史系统维护中312312312",
+                                "Content" => "场景值" . $data['EventKey'],
                             ];
                             exit(arr2xml($response_data));
 
@@ -87,7 +87,7 @@ class Api extends Base {
                                 "FromUserName" => $data['ToUserName'],
                                 "CreateTime" => time(),
                                 "MsgType" => "text",
-                                "Content" => "感谢关注掌控的历史!",
+                                "Content" => "场景值" . $data['EventKey'],
                             ];
                             exit(arr2xml($response_data));
 
