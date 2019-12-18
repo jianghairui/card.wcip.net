@@ -92,6 +92,7 @@ class Base extends Controller {
     //微信日志
     protected function weixinlog($cmd = '',$msg = '') {
         $file= LOG_PATH . '/wechat.log';
+        create_dir($file);
         $text='[Time ' . date('Y-m-d H:i:s') ."]\ncmd:".$cmd."\n".$msg."\n---END---" . "\n";
         if(false !== fopen($file,'a+')){
             file_put_contents($file,$text,FILE_APPEND);
@@ -103,6 +104,7 @@ class Base extends Controller {
     //xml数据日志
     protected function xmllog($cmd = '',$msg = '') {
         $file= LOG_PATH . '/xml.log';
+        create_dir($file);
         $text='[Time ' . date('Y-m-d H:i:s') ."]\ncmd:".$cmd."\n".$msg."\n---END---" . "\n";
         if(false !== fopen($file,'a+')){
             file_put_contents($file,$text,FILE_APPEND);

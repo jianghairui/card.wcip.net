@@ -38,20 +38,22 @@ class Api extends Base {
                     switch ($data['Event']) {
                         //扫码事件
                         case 'SCAN':
-//                            $response_data = [
-//                                "ToUserName" => $data['FromUserName'],
-//                                "FromUserName" => $data['ToUserName'],
-//                                "CreateTime" => time(),
-//                                "MsgType" => "text",
-//                                "Content" => "掌控的历史系统维护中",
-//                            ];
-//                            exit(arr2xml($response_data));
-
                             $this->weixinlog($this->cmd . '.SCAN',var_export($data,true));
 
-                            $device_id = $data['EventKey'];
+
+                            $response_data = [
+                                "ToUserName" => $data['FromUserName'],
+                                "FromUserName" => $data['ToUserName'],
+                                "CreateTime" => time(),
+                                "MsgType" => "text",
+                                "Content" => "掌控的历史系统维护中312312312",
+                            ];
+                            exit(arr2xml($response_data));
+
+
+                            $scene_id = $data['EventKey'];
                             try {
-                                $device = Db::table('mp_device')->where('id','=',$device_id)->find();
+                                $device = Db::table('mp_scene')->where('id','=',$scene_id)->find();
                                 //$this->weixinlog($this->cmd,var_export($device,true));
                             } catch (\Exception $e) {
                                 $this->excep($this->cmd,$e->getMessage());
@@ -79,39 +81,52 @@ class Api extends Base {
                             //带参数关注
 
                             $this->weixinlog($this->cmd . '.subscribe',var_export($data,true));
-                            if($data['EventKey']) {
-                                try {
-                                    $device_id = explode('_',$data['EventKey'])[1];
-                                    $device = Db::table('mp_device')->where('id','=',$device_id)->find();
-                                } catch (\Exception $e) {
-                                    $this->excep($this->cmd,$e->getMessage());
-                                    exit('success');
-                                }
-                                $response_data = [
-                                    "ToUserName" => $data['FromUserName'],
-                                    "FromUserName" => $data['ToUserName'],
-                                    "CreateTime" => time(),
-                                    "MsgType" => "news",
-                                    "ArticleCount" => 1,
-                                    "Articles" => [
-                                        "item" => [
-                                            "Title" => $device['name'],
-                                            "Description" => "设备编号" . $device['device_num'],
-                                            "PicUrl" => "https://ss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=2297371377,1524008543&fm=26&gp=0.jpg",
-                                            "Url" => $device['gift_url']
-                                        ]
-                                    ]
-                                ];
-                                exit(arr2xml($response_data));
-                            }
-                            ;break;
 
+                            $response_data = [
+                                "ToUserName" => $data['FromUserName'],
+                                "FromUserName" => $data['ToUserName'],
+                                "CreateTime" => time(),
+                                "MsgType" => "text",
+                                "Content" => "感谢关注掌控的历史!",
+                            ];
+                            exit(arr2xml($response_data));
+
+//                            if($data['EventKey']) {
+//                                try {
+//                                    $scene_id = explode('_',$data['EventKey'])[1];
+//                                    $device = Db::table('mp_device')->where('id','=',$scene_id)->find();
+//                                } catch (\Exception $e) {
+//                                    $this->excep($this->cmd,$e->getMessage());
+//                                    exit('success');
+//                                }
+//                                $response_data = [
+//                                    "ToUserName" => $data['FromUserName'],
+//                                    "FromUserName" => $data['ToUserName'],
+//                                    "CreateTime" => time(),
+//                                    "MsgType" => "news",
+//                                    "ArticleCount" => 1,
+//                                    "Articles" => [
+//                                        "item" => [
+//                                            "Title" => $device['name'],
+//                                            "Description" => "设备编号" . $device['device_num'],
+//                                            "PicUrl" => "https://ss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=2297371377,1524008543&fm=26&gp=0.jpg",
+//                                            "Url" => $device['gift_url']
+//                                        ]
+//                                    ]
+//                                ];
+//                                exit(arr2xml($response_data));
+//                            }
+                            break;
+                        //取关事件
                         case 'unsubscribe':
                             //todo
-                                break;
+                            $this->weixinlog($this->cmd . '.unsubscribe',var_export($data,true));
+                            break;
 
 
                     };break;
+
+
                 default:;
             }
             exit('success');

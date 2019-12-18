@@ -7,80 +7,171 @@
  */
 namespace app\admin\controller;
 
+use think\Db;
 use wx\Jssdk;
 
-class Qrcode extends Common {
+class Qrcode extends Base {
 
     public function sceneList() {
-
+        $curr_page = input('param.page',1);
+        $perpage = input('param.perpage',10);
+        $page['query'] = http_build_query(input('param.'));
+        $whereScene = [];
+        try {
+            $count = Db::table('mp_scene')->where($whereScene)->count();
+            $page['count'] = $count;
+            $page['curr'] = $curr_page;
+            $page['totalPage'] = ceil($count/$perpage);
+            $list = Db::table('mp_scene')->where($whereScene)->limit(($curr_page-1)*$perpage,$perpage)->select();
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+        $this->assign('list',$list);
+        $this->assign('page',$page);
+        return $this->fetch();
     }
 
     public function sceneAdd() {
+        if(request()->isPost()) {
+            $val['scene_name'] = input('post.scene_name');
+            checkInput($val);
+            $val['desc'] = input('post.desc');
+            try {
+                $scene_id = Db::table('mp_scene')->insertGetId($val);
 
+                $post_data = [
+                    'action_name' => 'QR_LIMIT_SCENE',
+                    'action_info' => [
+                        'scene' => [
+                            'scene_id' => $scene_id
+                        ]
+                    ]
+                ];
+                $jssdk = new Jssdk($this->config['appid'], $this->config['app_secret']);
+                $access_token = $jssdk->getAccessToken();
+
+                $url = 'https://api.weixin.qq.com/cgi-bin/qrcode/create?access_token=' . $access_token;
+                $result = curl_post_data($url,json_encode($post_data,JSON_UNESCAPED_UNICODE));
+                $obj = json_decode($result,true);
+                if(isset($obj['errcode'])) {
+                    return ajax($obj['errmsg'],-1);
+                }
+                $update['qrcode_url'] = $obj['url'];
+                $update['qrcode'] = $this->genQrcode($obj['url'],$scene_id);
+                $whereScene = [['id','=',$scene_id]];
+                Db::table('mp_scene')->where($whereScene)->update($update);
+            } catch (\Exception $e) {
+                return ajax($e->getMessage(), -1);
+            }
+            return ajax();
+        }
+        return $this->fetch();
     }
 
     public function sceneDetail() {
-
+        $val['id'] = input('param.id');
+        checkInput($val);
+        try {
+            $whereAttr = [
+                ['id','=',$val['id']]
+            ];
+            $scene_exist = Db::table('mp_scene')->where($whereAttr)->find();
+            if(!$scene_exist) {
+                die('非法参数');
+            }
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+        $this->assign('info',$scene_exist);
+        return $this->fetch();
     }
 
     public function sceneMod() {
-
+        if(request()->isPost()) {
+            $val['scene_name'] = input('post.scene_name');
+            $val['id'] = input('post.id');
+            checkInput($val);
+            $val['desc'] = input('post.desc');
+            try {
+                $whereScene = [
+                    ['id','=',$val['id']]
+                ];
+                $scene_exist = Db::table('mp_scene')->where($whereScene)->find();
+                if(!$scene_exist) {
+                    return ajax('非法参数',-1);
+                }
+                Db::table('mp_scene')->where($whereScene)->update($val);
+            } catch (\Exception $e) {
+                return ajax($e->getMessage(), -1);
+            }
+            return ajax();
+        }
     }
 
-    //生成带参数的二维码
-    public function getQrcodeWithParams() {
-        $data = [
-            'action_name' => 'QR_LIMIT_SCENE',
-            'action_info' => [
-                'scene' => [
-                    'scene_id' => 12
-                ]
-            ]
-        ];
-        $jssdk = new Jssdk($this->config['appid'], $this->config['app_secret']);
-        $access_token = $jssdk->getAccessToken();
 
-        $url = 'https://api.weixin.qq.com/cgi-bin/qrcode/create?access_token=' . $access_token;
-        $result = curl_post_data($url,json_encode($data,JSON_UNESCAPED_UNICODE));
-        $obj = json_decode($result,true);
-        halt($obj);
+
+    //生成二维码
+    private function genQrcode($str = '',$scene_id = 1) {
+        include ROOT_PATH . '/extend/phpqrcode/phpqrcode.php';
+        $errorCorrectionLevel = "M"; // 纠错级别：L、M、Q、H
+        $matrixPointSize = "6"; // 点的大小：1到10
+        header('Content-Type:image/png');
+        $file_path = 'qrcode/'. md5($scene_id . config('qrcode_key')) .'.png';
+        \QRcode::png($str, $file_path, $errorCorrectionLevel, $matrixPointSize);
+//        exit;
+
+        return $file_path;
+    }
+
+
+
+    //生成带参数的二维码
+    private function getQrcodeWithParams() {
+        $val['scene_name'] = input('post.scene_name');
+        $val['desc'] = input('post.desc');
+        checkInput($val);
+        try {
+            $scene_id = Db::table('mp_scene')->insertGetId($val);
+
+            $data = [
+                'action_name' => 'QR_LIMIT_SCENE',
+                'action_info' => [
+                    'scene' => [
+                        'scene_id' => $scene_id
+                    ]
+                ]
+            ];
+            $jssdk = new Jssdk($this->config['appid'], $this->config['app_secret']);
+            $access_token = $jssdk->getAccessToken();
+
+            $url = 'https://api.weixin.qq.com/cgi-bin/qrcode/create?access_token=' . $access_token;
+            $result = curl_post_data($url,json_encode($data,JSON_UNESCAPED_UNICODE));
+            $obj = json_decode($result,true);
+            if(isset($obj['errcode'])) {
+                return ajax($obj['errmsg'],-1);
+            }
+            $update['qrcode_url'] = $obj['url'];
+            $update['qrcode'] = $this->genQrcode($obj['url'],$scene_id);
+            $whereScene = [['id','=',$scene_id]];
+            Db::table('mp_scene')->where($whereScene)->update($update);
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+
+        return ajax();
     }
 
     public function test() {
-//        $xml = '<xml>
-//  <ToUserName><![CDATA[toUser]]></ToUserName>
-//  <FromUserName><![CDATA[fromUser]]></FromUserName>
-//  <CreateTime>12345678</CreateTime>
-//  <MsgType><![CDATA[news]]></MsgType>
-//  <ArticleCount>1</ArticleCount>
-//  <Articles>
-//    <item>
-//      <Title><![CDATA[title1]]></Title>
-//      <Description><![CDATA[description1]]></Description>
-//      <PicUrl><![CDATA[picurl]]></PicUrl>
-//      <Url><![CDATA[url]]></Url>
-//    </item>
-//  </Articles>
-//</xml>';
-//        $data = $this->xml2array($xml);
-//        halt($data);
 
-        $response_data = [
-            "ToUserName" => 'FromUserName',
-            "FromUserName" => 'ToUserName',
-            "CreateTime" => time(),
-            "MsgType" => "news",
-            "ArticleCount" => 1,
-            "Articles" => [
-                "item" => [
-                    "Title" => "山海图书馆",
-                    "Description" => "description1",
-                    "PicUrl" => "https://ss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=2297371377,1524008543&fm=26&gp=0.jpg",
-                    "Url" => 'http://www.baidu.com'
-                ]
-            ]
-        ];
-        halt(arr2xml($response_data));
+        $where = [];
+
+        $arr = [1,2,3];
+        $where[] = ['id','in',$arr];
     }
+
+
+
+
+
 
 }
