@@ -14,12 +14,12 @@
         </div>
         <div class="row cl" id="pic">
             <label class="form-label col-xs-4 col-sm-2">
-                <span id="btn-star" class="btn btn-primary btn-uploadstar radius ml-10">场景码</span>
+                <span class="c-red"></span>场景码：
             </label>
             <div class="formControls col-xs-8 col-sm-9">
                 <div class="uploader-thum-container">
                     <div id="fileList" class="uploader-list">
-                        <img class="thumbnail" src="/{$info.qrcode}">
+                        <img class="thumbnail" src="/{$info.qrcode}" onclick="refreshQrcode(this,{$info.id})">
                     </div>
                 </div>
             </div>
@@ -121,4 +121,30 @@
 
 
     });
+
+    var  click_lock = true;
+
+    function refreshQrcode(obj,id) {
+        if(click_lock === true) {
+            click_lock = false;
+            $.ajax({
+                url: "{:url('Qrcode/refreshQrode')}",
+                type: 'POST',
+                dataType: 'json',
+                data: {id: id},
+                success: function (data) {
+                    // console.log(data);
+                    if (data.code == 1) {
+                        obj.src = '/' + data.data;
+                    } else {
+                        layer.msg(data.data, {icon: 2, time: 1000});
+                    }
+                    click_lock = true;
+                },
+                error: function (data) {
+                    console.log(data.msg);
+                }
+            });
+        }
+    }
 </script>

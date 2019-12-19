@@ -77,7 +77,7 @@
             <th width="120">资源值</th>
             <th width="80">类型</th>
             <th width="44">阵营</th>
-            <th width="130">能力</th>
+            <th width="100">能力</th>
             <th>版本</th>
             <th width="80">状态</th>
             <th width="130">操作</th>
@@ -112,7 +112,7 @@
                 </td>
                 <td>
                     {if isset($ability[$li['ability_id']])}
-                    <div style="width: 130px;height: 49px;background-image: url('/{$ability[$li['ability_id']]['icon']}');background-position: center;background-repeat: no-repeat;background-size: 100%"></div>
+                    <div style="width: 100px;height: 38px;background-image: url('/{$ability[$li['ability_id']]['icon']}');background-position: center;background-repeat: no-repeat;background-size: 100%"></div>
                     {/if}
                 </td>
                 <td>{if isset($version[$li['version_id']])}{$version[$li['version_id']]}{/if}</td>

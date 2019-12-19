@@ -12,6 +12,31 @@ use wx\Jssdk;
 
 class Qrcode extends Base {
 
+    public function userList() {
+        $curr_page = input('param.page',1);
+        $perpage = input('param.perpage',10);
+        $page['query'] = http_build_query(input('param.'));
+        $whereUser = [];
+        try {
+            $count = Db::table('mp_scene_user')->alias('u')->where($whereUser)->count();
+            $page['count'] = $count;
+            $page['curr'] = $curr_page;
+            $page['totalPage'] = ceil($count/$perpage);
+            $list = Db::table('mp_scene_user')->alias('u')
+                ->join('mp_scene c','u.scene_id=c.id','left')
+                ->where($whereUser)
+                ->field('u.*,c.scene_name')
+                ->limit(($curr_page-1)*$perpage,$perpage)
+                ->order(['u.id'=>'DESC'])
+                ->select();
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+        $this->assign('list',$list);
+        $this->assign('page',$page);
+        return $this->fetch();
+    }
+
     public function sceneList() {
         $curr_page = input('param.page',1);
         $perpage = input('param.perpage',10);
@@ -105,6 +130,26 @@ class Qrcode extends Base {
                 return ajax($e->getMessage(), -1);
             }
             return ajax();
+        }
+    }
+
+    public function refreshQrode() {
+        if(request()->isPost()) {
+            $val['id'] = input('post.id');
+            checkInput($val);
+            try {
+                $whereScene = [
+                    ['id','=',$val['id']]
+                ];
+                $scene_exist = Db::table('mp_scene')->where($whereScene)->find();
+                if(!$scene_exist) {
+                    return ajax('非法参数',-1);
+                }
+                $this->genQrcode($scene_exist['qrcode_url'],$scene_exist['id']);
+            } catch (\Exception $e) {
+                return ajax($e->getMessage(), -1);
+            }
+            return ajax($scene_exist['qrcode'] . '?' . mt_rand(1,1000));
         }
     }
 

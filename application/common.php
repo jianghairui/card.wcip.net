@@ -277,7 +277,25 @@ function curl_post_data($url, $curlPost,$userCert = false)
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
     curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
     $data = curl_exec($ch);
+    curl_close($ch);
     return $data;
+}
+
+function curl_get_data($url,$data = [])
+{
+    $ch = curl_init();
+    if($data){
+        $querystring = http_build_query($data);
+        $url = $url.'?'.$querystring;
+    }
+    curl_setopt($ch, CURLOPT_URL,$url);
+    curl_setopt($ch, CURLOPT_HEADER, 0);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);         // 执行后不直接打印出来
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE); // 跳过证书检查
+    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE); // 不从证书中检查SSL加密算法是否存在
+    $output = curl_exec($ch); //执行并获取HTML文档内容
+    curl_close($ch); //释放curl句柄
+    return $output;
 }
 
 //生成签名

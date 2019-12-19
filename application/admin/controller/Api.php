@@ -6,7 +6,6 @@
  * Time=>14:15
  */
 namespace  app\admin\controller;
-use function Couchbase\defaultDecoder;
 use think\Db;
 use wx\Jssdk;
 class Api extends Base {
@@ -29,9 +28,6 @@ class Api extends Base {
         }else{
             $xml = file_get_contents('php://input');
             $data = xml2array($xml);
-//            if($data) {
-//                $this->xmllog($this->cmd,var_export($data,true));
-//            }
             switch ($data['MsgType']) {
                 case 'event':
                     //匹配各种事件
@@ -39,88 +35,111 @@ class Api extends Base {
                         //扫码事件
                         case 'SCAN':
                             $this->weixinlog($this->cmd . '.SCAN',var_export($data,true));
-
-
-                            $response_data = [
-                                "ToUserName" => $data['FromUserName'],
-                                "FromUserName" => $data['ToUserName'],
-                                "CreateTime" => time(),
-                                "MsgType" => "text",
-                                "Content" => "场景值" . $data['EventKey'],
-                            ];
-                            exit(arr2xml($response_data));
-
-
                             $scene_id = $data['EventKey'];
+                            break;
+                        //关注事件
+                        case 'subscribe':
+                            $this->weixinlog($this->cmd . '.subscribe',var_export($data,true));
+
+                            //带参数关注
+                            if($data['EventKey']) {
+                                try {
+                                    $scene_id = explode('_',$data['EventKey'])[1];
+                                    $scene_exist = Db::table('mp_scene')->where('id','=',$scene_id)->find();
+                                    if(!$scene_exist) {
+                                        $this->weixinlog($this->cmd . '.subscribe','scene_id not exist' . $scene_id);
+                                        exit('success');
+                                    }
+                                    //根据OPENID获取用户信息
+                                    $jssdk = new Jssdk($this->config['appid'], $this->config['app_secret']);
+                                    $access_token = $jssdk->getAccessToken();
+                                    $openid = $data['FromUserName'];
+                                    $url = 'https://api.weixin.qq.com/cgi-bin/user/info?access_token='.$access_token.'&openid='.$openid.'&lang=zh_CN';
+                                    $result = curl_get_data($url);
+                                    $obj = json_decode($result,true);
+                                    $insert_data = [
+                                        'openid' => $obj['openid'],
+                                        'nickname' => $obj['nickname'],
+                                        'sex' => $obj['sex'],
+                                        'avatar' => $obj['headimgurl'],
+                                        'sub_time' => time(),
+                                        'subscribe' => 1
+                                    ];
+                                    $whereUser = [['openid','=',$obj['openid']]];
+                                    $user_exist = Db::table('mp_scene_user')->where($whereUser)->find();
+                                    if($user_exist) {
+                                        if($user_exist['subscribe'] == 0) {
+                                            $scene_id = $user_exist['scene_id'];
+                                            Db::table('mp_scene_user')->where($whereUser)->update($insert_data);
+                                            Db::table('mp_scene')->where('id','=',$scene_id)->setInc('subscribe',1);
+                                            Db::table('mp_scene')->where('id','=',$scene_id)->setDec('unsubscribe',1);
+                                        }
+                                    }else {
+                                        $insert_data['scene_id'] = $scene_id;
+                                        $insert_data['create_time'] = time();
+                                        Db::table('mp_scene_user')->insert($insert_data);
+                                        Db::table('mp_scene')->where('id','=',$scene_id)->setInc('total_num',1);
+                                        Db::table('mp_scene')->where('id','=',$scene_id)->setInc('subscribe',1);
+                                    }
+                                } catch (\Exception $e) {
+                                    $this->excep($this->cmd . '.subscribe',$e->getMessage());
+                                    exit('success');
+                                }
+                            }else {//不带参数的关注
+                                $whereUser = [
+                                    ['openid','=',$data['FromUserName']],
+                                    ['subscribe','=',0]
+                                ];
+                                try {
+                                    $user_exist = Db::table('mp_scene_user')->where($whereUser)->find();
+                                    if($user_exist) {
+                                        //根据OPENID获取用户信息
+                                        $jssdk = new Jssdk($this->config['appid'], $this->config['app_secret']);
+                                        $access_token = $jssdk->getAccessToken();
+                                        $openid = $data['FromUserName'];
+                                        $url = 'https://api.weixin.qq.com/cgi-bin/user/info?access_token='.$access_token.'&openid='.$openid.'&lang=zh_CN';
+                                        $result = curl_get_data($url);
+                                        $obj = json_decode($result,true);
+                                        $update_data = [
+                                            'openid' => $obj['openid'],
+                                            'nickname' => $obj['nickname'],
+                                            'sex' => $obj['sex'],
+                                            'avatar' => $obj['headimgurl'],
+                                            'sub_time' => time(),
+                                            'subscribe' => 1
+                                        ];
+                                        //修改用户关注状态,场景关注值+1 取关值-1
+                                        Db::table('mp_scene_user')->where($whereUser)->update($update_data);
+                                        Db::table('mp_scene')->where('id','=',$user_exist['scene_id'])->setInc('subscribe',1);
+                                        Db::table('mp_scene')->where('id','=',$user_exist['scene_id'])->setDec('unsubscribe',1);
+                                    }
+                                } catch (\Exception $e) {
+                                    $this->excep($this->cmd . '.subscribe',$e->getMessage());
+                                    return ajax($e->getMessage(), -1);
+                                }
+
+                            }
+                            break;
+                        //取关事件
+                        case 'unsubscribe':
+                            //TODO
+                            $this->weixinlog($this->cmd . '.unsubscribe',var_export($data,true));
                             try {
-                                $device = Db::table('mp_scene')->where('id','=',$scene_id)->find();
-                                //$this->weixinlog($this->cmd,var_export($device,true));
+                                $whereUser = [
+                                    ['openid','=',$data['FromUserName']],
+                                    ['subscribe','=',1]
+                                ];
+                                $user_exist = Db::table('mp_scene_user')->where($whereUser)->find();
+                                if($user_exist) {
+                                    //修改用户关注状态,场景关注值-1 取关值+1
+                                    Db::table('mp_scene_user')->where($whereUser)->update(['subscribe'=>0,'unsub_time'=>time()]);
+                                    Db::table('mp_scene')->where('id','=',$user_exist['scene_id'])->setInc('unsubscribe',1);
+                                    Db::table('mp_scene')->where('id','=',$user_exist['scene_id'])->setDec('subscribe',1);
+                                }
                             } catch (\Exception $e) {
                                 $this->excep($this->cmd,$e->getMessage());
                                 exit('success');
                             }
-                            $response_data = [
-                                "ToUserName" => $data['FromUserName'],
-                                "FromUserName" => $data['ToUserName'],
-                                "CreateTime" => time(),
-                                "MsgType" => "news",
-                                "ArticleCount" => 1,
-                                "Articles" => [
-                                    "item" => [
-                                        "Title" => $device['name'],
-                                        "Description" => "设备编号" . $device['device_num'],
-                                        "PicUrl" => "https://ss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=2297371377,1524008543&fm=26&gp=0.jpg",
-                                        "Url" => $device['gift_url']
-                                    ]
-                                ]
-                            ];
-                            exit(arr2xml($response_data));
-                            break;
-                        //关注事件
-                        case 'subscribe':
-                            //带参数关注
-
-                            $this->weixinlog($this->cmd . '.subscribe',var_export($data,true));
-
-                            $response_data = [
-                                "ToUserName" => $data['FromUserName'],
-                                "FromUserName" => $data['ToUserName'],
-                                "CreateTime" => time(),
-                                "MsgType" => "text",
-                                "Content" => "场景值" . $data['EventKey'],
-                            ];
-                            exit(arr2xml($response_data));
-
-//                            if($data['EventKey']) {
-//                                try {
-//                                    $scene_id = explode('_',$data['EventKey'])[1];
-//                                    $device = Db::table('mp_device')->where('id','=',$scene_id)->find();
-//                                } catch (\Exception $e) {
-//                                    $this->excep($this->cmd,$e->getMessage());
-//                                    exit('success');
-//                                }
-//                                $response_data = [
-//                                    "ToUserName" => $data['FromUserName'],
-//                                    "FromUserName" => $data['ToUserName'],
-//                                    "CreateTime" => time(),
-//                                    "MsgType" => "news",
-//                                    "ArticleCount" => 1,
-//                                    "Articles" => [
-//                                        "item" => [
-//                                            "Title" => $device['name'],
-//                                            "Description" => "设备编号" . $device['device_num'],
-//                                            "PicUrl" => "https://ss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=2297371377,1524008543&fm=26&gp=0.jpg",
-//                                            "Url" => $device['gift_url']
-//                                        ]
-//                                    ]
-//                                ];
-//                                exit(arr2xml($response_data));
-//                            }
-                            break;
-                        //取关事件
-                        case 'unsubscribe':
-                            //todo
-                            $this->weixinlog($this->cmd . '.unsubscribe',var_export($data,true));
                             break;
 
 
