@@ -39,8 +39,6 @@ class Pay extends Base {
         }catch (\Exception $e) {
             return ajax($e->getMessage(),-1);
         }
-
-        return ajax($result,-888);
         if($result['return_code'] != 'SUCCESS' || $result['result_code'] != 'SUCCESS') {
             return ajax($result['err_code_des'],-1);
         }

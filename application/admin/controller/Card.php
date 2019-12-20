@@ -29,21 +29,21 @@ class Card extends Base {
             ['status','=',1],
             ['del','=',0]
         ];
-        if($param['attr_id'] !== '') { $whereCard[] = ['attr_id','=',$param['attr_id']]; }
-        if($param['type_id'] !== '') { $whereCard[] = ['type_id','=',$param['type_id']]; }
-        if($param['camp_id'] !== '') { $whereCard[] = ['camp_id','=',$param['camp_id']]; }
-        if($param['ability_id'] !== '') { $whereCard[] = ['ability_id','=',$param['ability_id']]; }
-        if($param['version_id'] !== '') { $whereCard[] = ['version_id','=',$param['version_id']]; }
+        if($param['attr_id'] !== '') { $whereCard[] = ['attr_id','in',explode(',',$param['attr_id'])]; }
+        if($param['type_id'] !== '') { $whereCard[] = ['type_id','in',explode(',',$param['type_id'])]; }
+        if($param['camp_id'] !== '') { $whereCard[] = ['camp_id','in',explode(',',$param['camp_id'])]; }
+        if($param['ability_id'] !== '') { $whereCard[] = ['ability_id','in',explode(',',$param['ability_id'])]; }
+        if($param['version_id'] !== '') { $whereCard[] = ['version_id','in',explode(',',$param['version_id'])]; }
         if($param['resource'] !== '') {
-            if(intval($param['resource']) == 7) {
-                $whereCard[] = ['resource','>=',$param['resource']];
+            $resource_arr = explode(',',$param['resource']);
+            if(in_array(7,$resource_arr)) {
+                $whereCard[] = ['resource','in',array_merge($resource_arr,range(8,20))];
             }else {
-                $whereCard[] = ['resource','=',$param['resource']];
+                $whereCard[] = ['resource','in',$resource_arr];
             }
         }
         if($param['search']) { $whereCard[] = ['card_name','like',"%{$param['search']}%"]; }
 
-//        halt($whereCard);
         try {
             $count = Db::table('mp_card')->where($whereCard)->count();
             $page['count'] = $count;

@@ -19,6 +19,14 @@ class Test extends Base {
     }
 
 
+    public function test() {
+        $where[] = ['id1','in',[1,3]];
+        $where[] = ['id2','in',[3,5]];
+        $where[] = ['id3','in',[]];
+        $where[] = ['id4','in',[]];
+    }
+
+
 
 
 }

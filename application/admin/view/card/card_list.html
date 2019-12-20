@@ -1,63 +1,121 @@
+<style>
+    .attr-prefix{width: 100px;flex-shrink:0;font-weight: bold}
+    .attr-prefix-item{flex-grow: 1;}
+    .icheckbox-blue{top:2px;}
+    .formControls {display: flex;margin-bottom: 15px}
+    .card-attr-icon {width:35px;height:35px;}
+    .card-ability-icon {width:79px;height:30px;}
+</style>
 <nav class="breadcrumb"><i class="Hui-iconfont">&#xe67f;</i> 首页 <span class="c-gray en">&gt;</span> 卡牌管理 <span class="c-gray en">&gt;</span> 卡牌列表 <a class="btn btn-success radius r" style="line-height:1.6em;margin-top:3px" href="javascript:location.replace(location.href);" title="刷新" ><i class="Hui-iconfont">&#xe68f;</i></a></nav>
 <div class="page-container">
     <section id="formAjax">
         <div class="text-c">
-            <span class="select-box inline" style="width: 100px;">
-				<select class="select" name="attr_id" id="attr_id">
-                    <option value="">属性</option>
-                    {foreach $card_attr as $v}
-                    <option value="{$v.id}" {if $param['attr_id'] === strval($v['id'])}selected{/if}>{$v.attr_name}</option>
-                    {/foreach}
-				</select>
-            </span>
-            <span class="select-box inline" style="width: 100px;">
-				<select class="select" name="resource" id="resource">
-                    <option value="">资源</option>
-                    <option value="-1" {if $param['resource'] === '-1'}selected{/if}>x</option>
-                    <option value="0" {if $param['resource'] === '0'}selected{/if}>0</option>
-                    <option value="1" {if $param['resource'] === '1'}selected{/if}>1</option>
-                    <option value="2" {if $param['resource'] === '2'}selected{/if}>2</option>
-                    <option value="3" {if $param['resource'] === '3'}selected{/if}>3</option>
-                    <option value="4" {if $param['resource'] === '4'}selected{/if}>4</option>
-                    <option value="5" {if $param['resource'] === '5'}selected{/if}>5</option>
-                    <option value="6" {if $param['resource'] === '6'}selected{/if}>6</option>
-                    <option value="7" {if $param['resource'] === '7'}selected{/if}>7+</option>
-				</select>
-            </span>
-            <span class="select-box inline" style="width: 100px;">
-				<select class="select" name="type_id" id="type_id">
-                    <option value="">类型</option>
-                    {foreach $card_type as $v}
-                    <option value="{$v.id}" {if $param['type_id'] === strval($v['id'])}selected{/if}>{$v.type_name}</option>
-                    {/foreach}
-				</select>
-            </span>
-            <span class="select-box inline" style="width: 100px;">
-				<select class="select" name="camp_id" id="camp_id">
-                    <option value="">阵营</option>
-                    {foreach $card_camp as $v}
-                    <option value="{$v.id}" {if $param['camp_id'] === strval($v['id'])}selected{/if}>{$v.camp_name}</option>
-                    {/foreach}
-				</select>
-            </span>
-            <span class="select-box inline" style="width: 100px;">
-				<select class="select" name="ability_id" id="ability_id">
-                    <option value="">能力</option>
-                    {foreach $card_ability as $v}
-                    <option value="{$v.id}" {if $param['ability_id'] === strval($v['id'])}selected{/if}>{$v.ability_name}</option>
-                    {/foreach}
-				</select>
-            </span>
-            <span class="select-box inline">
-				<select class="select" name="version_id" id="version_id" style="width: 100px;">
-                    <option value="">版本</option>
-                    {foreach $card_version as $v}
-                    <option value="{$v.id}" {if $param['version_id'] === strval($v['id'])}selected{/if}>{$v.version_name}</option>
-                    {/foreach}
-				</select>
-            </span>
             <input type="text" name="search" value="{$Think.get.search}" id="search" placeholder="卡牌名字" style="width:250px" class="input-text">
             <button name="" id="search-btn" class="btn btn-success" type="button"><i class="Hui-iconfont">&#xe665;</i> 查找卡牌</button>
+            <br>
+            <br>
+            <div class="text-l formControls">
+                <div class="attr-prefix">属性：</div>
+                <div class="attr-prefix-item" id="attr_id">
+                    <?php $attr_id_arr=explode(',',$param['attr_id']);?>
+                    {foreach $card_attr as $v}
+                    <div class="radio-box">
+                        <input type="checkbox" value="{$v.id}" name="attr_id[]" id="attr-{$v.id}" {if in_array(strval($v['id']),$attr_id_arr,true)}checked{/if}>
+                        <label for="attr-{$v.id}"><img class="card-attr-icon" src="/{$v.icon}" alt="" title="{$v.attr_name}"></label>
+                    </div>
+                    {/foreach}
+                </div>
+            </div>
+            <div class="text-l formControls">
+                <div class="attr-prefix">资源值：</div>
+                <div class="attr-prefix-item" id="resource">
+                    <?php $resource_arr=explode(',',$param['resource']);?>
+                    <div class="radio-box">
+                        <input type="checkbox" value="-1" name="resource[]" id="resource--1">
+                        <label for="resource--1">x</label>
+                    </div>
+                    <div class="radio-box">
+                        <input type="checkbox" value="0" name="resource[]" id="resource-0">
+                        <label for="resource-0">0</label>
+                    </div>
+                    <div class="radio-box">
+                        <input type="checkbox" value="1" name="resource[]" id="resource-1">
+                        <label for="resource-1">1</label>
+                    </div>
+                    <div class="radio-box">
+                        <input type="checkbox" value="2" name="resource[]" id="resource-2">
+                        <label for="resource-2">2</label>
+                    </div>
+                    <div class="radio-box">
+                        <input type="checkbox" value="3" name="resource[]" id="resource-3">
+                        <label for="resource-3">3</label>
+                    </div>
+                    <div class="radio-box">
+                        <input type="checkbox" value="4" name="resource[]" id="resource-4">
+                        <label for="resource-4">4</label>
+                    </div>
+                    <div class="radio-box">
+                        <input type="checkbox" value="5" name="resource[]" id="resource-5">
+                        <label for="resource-5">5</label>
+                    </div>
+                    <div class="radio-box">
+                        <input type="checkbox" value="6" name="resource[]" id="resource-6">
+                        <label for="resource-6">6</label>
+                    </div>
+                    <div class="radio-box">
+                        <input type="checkbox" value="7" name="resource[]" id="resource-7">
+                        <label for="resource-7">7+</label>
+                    </div>
+                </div>
+            </div>
+            <div class="text-l formControls">
+                <div class="attr-prefix">卡牌类型：</div>
+                <div class="attr-prefix-item" id="type_id">
+                    <?php $type_id_arr=explode(',',$param['type_id']);?>
+                    {foreach $card_type as $v}
+                    <div class="radio-box">
+                        <input type="checkbox" value="{$v.id}" name="type_id[]" id="type-{$v.id}" {if in_array(strval($v['id']),$type_id_arr,true)}checked{/if}>
+                        <label for="type-{$v.id}">{$v.type_name}</label>
+                    </div>
+                    {/foreach}
+                </div>
+            </div>
+            <div class="text-l formControls">
+                <div class="attr-prefix">所属阵营：</div>
+                <div class="attr-prefix-item" id="camp_id">
+                    <?php $camp_id_arr=explode(',',$param['camp_id']);?>
+                    {foreach $card_camp as $v}
+                    <div class="radio-box">
+                        <input type="checkbox" value="{$v.id}" name="camp_id[]" id="camp-{$v.id}" {if in_array(strval($v['id']),$camp_id_arr,true)}checked{/if}>
+                        <label for="camp-{$v.id}"><img class="card-attr-icon" src="/{$v.icon}" alt="" title="{$v.camp_name}"></label>
+                    </div>
+                    {/foreach}
+                </div>
+            </div>
+            <div class="text-l formControls">
+                <div class="attr-prefix">卡牌能力：</div>
+                <div class="attr-prefix-item" id="ability_id">
+                    <?php $ability_id_arr=explode(',',$param['ability_id']);?>
+                    {foreach $card_ability as $v}
+                    <div class="radio-box">
+                        <input type="checkbox" value="{$v.id}" name="ability_id[]" id="ability-{$v.id}" {if in_array(strval($v['id']),$ability_id_arr,true)}checked{/if}>
+                        <label for="ability-{$v.id}"><img class="card-ability-icon" src="/{$v.icon}" alt="" title="{$v.ability_name}"></label>
+                    </div>
+                    {/foreach}
+                </div>
+            </div>
+            <div class="text-l formControls">
+                <div class="attr-prefix">版本：</div>
+                <div class="attr-prefix-item" id="version_id">
+                    <?php $version_id_arr=explode(',',$param['version_id']);?>
+                    {foreach $card_version as $v}
+                    <div class="radio-box">
+                        <input type="checkbox" value="{$v.id}" name="version_id[]" id="version-{$v.id}" {if in_array(strval($v['id']),$version_id_arr,true)}checked{/if}>
+                        <label for="version-{$v.id}">{$v.version_name}</label>
+                    </div>
+                    {/foreach}
+                </div>
+            </div>
             <!--<button name="" class="btn btn-info" type="button" id="toExcel"><i class="Hui-iconfont">&#xe66b;</i> 导出Excel</button>-->
         </div>
     </section>
@@ -139,6 +197,11 @@
 <script type="text/javascript" src="/lib/My97DatePicker/4.8/WdatePicker.js"></script>
 <script type="text/javascript" src="/lib/datatables/1.10.0/jquery.dataTables.min.js"></script>
 <script type="text/javascript" src="/lib/laypage/1.2/laypage.js"></script>
+
+<script type="text/javascript" src="/lib/lightbox2/2.8.1/js/lightbox.min.js"></script>
+<script type="text/javascript" src="/lib/jquery.validation/1.14.0/jquery.validate.js"></script>
+<script type="text/javascript" src="/lib/jquery.validation/1.14.0/validate-methods.js"></script>
+<script type="text/javascript" src="/lib/jquery.validation/1.14.0/messages_zh.js"></script>
 <script type="text/javascript">
 
     var url = '{:url("Card/cardList")}' + '?<?php echo $page["query"];?>',totalPage = '{$page.totalPage}';
@@ -159,43 +222,69 @@
         });
     }
 
-    $("#search-btn").click(function () {
-        var attr_id = $("#formAjax").find("#attr_id").val();
-        var resource = $("#formAjax").find("#resource").val();
-        var type_id = $("#formAjax").find("#type_id").val();
-        var camp_id = $("#formAjax").find("#camp_id").val();
-        var ability_id = $("#formAjax").find("#ability_id").val();
-        var version_id = $("#formAjax").find("#version_id").val();
-        var search = $("#formAjax").find("#search").val();
+    $(function () {
 
-        var str = '';
-        if(attr_id.length != '') { str += '&attr_id=' + attr_id }
-        if(resource.length != '') { str += '&resource=' + resource }
-        if(type_id.length != '') { str += '&type_id=' + type_id }
-        if(camp_id.length != '') { str += '&camp_id=' + camp_id }
-        if(ability_id.length != '') { str += '&ability_id=' + ability_id }
-        if(version_id.length != '') { str += '&version_id=' + version_id }
-        if(search.length != 0) { str += '&search=' + search; }
+        $("#search-btn").click(function () {
+            var attr_id = [];
+            var resource = [];
+            var type_id = [];
+            var camp_id = [];
+            var ability_id = [];
+            var version_id = [];
+            var search = $("#formAjax").find("#search").val();
 
-        window.location.href = '{:url("Card/cardList")}' + '?' + str;
+            $("#attr_id input:checkbox:checked").each(function () {
+                attr_id.push($(this).val());
+            }); attr_id = attr_id.join(',');
+            $("#resource input:checkbox:checked").each(function () {
+                resource.push($(this).val());
+            }); resource = resource.join(',');
+            $("#type_id input:checkbox:checked").each(function () {
+                type_id.push($(this).val());
+            }); type_id = type_id.join(',');
+            $("#camp_id input:checkbox:checked").each(function () {
+                camp_id.push($(this).val());
+            }); camp_id = camp_id.join(',');
+            $("#ability_id input:checkbox:checked").each(function () {
+                ability_id.push($(this).val());
+            }); ability_id = ability_id.join(',');
+            $("#version_id input:checkbox:checked").each(function () {
+                version_id.push($(this).val());
+            }); version_id = version_id.join(',');
+
+            var str = '';
+            if(attr_id.length != '') { str += '&attr_id=' + attr_id }
+            if(resource.length != '') { str += '&resource=' + resource }
+            if(type_id.length != '') { str += '&type_id=' + type_id }
+            if(camp_id.length != '') { str += '&camp_id=' + camp_id }
+            if(ability_id.length != '') { str += '&ability_id=' + ability_id }
+            if(version_id.length != '') { str += '&version_id=' + version_id }
+            if(search.length != 0) { str += '&search=' + search; }
+            //
+            window.location.href = '{:url("Card/cardList")}' + '?' + str;
+        });
+
+        $("#toExcel").click(function () {
+            var datemin = $("#formAjax").find("#datemin").val();
+            var datemax = $("#formAjax").find("#datemax").val();
+            var search = $("#formAjax").find("#search").val();
+            var str = '';
+            if(datemin.length != '') {
+                str += '&datemin=' + datemin
+            }
+            if(datemax.length != '') {
+                str += '&datemax=' + datemax
+            }
+            if(search.length != 0) {
+                str += '&search=' + search;
+            }
+            window.location.href = '{:url("Excel/cardToExcel")}' + '?' + str;
+        });
     });
 
-    $("#toExcel").click(function () {
-        var datemin = $("#formAjax").find("#datemin").val();
-        var datemax = $("#formAjax").find("#datemax").val();
-        var search = $("#formAjax").find("#search").val();
-        var str = '';
-        if(datemin.length != '') {
-            str += '&datemin=' + datemin
-        }
-        if(datemax.length != '') {
-            str += '&datemax=' + datemax
-        }
-        if(search.length != 0) {
-            str += '&search=' + search;
-        }
-        window.location.href = '{:url("Excel/cardToExcel")}' + '?' + str;
-    });
+
+
+
 
 
 </script>

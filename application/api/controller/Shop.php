@@ -58,16 +58,25 @@ class Shop extends Base {
         checkPost($val);
         try {
             $where = [
-                ['g.id','=',$val['id']]
+                ['id','=',$val['id']]
             ];
-            $info = Db::table('mp_goods')->alias('g')
-                ->join('mp_goods_cate c','g.cate_id=c.id','left')
+            $info = Db::table('mp_goods')
                 ->where($where)
-                ->field("g.id,g.name,g.detail,g.origin_price,g.price,g.pics,g.carriage,g.stock,g.sales,g.hot,g.limit,c.cate_name")
+                ->field("id,name,detail,origin_price,price,pics,carriage,stock,sales,use_attr,attr,hot,limit")
                 ->find();
             if(!$info) {
                 return ajax($val['id'],-4);
             }
+            if($info['use_attr']) {
+                $whereAttr = [
+                    ['goods_id','=',$val['id']],
+                    ['del','=',0]
+                ];
+                $attr_list = Db::table('mp_goods_attr')->where($whereAttr)->select();
+            }else {
+                $attr_list = [];
+            }
+            $info['attr_list'] = $attr_list;
         } catch (\Exception $e) {
             return ajax($e->getMessage(), -1);
         }
@@ -75,21 +84,31 @@ class Shop extends Base {
         return ajax($info);
     }
 
-
     //购物车列表
     public function cartList() {
         try {
             $where = [
-                ['c.uid','=',$this->myinfo['id']]
+                ['uid','=',$this->myinfo['id']]
             ];
             $list = Db::table('mp_cart')->alias('c')
                 ->join("mp_goods g","c.goods_id=g.id","left")
-                ->field("c.id,c.uid,c.goods_id,c.num,g.name,g.pics,g.price,g.carriage,g.stock,g.limit")
+                ->join("mp_goods_attr a","c.attr_id=a.id","left")
+                ->field("c.id,c.uid,c.goods_id,c.num,c.use_attr,c.attr,c.attr_id,g.name,g.pics,g.price,g.carriage,g.stock,g.limit")
                 ->where($where)->select();
             foreach ($list as &$v) {
                 $v['cover'] = unserialize($v['pics'])[0];
                 unset($v['pics']);
-                $price = $v['price'];
+                if($v['use_attr']) {
+                    $map_attr = [
+                        ['id','=',$v['attr_id']],
+                        ['goods_id','=',$v['goods_id']]
+                    ];
+                    $attr_exist = Db::table('mp_goods_attr')->where($map_attr)->find();
+
+                    $price = $attr_exist['price'];
+                }else {
+                    $price = $v['price'];
+                }
                 $v['price'] = $price;
                 $v['total_price'] = $price * $v['num'];
                 $v['total_price'] = sprintf ( "%1\$.2f",$v['total_price']);
@@ -106,50 +125,80 @@ class Shop extends Base {
         $val['goods_id'] = input('post.goods_id');
         $val['num'] = input('post.num');
         checkPost($val);
+        $val['attr_id'] = input('post.attr_id',0);
+        $val['use_attr'] = 0;
         $val['uid'] = $this->myinfo['id'];
         if(!if_int($val['num'])) {
-            return ajax($val['num'],-4);
+            return ajax('num:' . $val['num'],-4);
         }
         try {
             //判断当前购物车内商品件数
-            $whereCart = [
+            $whereCartCount = [
                 ['uid','=',$this->myinfo['id']]
             ];
-            $count = Db::table('mp_cart')->where($whereCart)->count();
-            if($count >= 10) {
-                return ajax('购物车已经满啦',14);
-            }
+            $count = Db::table('mp_cart')->where($whereCartCount)->count();
+            if($count >= 10) { return ajax('购物车已经满啦',14); }
             //判断商品是否存在
             $whereGoods = [
                 ['id','=',$val['goods_id']]
             ];
             $goods_exist = Db::table('mp_goods')->where($whereGoods)->find();
-            if(!$goods_exist) {
-                return ajax($val['goods_id'],-4);
-            }
-            $map = [
+            if(!$goods_exist) { return ajax('goods_id:' . $val['goods_id'],-4); }
+            $whereCart = [
                 ['goods_id','=',$val['goods_id']],
                 ['uid','=',$this->myinfo['id']]
             ];
-            if($val['num'] > $goods_exist['stock']) {
-                return ajax('库存不足',15);
-            }
             if($val['num'] > $goods_exist['limit']) {
                 return ajax('超出单笔限购数量',16);
             }
-            $cart_exist = Db::table('mp_cart')->where($map)->find();//购物车是否已经存在此商品
-            if($cart_exist) {
-                if(($val['num'] + $cart_exist['num']) > $goods_exist['stock']) {
-                    return ajax('商品+购件数(含购物车)超出库存',17);
+            if($val['attr_id']) {
+                $val['use_attr'] = 1;
+                $map_attr = [
+                    ['id','=',$val['attr_id']],
+                    ['goods_id','=',$val['goods_id']]
+                ];
+                $attr_exist = Db::table('mp_goods_attr')->where($map_attr)->find();
+                if(!$attr_exist) {
+                    return ajax('attr_id:' . $val['attr_id'],-4);
                 }
-                if(($val['num'] + $cart_exist['num']) > $goods_exist['limit']) {
-                    return ajax('超出单笔限购数量',16);
+                if($val['num'] > $attr_exist['stock']) {
+                    return ajax('库存不足',15);
                 }
-                Db::table('mp_cart')->where($map)->setInc('num',$val['num']);
+
+                $val['attr'] = $attr_exist['value'];
+                $whereCart[] = ['attr_id','=',$val['attr_id']];
+                $cart_exist = Db::table('mp_cart')->where($whereCart)->find();//购物车是否已经存在此商品
+                if($cart_exist) {
+                    if(($val['num'] + $cart_exist['num']) > $attr_exist['stock']) {
+                        return ajax('商品+购件数(含购物车)超出库存',17);
+                    }
+                    if(($val['num'] + $cart_exist['num']) > $goods_exist['limit']) {
+                        return ajax('超出单笔限购数量',16);
+                    }
+                    Db::table('mp_cart')->where($whereCart)->setInc('num',$val['num']);
+                }else {
+                    $val['create_time'] = time();
+                    Db::table('mp_cart')->insert($val);
+                }
             }else {
-                $val['create_time'] = time();
-                Db::table('mp_cart')->insert($val);
+                if($val['num'] > $goods_exist['stock']) {
+                    return ajax('库存不足',15);
+                }
+                $cart_exist = Db::table('mp_cart')->where($whereCart)->find();//购物车是否已经存在此商品
+                if($cart_exist) {
+                    if(($val['num'] + $cart_exist['num']) > $goods_exist['stock']) {
+                        return ajax('商品+购件数(含购物车)超出库存',17);
+                    }
+                    if(($val['num'] + $cart_exist['num']) > $goods_exist['limit']) {
+                        return ajax('超出单笔限购数量',16);
+                    }
+                    Db::table('mp_cart')->where($whereCart)->setInc('num',$val['num']);
+                }else {
+                    $val['create_time'] = time();
+                    Db::table('mp_cart')->insert($val);
+                }
             }
+
         } catch (\Exception $e) {
             return ajax($e->getMessage(), -1);
         }
@@ -174,13 +223,25 @@ class Shop extends Base {
                 ['id','=',$cart_exist['goods_id']]
             ];
             $goods_exist = Db::table('mp_goods')->where($where_goods)->find();
-            if($cart_exist['num'] > $goods_exist['stock']) {
-                return ajax('库存不足',15);
-            }
-            if($cart_exist['num'] > $goods_exist['limit']) {
+            if(($cart_exist['num']) > $goods_exist['limit']) {
                 return ajax('超出单笔限购数量',16);
             }
-            $price = $goods_exist['price'];
+            if($cart_exist['use_attr']) {
+                $map_attr = [
+                    ['id','=',$cart_exist['attr_id']],
+                    ['goods_id','=',$cart_exist['goods_id']]
+                ];
+                $attr_exist = Db::table('mp_goods_attr')->where($map_attr)->find();
+                if($cart_exist['num'] > $attr_exist['stock']) {
+                    return ajax('此规格库存不足',41);
+                }
+                $price = $attr_exist['price'];
+            }else {
+                if($cart_exist['num'] > $goods_exist['stock']) {
+                    return ajax('库存不足',39);
+                }
+                $price = $goods_exist['price'];
+            }
             Db::table('mp_cart')->where($where)->setInc('num',1);
         } catch (\Exception $e) {
             return ajax($e->getMessage(), -1);
@@ -212,7 +273,16 @@ class Shop extends Base {
                 ['id','=',$cart_exist['goods_id']]
             ];
             $goods_exist = Db::table('mp_goods')->where($where_goods)->find();
-            $price = $goods_exist['price'];
+            if($cart_exist['use_attr']) {
+                $map_attr = [
+                    ['id','=',$cart_exist['attr_id']],
+                    ['goods_id','=',$cart_exist['goods_id']]
+                ];
+                $attr_exist = Db::table('mp_goods_attr')->where($map_attr)->find();
+                $price = $attr_exist['price'];
+            }else {
+                $price = $goods_exist['price'];
+            }
             Db::table('mp_cart')->where($where)->setDec('num',1);
         } catch (\Exception $e) {
             return ajax($e->getMessage(), -1);
@@ -249,6 +319,7 @@ class Shop extends Base {
         $data['receiver'] = input('post.receiver');
         $data['tel'] = input('post.tel');
         $data['address'] = input('post.address');
+        $data['attr_id'] = input('post.attr_id',0);
         checkPost($data);
         if(!if_int($data['num'])) {
             return ajax($data['num'],-4);
@@ -263,7 +334,29 @@ class Shop extends Base {
             if (!$goods_exist) { return ajax('invalid goods_id', -4); }
             if($data['num'] > $goods_exist['stock']) { return ajax('库存不足',15); }
             if($data['num'] > $goods_exist['limit']) { return ajax('超出单笔限购数量',16); }
-            $unit_price = $goods_exist['price'];
+
+            if($data['attr_id']) {
+                $where_attr = [
+                    ['id','=',$data['attr_id']],
+                    ['goods_id','=',$data['goods_id']],
+                ];
+                $attr_exist = Db::table('mp_goods_attr')->where($where_attr)->find();
+                if(!$attr_exist) {
+                    return ajax('invalid attr_id',-4);
+                }
+                if($data['num'] > $attr_exist['stock']) {
+                    return ajax('库存不足',39);
+                }
+                $unit_price = $attr_exist['price'];
+                $order_detail['use_attr'] = 1;
+                $order_detail['attr_id'] = $data['attr_id'];
+                $order_detail['attr'] = $attr_exist['value'];
+            }else {
+                $unit_price = $goods_exist['price'];
+                $order_detail['use_attr'] = 0;
+                $order_detail['attr_id'] = 0;
+                $order_detail['attr'] = '默认';
+            }
 
             $total_price = $unit_price * $data['num'] + $goods_exist['carriage'];
             $insert_data = [
@@ -294,6 +387,9 @@ class Shop extends Base {
 
             Db::table('mp_order_detail')->insert($order_detail);//创建订单详情
             Db::table('mp_goods')->where('id', $data['goods_id'])->setDec('stock',$data['num']);
+            if($data['attr_id']) {
+                Db::table('mp_goods_attr')->where($where_attr)->setDec('stock',$data['num']);
+            }
             Db::commit();
         } catch (\Exception $e) {
             Db::rollback();
@@ -333,8 +429,28 @@ class Shop extends Base {
             $insert_detail_all = [];//商品详情表数据
 
             foreach ($cart_list as $v) {
-                if($v['num'] > $v['total_stock']) { $card_delete_ids[] = $v['id']; }
-                $unit_price = $v['price'];
+
+                if($v['use_attr']) {//带规格商品
+                    $where_attr = [
+                        ['id','=',$v['attr_id']],
+                        ['goods_id','=',$v['goods_id']],
+                    ];
+                    $attr_exist = Db::table('mp_goods_attr')->where($where_attr)->find();
+                    if(!$attr_exist) {  return ajax('invalid attr_id',-4);}
+                    if($v['num'] > $attr_exist['stock']) {$card_delete_ids[] = $v['id'];}
+
+                    $unit_price = $attr_exist['price'];
+                    $insert_detail['use_attr'] = 1;
+                    $insert_detail['attr_id'] = $v['attr_id'];
+                    $insert_detail['attr'] = $attr_exist['value'];
+                }else {//不带规格商品
+                    if($v['num'] > $v['total_stock']) {$card_delete_ids[] = $v['id'];}
+
+                    $unit_price = $v['price'];
+                    $insert_detail['use_attr'] = 0;
+                    $insert_detail['attr_id'] = 0;
+                    $insert_detail['attr'] = '默认';
+                }
                 $total_order_price += ($unit_price + $v['carriage']) * $v['num'];
                 $carriage += $v['carriage'];
 
@@ -379,6 +495,13 @@ class Shop extends Base {
             Db::table('mp_order_detail')->insertAll($insert_detail_all);
             foreach ($cart_list as $v) {
                 Db::table('mp_goods')->where('id','=',$v['goods_id'])->setDec('stock',$v['num']);
+                if($v['use_attr']) {
+                    $where_attr = [
+                        ['id','=',$v['attr_id']],
+                        ['goods_id','=',$v['goods_id']],
+                    ];
+                    Db::table('mp_goods_attr')->where($where_attr)->setDec('stock',$v['num']);
+                }
             }
             //清除购物车已结算商品
             $whereDelete = [
