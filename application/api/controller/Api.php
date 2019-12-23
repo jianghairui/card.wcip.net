@@ -44,45 +44,42 @@ class Api extends Base
     }
     //卡牌列表
     public function cardList() {
-        $val['search'] = input('post.search');
-        $val['resource'] = input('post.resource');
-        $val['attr_id'] = input('post.attr_id');
-        $val['type_id'] = input('post.type_id');
-        $val['camp_id'] = input('post.camp_id');
-        $val['ability_id'] = input('post.ability_id');
-        $val['version_id'] = input('post.version_id');
+
+        $post['attr_id'] = input('post.attr_id',[]);
+        $post['resource'] = input('post.resource',[]);
+        $post['type_id'] = input('post.type_id',[]);
+        $post['camp_id'] = input('post.camp_id',[]);
+        $post['ability_id'] = input('post.ability_id',[]);
+        $post['version_id'] = input('post.version_id',[]);
+        $post['search'] = input('post.search');
+        $page['query'] = http_build_query(input('post.'));
 
         $curr_page = input('post.page',1);
         $perpage = input('post.perpage',10);
-        $curr_page = $curr_page ? $curr_page:1;
-        $perpage = $perpage ? $perpage:10;
+        $curr_page = $curr_page ? $curr_page : 1;
+        $perpage = $perpage ? $perpage : 10;
 
         $whereCard = [
             ['status','=',1],
             ['del','=',0]
         ];
-
-        if($val['search']) {
-            $whereCard[] = ['card_name','like',"%{$val['search']}%"];
+        if(is_array($post['attr_id']) && !empty($post['attr_id'])) { $whereCard[] = ['attr_id','in',$post['attr_id']]; }
+        if(is_array($post['type_id']) && !empty($post['attr_id'])) { $whereCard[] = ['type_id','in',$post['type_id']]; }
+        if(is_array($post['camp_id']) && !empty($post['attr_id'])) { $whereCard[] = ['camp_id','in',$post['camp_id']]; }
+        if(is_array($post['ability_id']) && !empty($post['attr_id'])) { $whereCard[] = ['ability_id','in',$post['ability_id']]; }
+        if(is_array($post['version_id']) && !empty($post['attr_id'])) { $whereCard[] = ['version_id','in',$post['version_id']]; }
+        if(is_array($post['resource']) && !empty($post['resource'])) {
+            $resource_arr = $post['resource'];
+            if(in_array(7,$resource_arr)) {
+                $whereCard[] = ['resource','in',array_merge($resource_arr,range(8,20))];
+            }else {
+                $whereCard[] = ['resource','in',$resource_arr];
+            }
         }
-        if($val['attr_id'] !== '' && !is_null($val['attr_id'])) {
-            $whereCard[] = ['attr_id','=',$val['attr_id']];
-        }
-        if($val['type_id'] !== '' && !is_null($val['type_id'])) {
-            $whereCard[] = ['type_id','=',$val['type_id']];
-        }
-        if($val['camp_id'] !== '' && !is_null($val['camp_id'])) {
-            $whereCard[] = ['camp_id','=',$val['camp_id']];
-        }
-        if($val['ability_id'] !== '' && !is_null($val['ability_id'])) {
-            $whereCard[] = ['ability_id','=',$val['ability_id']];
-        }
-        if($val['version_id'] !== '' && !is_null($val['version_id'])) {
-            $whereCard[] = ['version_id','=',$val['version_id']];
-        }
+        if($post['search']) { $whereCard[] = ['card_name','like',"%{$post['search']}%"]; }
 
         try {
-            $list = Db::table('mp_card')->where($whereCard)->limit(($curr_page-1)*$perpage,$perpage)->field('id,card_name,pic')->select();
+            $list = Db::table('mp_card')->where($whereCard)->limit(($curr_page-1)*$perpage,$perpage)->select();
         } catch (\Exception $e) {
             return ajax($e->getMessage(), -1);
         }

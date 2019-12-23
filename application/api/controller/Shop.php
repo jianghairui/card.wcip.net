@@ -358,14 +358,14 @@ class Shop extends Base {
                 $order_detail['attr'] = '默认';
             }
 
-            $total_price = $unit_price * $data['num'] + $goods_exist['carriage'];
+            $total_price = ($unit_price + $goods_exist['carriage']) * $data['num'];
             $insert_data = [
                 'uid' => $this->myinfo['id'],
                 'pay_order_sn' => $pay_order_sn,
                 'order_sn' => create_unique_number(''),
                 'total_price' => $total_price,
                 'pay_price' => $total_price,
-                'carriage' => $goods_exist['carriage'],
+                'carriage' => $goods_exist['carriage'] * $data['num'],
                 'receiver' => $data['receiver'],
                 'tel' => $data['tel'],
                 'address' => $data['address'],
@@ -380,8 +380,8 @@ class Shop extends Base {
             $order_detail['goods_name'] = $goods_exist['name'];
             $order_detail['num'] = $data['num'];
             $order_detail['unit_price'] = $unit_price;
-            $order_detail['total_price'] = $unit_price * $data['num'] + $goods_exist['carriage'];
-            $order_detail['carriage'] = $goods_exist['carriage'];
+            $order_detail['total_price'] = ($unit_price + $goods_exist['carriage']) * $data['num'];
+            $order_detail['carriage'] = $goods_exist['carriage'] * $data['num'];
             $order_detail['create_time'] = $time;
 
 
@@ -429,8 +429,8 @@ class Shop extends Base {
             $insert_detail_all = [];//商品详情表数据
 
             foreach ($cart_list as $v) {
-
-                if($v['use_attr']) {//带规格商品
+                //商品带规格
+                if($v['use_attr']) {
                     $where_attr = [
                         ['id','=',$v['attr_id']],
                         ['goods_id','=',$v['goods_id']],
@@ -443,23 +443,23 @@ class Shop extends Base {
                     $insert_detail['use_attr'] = 1;
                     $insert_detail['attr_id'] = $v['attr_id'];
                     $insert_detail['attr'] = $attr_exist['value'];
-                }else {//不带规格商品
+                }else {
+                    //商品不带规格
                     if($v['num'] > $v['total_stock']) {$card_delete_ids[] = $v['id'];}
-
                     $unit_price = $v['price'];
                     $insert_detail['use_attr'] = 0;
                     $insert_detail['attr_id'] = 0;
                     $insert_detail['attr'] = '默认';
                 }
                 $total_order_price += ($unit_price + $v['carriage']) * $v['num'];
-                $carriage += $v['carriage'];
+                $carriage += $v['carriage'] * $v['num'];
 
                 $insert_detail['goods_id'] = $v['goods_id'];
                 $insert_detail['goods_name'] = $v['name'];
                 $insert_detail['num'] = $v['num'];
                 $insert_detail['unit_price'] = $unit_price;
-                $insert_detail['total_price'] = $unit_price * $v['num'] + $v['carriage'];
-                $insert_detail['carriage'] = $v['carriage'];
+                $insert_detail['total_price'] = ($unit_price + $v['carriage']) * $v['num'];
+                $insert_detail['carriage'] = $v['carriage'] * $v['num'];
                 $insert_detail['create_time'] = $time;
                 $insert_detail_all[] = $insert_detail;
             }
@@ -477,6 +477,7 @@ class Shop extends Base {
                 'create_time' => $time,
             ];
 
+            //有库存不足的商品清除购物车库存不足部分
             if(!empty($card_delete_ids)) {
                 $whereDelete = [
                     ['id','in',$card_delete_ids],
