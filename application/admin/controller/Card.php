@@ -26,9 +26,9 @@ class Card extends Base {
         $perpage = input('param.perpage',10);
 
         $whereCard = [
-            ['status','=',1],
-            ['del','=',0]
+            ['status','=',1]
         ];
+        $order = ['id'=>'DESC'];
         if($param['attr_id'] !== '') { $whereCard[] = ['attr_id','in',explode(',',$param['attr_id'])]; }
         if($param['type_id'] !== '') { $whereCard[] = ['type_id','in',explode(',',$param['type_id'])]; }
         if($param['camp_id'] !== '') { $whereCard[] = ['camp_id','in',explode(',',$param['camp_id'])]; }
@@ -49,7 +49,7 @@ class Card extends Base {
             $page['count'] = $count;
             $page['curr'] = $curr_page;
             $page['totalPage'] = ceil($count/$perpage);
-            $list = Db::table('mp_card')->where($whereCard)->limit(($curr_page-1)*$perpage,$perpage)->select();
+            $list = Db::table('mp_card')->where($whereCard)->limit(($curr_page-1)*$perpage,$perpage)->order($order)->select();
             $card_type = Db::table('mp_card_type')->select();
             $card_camp = Db::table('mp_card_camp')->select();
             $card_attr = Db::table('mp_card_attr')->select();

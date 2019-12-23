@@ -13,6 +13,7 @@ use think\Exception;
 
 class Api extends Base
 {
+
     //获取轮播图列表
     public function slideList() {
         $where = [
@@ -27,7 +28,6 @@ class Api extends Base
         }
         return ajax($list);
     }
-
     //获取卡牌筛选条件
     public function cardParams() {
         try {
@@ -52,7 +52,6 @@ class Api extends Base
         $post['ability_id'] = input('post.ability_id',[]);
         $post['version_id'] = input('post.version_id',[]);
         $post['search'] = input('post.search');
-        $page['query'] = http_build_query(input('post.'));
 
         $curr_page = input('post.page',1);
         $perpage = input('post.perpage',10);
@@ -60,9 +59,9 @@ class Api extends Base
         $perpage = $perpage ? $perpage : 10;
 
         $whereCard = [
-            ['status','=',1],
-            ['del','=',0]
+            ['status','=',1]
         ];
+        $order = ['id'=>'DESC'];
         if(is_array($post['attr_id']) && !empty($post['attr_id'])) { $whereCard[] = ['attr_id','in',$post['attr_id']]; }
         if(is_array($post['type_id']) && !empty($post['attr_id'])) { $whereCard[] = ['type_id','in',$post['type_id']]; }
         if(is_array($post['camp_id']) && !empty($post['attr_id'])) { $whereCard[] = ['camp_id','in',$post['camp_id']]; }
@@ -79,7 +78,7 @@ class Api extends Base
         if($post['search']) { $whereCard[] = ['card_name','like',"%{$post['search']}%"]; }
 
         try {
-            $list = Db::table('mp_card')->where($whereCard)->limit(($curr_page-1)*$perpage,$perpage)->select();
+            $list = Db::table('mp_card')->where($whereCard)->limit(($curr_page-1)*$perpage,$perpage)->order($order)->select();
         } catch (\Exception $e) {
             return ajax($e->getMessage(), -1);
         }
@@ -90,7 +89,15 @@ class Api extends Base
     public function cardDetail() {
         $val['id'] = input('post.id');
         checkPost($val);
+        $post['attr_id'] = input('post.attr_id',[]);
+        $post['resource'] = input('post.resource',[]);
+        $post['type_id'] = input('post.type_id',[]);
+        $post['camp_id'] = input('post.camp_id',[]);
+        $post['ability_id'] = input('post.ability_id',[]);
+        $post['version_id'] = input('post.version_id',[]);
+        $post['search'] = input('post.search');
         try {
+            //卡牌详情
             $whereCard = [
                 ['id','=',$val['id']]
             ];
@@ -125,12 +132,42 @@ class Api extends Base
                 default:;
             }
             unset($info['type_id']);unset($info['camp_id']);unset($info['attr_id']);unset($info['ability_id']);unset($info['version_id']);
+            //卡牌在列表中位置
+            $whereCardList = [
+                ['status','=',1]
+            ];
+            $order = ['id'=>'DESC'];
+            if(is_array($post['attr_id']) && !empty($post['attr_id'])) { $whereCardList[] = ['attr_id','in',$post['attr_id']]; }
+            if(is_array($post['type_id']) && !empty($post['attr_id'])) { $whereCardList[] = ['type_id','in',$post['type_id']]; }
+            if(is_array($post['camp_id']) && !empty($post['attr_id'])) { $whereCardList[] = ['camp_id','in',$post['camp_id']]; }
+            if(is_array($post['ability_id']) && !empty($post['attr_id'])) { $whereCardList[] = ['ability_id','in',$post['ability_id']]; }
+            if(is_array($post['version_id']) && !empty($post['attr_id'])) { $whereCardList[] = ['version_id','in',$post['version_id']]; }
+            if(is_array($post['resource']) && !empty($post['resource'])) {
+                $resource_arr = $post['resource'];
+                if(in_array(7,$resource_arr)) {
+                    $whereCardList[] = ['resource','in',array_merge($resource_arr,range(8,20))];
+                }else {
+                    $whereCardList[] = ['resource','in',$resource_arr];
+                }
+            }
+            if($post['search']) { $whereCardList[] = ['card_name','like',"%{$post['search']}%"]; }
+            $card_ids = Db::table('mp_card')->where($whereCardList)->order($order)->column('id');
+            $offset = array_search($val['id'],$card_ids);
+            if($offset !== false) {
+                $info['prev_card_id'] = isset($card_ids[$offset-1]) ? $card_ids[$offset-1] : null;
+                $info['next_card_id'] = isset($card_ids[$offset+1]) ? $card_ids[$offset+1] : null;
+                $info['page'] = $offset + 1;
+
+            }else {
+                $info['page'] = null;
+            }
+            $info['total_count'] = count($card_ids);
+            $info['card_ids'] = $card_ids;
         } catch (\Exception $e) {
             return ajax($e->getMessage(), -1);
         }
         return ajax($info);
     }
-
     //公告列表
     public function articleList() {
         $curr_page = input('post.page',1);
@@ -153,7 +190,6 @@ class Api extends Base
         $ret['list'] = $list;
         return ajax($ret);
     }
-
     //公告详情
     public function articleDetail() {
         $val['id'] = input('post.id');
