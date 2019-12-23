@@ -483,9 +483,108 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
         return ajax($result);
     }
 
+    //获取我的套牌列表
+    public function myComboDir() {
+        $uid = $this->myinfo['id'];
+        try {
+            $whereDir = [
+                ['uid','=',$uid]
+            ];
+            $list = Db::table('mp_combo_dir')->where($whereDir)->order(['id'=>'DESC'])->select();
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+        return ajax($list);
+    }
+    //获取套牌详情
+    public function myComboDetail() {
+        $val['dir_id'] = input('post.dir_id');
+        checkPost($val);
+        try {
+            $whereDir = [
+                ['id','=',$val['dir_id']]
+            ];
+            $info = Db::table('mp_combo_dir')->where($whereDir)->find();
+            if(!$info) { return ajax('非法参数' . $val['dir_id'],-4); }
+            $whereCard = [
+                ['dir_id','=',$val['dir_id']]
+            ];
+            $list = Db::table('mp_card_combo')->alias('c')
+                ->join('mp_card ca','c.card_id=ca.id','left')
+                ->where($whereCard)
+                ->field('c.*,ca.card_name,ca.cover')
+                ->select();
+            $info['list'] = $list;
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+        return ajax($info);
+    }
+    //创建套牌组合
+    public function createCardCombo() {
+        $dir_data['dir_name'] = input('post.dir_name');
+        checkPost($dir_data);
+        $combo = input('post.combo',[]);
+        try {
+            $combo = array_unique($combo);
+            if(!is_array($combo) || empty($combo)) {
+                return ajax('invalid combo',-4);
+            }
+            $time = time();
+            $dir_data['uid'] = $this->myinfo['id'];
+            $dir_data['total_num'] = 0;
+            $dir_data['main_num'] = 0;
+            $dir_data['spare_num'] = 0;
+            $dir_data['create_time'] = $time;
+            $dir_data['cover'] = '';
+            $time_count = 0;
+            foreach ($combo as $k=>$num) {//$k的格式 c_$card_id_$main
+                $v = explode('_',$k);
+                $card_id = $v[1];
+                $main = $v[2];
+                $whereCard = [
+                    ['id'=>$card_id]
+                ];
+                $card_exist = Db::table('mp_card')->where($whereCard)->find();
+                if(!$card_exist) { return ajax('非法参数card_id ' . $card_id,-4); }
+                if($time_count === 0) { $dir_data['cover'] = $card_exist['cover']; }
+                $dir_data['total_num'] += $v['num'];
+                if($main == 1) {
+                    $dir_data['main_num'] += $v['num'];
+                }else {
+                    $dir_data['spare_num'] += $v['num'];
+                }
+                $time_count++;
+            }
 
+            Db::startTrans();
+            $dir_id = Db::table('mp_combo_dir')->insertGetId($dir_data);
+            $combo_data_all = [];
+            foreach ($combo as $k=>$num) {
+                $v = explode('_',$k);
+                $card_id = $v[1];
+                $main = $v[2];
+                $combo_data['dir_id'] = $dir_id;
+                $combo_data['uid'] = $dir_data['uid'];
+                $combo_data['card_id'] = $card_id;
+                $combo_data['main'] = $main;//1.主牌 2.副牌
+                $combo_data['num'] = $num;
+                $combo_data['combo_key'] = 'c_' . $card_id . '_' . $main;
+                $combo_data['create_time'] = $time;
+                $combo_data_all[] = $combo_data;
+            }
+            Db::table('mp_card_combo')->insertAll($combo_data_all);
+            Db::commit();
+        } catch (\Exception $e) {
+            Db::rollback();
+            return ajax($e->getMessage(), -1);
+        }
+        return ajax();
+    }
+    //套牌修改
+    public function cardComboModify() {
 
-
+    }
 
 
 

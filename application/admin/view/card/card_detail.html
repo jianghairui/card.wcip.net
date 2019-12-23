@@ -107,12 +107,32 @@
         </div>
         <div class="row cl" id="pic">
             <label class="form-label col-xs-4 col-sm-2">
-                <span id="btn-star" class="btn btn-primary btn-uploadstar radius ml-10">卡牌图片</span>
+                <span id="btn-star" class="btn btn-primary btn-uploadstar radius ml-10">卡牌图片一</span>
             </label>
             <div class="formControls col-xs-8 col-sm-9">
                 <div class="uploader-thum-container">
                     <div id="fileList" class="uploader-list">
                         <img class="thumbnail" src="/{$info.pic}">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2"><span class="c-red">*</span></label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <span style="font-size: 16px">
+                    (建议尺寸: 360*240)
+                </span>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">
+                <span id="btn-star2" class="btn btn-primary btn-uploadstar radius ml-10">卡牌图片二</span>
+            </label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <div class="uploader-thum-container">
+                    <div id="fileList2" class="uploader-list">
+                        <img class="thumbnail" src="/{$info.cover}">
                     </div>
                 </div>
             </div>
@@ -198,6 +218,7 @@
             </div>
         </div>
         <input type="file" name="file" id="file" style="display: none;">
+        <input type="file" name="file2" id="file2" style="display: none;">
         <input type="hidden" name="id" value="{$info.id}">
     </form>
 </article>
@@ -268,20 +289,38 @@
 
         $("#btn-star").click(function(){
             $("#file").click();
-            $("#file").change(function(e){
-                if ($("#file").val()) {
-                    if(checkfile('file') !== true) {
-                        $("#file").val('');
-                        $("#fileList").html('');
-                        return false
-                    }
-                    var img = e.target.files[0];
-                    var src = window.URL.createObjectURL(img);
-                    $("#fileList").html('<img class="thumbnail" src="'+src+'">');
-                }else {
+        });
+        $("#file").change(function(e){
+            if ($("#file").val()) {
+                if(checkfile('file') !== true) {
+                    $("#file").val('');
                     $("#fileList").html('');
+                    return false
                 }
-            });
+                var img = e.target.files[0];
+                var src = window.URL.createObjectURL(img);
+                $("#fileList").html('<img class="thumbnail" src="'+src+'">');
+            }else {
+                $("#fileList").html('');
+            }
+        });
+
+        $("#btn-star2").click(function(){
+            $("#file2").click();
+        });
+        $("#file2").change(function(e){
+            if ($("#file2").val()) {
+                if(checkfile('file2') !== true) {
+                    $("#file2").val('');
+                    $("#fileList2").html('');
+                    return false
+                }
+                var img = e.target.files[0];
+                var src = window.URL.createObjectURL(img);
+                $("#fileList2").html('<img class="thumbnail" src="'+src+'">');
+            }else {
+                $("#fileList2").html('');
+            }
         });
 
         var textlen1 = $("textarea[name='desc']").val().length;

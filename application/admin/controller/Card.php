@@ -124,10 +124,26 @@ class Card extends Base {
                         return ajax($info['msg'],-1);
                     }
                 }else {
-                    return ajax('请上传封面图',-1);
+                    return ajax('请上传图一',-1);
+                }
+                if(isset($_FILES['file2'])) {
+                    $info = upload('file2',$this->upload_base_path . 'card/');
+                    if($info['error'] === 0) {
+                        $val['cover'] = $info['data'];
+                    }else {
+                        return ajax($info['msg'],-1);
+                    }
+                }else {
+                    return ajax('请上传图二',-1);
                 }
                 Db::table('mp_card')->insert($val);
             } catch (\Exception $e) {
+                if(isset($val['pic'])) {
+                    @unlink($val['pic']);
+                }
+                if(isset($val['cover'])) {
+                    @unlink($val['cover']);
+                }
                 return ajax($e->getMessage(), -1);
             }
             return ajax();
@@ -216,15 +232,29 @@ class Card extends Base {
                     return ajax($info['msg'],-1);
                 }
             }
+            if(isset($_FILES['file2'])) {
+                $info = upload('file2',$this->upload_base_path . 'card/');
+                if($info['error'] === 0) {
+                    $val['cover'] = $info['data'];
+                }else {
+                    return ajax($info['msg'],-1);
+                }
+            }
             Db::table('mp_card')->where($whereCard)->update($val);
         } catch (\Exception $e) {
             if(isset($val['pic'])) {
                 @unlink($val['pic']);
             }
+            if(isset($val['cover'])) {
+                @unlink($val['cover']);
+            }
             return ajax($e->getMessage(), -1);
         }
         if(isset($val['pic'])) {
             @unlink($card_exist['pic']);
+        }
+        if(isset($val['cover'])) {
+            @unlink($card_exist['cover']);
         }
         return ajax();
     }
