@@ -348,44 +348,17 @@ class Shop extends Base {
         }
     }
 
-    //商品审核通过
-    public function goodsPass() {
+    //商品排序
+    public function sortGoods() {
         $val['id'] = input('post.id');
+        $val['sort'] = input('post.sort');
         checkInput($val);
-        $map = [
-            ['check','=',0],
-            ['id','=',$val['id']]
-        ];
         try {
-            $exist = Db::table('mp_goods')->where($map)->find();
-            if(!$exist) {
-                return ajax('非法操作',-1);
-            }
-            Db::table('mp_goods')->where($map)->update(['check'=>1]);
+            Db::table('mp_goods')->update($val);
         }catch (\Exception $e) {
             return ajax($e->getMessage(),-1);
         }
-        return ajax([],1);
-    }
-    //商品审核拒绝
-    public function goodsReject() {
-        $val['id'] = input('post.id');
-        $val['reason'] = input('post.reason');
-        checkInput($val);
-        $map = [
-            ['check','=',0],
-            ['id','=',$val['id']]
-        ];
-        try {
-            $exist = Db::table('mp_goods')->where($map)->find();
-            if(!$exist) {
-                return ajax('非法操作',-1);
-            }
-            Db::table('mp_goods')->where($map)->update(['check'=>2,'reason'=>$val['reason']]);
-        }catch (\Exception $e) {
-            return ajax($e->getMessage(),-1);
-        }
-        return ajax([],1);
+        return ajax($val);
     }
 
 

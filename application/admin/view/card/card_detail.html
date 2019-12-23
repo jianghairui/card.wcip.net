@@ -42,7 +42,14 @@
                     </select>
                 </span>
             </div>
-            <div class="col-3"></div>
+            <div class="formControls col-xs-4 col-sm-4">
+                <span class="select-box">
+                    <select class="select" name="wushuang" id="wushuang">
+                        <option value="0" {if $info['wushuang'] == '0'}selected{/if}>非无双</option>
+                        <option value="1" {if $info['wushuang'] == '1'}selected{/if}>无双</option>
+                    </select>
+                </span>
+            </div>
         </div>
         <div class="row cl">
             <label class="form-label col-xs-4 col-sm-2">卡牌属性：</label>
@@ -113,15 +120,61 @@
         <div class="row cl">
             <label class="form-label col-xs-4 col-sm-2">卡牌简介：</label>
             <div class="formControls col-xs-8 col-sm-9">
-                <textarea name="desc" cols="" rows="" class="textarea" maxlength="255" placeholder="" oninput="this.value.length<=255?$('#textlen1').text(this.value.length):$('#textlen1').text(255)" >{$info.desc}</textarea>
-                <p class="textarea-numberbar"><em class="textarea-length" id="textlen1">0</em>/255</p>
+                <textarea name="desc" cols="" rows="" class="textarea" maxlength="1000" placeholder="" oninput="this.value.length<=1000?$('#textlen1').text(this.value.length):$('#textlen1').text(1000)" >{$info.desc}</textarea>
+                <p class="textarea-numberbar"><em class="textarea-length" id="textlen1">0</em>/1000</p>
             </div>
         </div>
         <div class="row cl">
-            <label class="form-label col-xs-4 col-sm-2">卡牌简介：</label>
+            <label class="form-label col-xs-4 col-sm-2"><span class="c-red"></span></label>
+            <div class="formControls col-xs-8 col-sm-9 skin-minimal">
+                <div class="radio-box">
+                    <input name="desc_show" type="radio" id="desc-1" value="1" {if $info['desc_show'] == '1'}checked{/if}>
+                    <label for="desc-1">显示</label>
+                </div>
+                <div class="radio-box">
+                    <input name="desc_show" type="radio" id="desc-2" value="0" {if $info['desc_show'] == '0'}checked{/if}>
+                    <label for="desc-2">隐藏</label>
+                </div>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">卡牌科普：</label>
             <div class="formControls col-xs-8 col-sm-9">
-                <textarea name="origin" cols="" rows="" class="textarea" maxlength="255" placeholder="" oninput="this.value.length<=255?$('#textlen2').text(this.value.length):$('#textlen2').text(255)" >{$info.origin}</textarea>
-                <p class="textarea-numberbar"><em class="textarea-length" id="textlen2">0</em>/255</p>
+                <textarea name="origin" cols="" rows="" class="textarea" maxlength="1000" placeholder="" oninput="this.value.length<=1000?$('#textlen2').text(this.value.length):$('#textlen2').text(1000)" >{$info.origin}</textarea>
+                <p class="textarea-numberbar"><em class="textarea-length" id="textlen2">0</em>/1000</p>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2"><span class="c-red"></span></label>
+            <div class="formControls col-xs-8 col-sm-9 skin-minimal">
+                <div class="radio-box">
+                    <input name="origin_show" type="radio" id="origin-1" value="1" {if $info['origin_show'] == '1'}checked{/if}>
+                    <label for="origin-1">显示</label>
+                </div>
+                <div class="radio-box">
+                    <input name="origin_show" type="radio" id="origin-2" value="0" {if $info['origin_show'] == '0'}checked{/if}>
+                    <label for="origin-2">隐藏</label>
+                </div>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">Q&A：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <textarea name="qa" cols="" rows="" class="textarea" maxlength="1000" placeholder="" oninput="this.value.length<=1000?$('#textlen3').text(this.value.length):$('#textlen3').text(1000)" >{$info.qa}</textarea>
+                <p class="textarea-numberbar"><em class="textarea-length" id="textlen3">0</em>/1000</p>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2"><span class="c-red"></span></label>
+            <div class="formControls col-xs-8 col-sm-9 skin-minimal">
+                <div class="radio-box">
+                    <input name="qa_show" type="radio" id="qa-1" value="1" {if $info['qa_show'] == '1'}checked{/if}>
+                    <label for="qa-1">显示</label>
+                </div>
+                <div class="radio-box">
+                    <input name="qa_show" type="radio" id="qa-2" value="0" {if $info['qa_show'] == '0'}checked{/if}>
+                    <label for="qa-2">隐藏</label>
+                </div>
             </div>
         </div>
         <div class="row cl">
@@ -177,7 +230,7 @@
                 },
                 desc: {
                     required:true,
-                    maxlength:255
+                    maxlength:1000
                 }
             },
             focusCleanup:true,
@@ -233,9 +286,11 @@
 
         var textlen1 = $("textarea[name='desc']").val().length;
         var textlen2 = $("textarea[name='origin']").val().length;
+        var textlen3 = $("textarea[name='qa']").val().length;
 
         $("#textlen1").text(textlen1);
         $("#textlen2").text(textlen2);
+        $("#textlen3").text(textlen3);
 
     });
 </script>

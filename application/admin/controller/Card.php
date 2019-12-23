@@ -107,6 +107,11 @@ class Card extends Base {
             checkInput($val);
             $val['desc'] = input('post.desc');
             $val['origin'] = input('post.origin');
+            $val['qa'] = input('post.qa');
+            $val['wushuang'] = input('post.wushuang');
+            $val['desc_show'] = input('post.desc_show');
+            $val['origin_show'] = input('post.origin_show');
+            $val['qa_show'] = input('post.qa_show');
             $val['create_time'] = time();
             $val['update_time'] = $val['create_time'];
 
@@ -187,6 +192,11 @@ class Card extends Base {
         checkInput($val);
         $val['desc'] = input('post.desc');
         $val['origin'] = input('post.origin');
+        $val['qa'] = input('post.qa');
+        $val['wushuang'] = input('post.wushuang');
+        $val['desc_show'] = input('post.desc_show');
+        $val['origin_show'] = input('post.origin_show');
+        $val['qa_show'] = input('post.qa_show');
         $val['create_time'] = time();
         $val['update_time'] = $val['create_time'];
 

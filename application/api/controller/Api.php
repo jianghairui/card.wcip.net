@@ -177,6 +177,25 @@ class Api extends Base
 
 
 
+    //关于我们
+    public function aboutUs() {
+        try {
+            $wherePlat = [
+                ['id','=',1]
+            ];
+            $info = Db::table('mp_plat')->where($wherePlat)->find();
+            if(!$info) {
+                return ajax('data not exists',-1);
+            }
+            $info['blood1'] = 'static/card/blood1.jpg';
+            $info['blood2'] = 'static/card/blood2.jpg';
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+        return ajax($info);
+    }
+
+
     //收集formid
     public function collectFormid() {
         $val['formid'] = input('post.formid');

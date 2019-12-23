@@ -35,7 +35,7 @@
             {foreach $list as $li}
             <tr class="text-c userinfo">
                 <td>{$li.id}</td>
-                <td>{$li.sort}</td>
+                <td><input type="text" class="input-text text-c sort" value="{$li.sort}"></td>
                 <td>
                     <?php $image = unserialize($li['pics'])[0];?>
                     <div style="width: 80px;height: 80px;background-image: url('/{$image}');background-position: center;background-repeat: no-repeat;background-size: 100%"></div>
@@ -161,6 +161,28 @@
 
         });
     }
+
+    $(".sort").bind('input propertychange', function() {
+        var id = $(this).parent().prev().text();
+        var sort = $(this).val();
+        var rule = /^[0-9]{0,10}$/;
+        if(!rule.test(sort)) {
+            // $(this).val('')
+            alert('排序必须为数字,且不超过10位');
+            return;
+        }
+        $.ajax({
+            url:"{:url('Shop/sortGoods')}",
+            type:"post",
+            data:{id:id,sort:sort},
+            success:function(data) {
+                console.log(data);
+            },
+            error: function(data) {
+                console.log('接口请求失败!');
+            }
+        })
+    });
 
 
 </script>
