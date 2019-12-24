@@ -15,7 +15,7 @@
             <br>
             <br>
             <div class="text-l formControls">
-                <div class="attr-prefix">属性：</div>
+                <div class="attr-prefix">卡牌属性：</div>
                 <div class="attr-prefix-item" id="attr_id">
                     <?php $attr_id_arr=explode(',',$param['attr_id']);?>
                     {foreach $card_attr as $v}
@@ -27,7 +27,7 @@
                 </div>
             </div>
             <div class="text-l formControls">
-                <div class="attr-prefix">资源值：</div>
+                <div class="attr-prefix">消耗资源：</div>
                 <div class="attr-prefix-item" id="resource">
                     <?php $resource_arr=explode(',',$param['resource']);?>
                     <div class="radio-box">
@@ -105,7 +105,7 @@
                 </div>
             </div>
             <div class="text-l formControls">
-                <div class="attr-prefix">版本：</div>
+                <div class="attr-prefix">所属版本：</div>
                 <div class="attr-prefix-item" id="version_id">
                     <?php $version_id_arr=explode(',',$param['version_id']);?>
                     {foreach $card_version as $v}

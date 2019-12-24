@@ -20,6 +20,20 @@
       "unicode_decimal": 58969
     },
     {
+      "icon_id": "380534",
+      "name": "物流快递",
+      "font_class": "wuliukuaidi",
+      "unicode": "e61a",
+      "unicode_decimal": 58906
+    },
+    {
+      "icon_id": "485744",
+      "name": "待付 款",
+      "font_class": "daifukuan",
+      "unicode": "e608",
+      "unicode_decimal": 58888
+    },
+    {
       "icon_id": "545056",
       "name": "xbox",
       "font_class": "xbox",
@@ -74,6 +88,13 @@
       "font_class": "jifenguizeguankong",
       "unicode": "e6ad",
       "unicode_decimal": 59053
+    },
+    {
+      "icon_id": "797424",
+      "name": "取消",
+      "font_class": "quxiao",
+      "unicode": "e709",
+      "unicode_decimal": 59145
     },
     {
       "icon_id": "827647",
@@ -132,6 +153,13 @@
       "unicode_decimal": 58899
     },
     {
+      "icon_id": "1115041",
+      "name": "关注",
+      "font_class": "guanzhu",
+      "unicode": "e61d",
+      "unicode_decimal": 58909
+    },
+    {
       "icon_id": "1119368",
       "name": "系统",
       "font_class": "xitong1",
@@ -188,6 +216,13 @@
       "unicode_decimal": 58904
     },
     {
+      "icon_id": "1509738",
+      "name": "取消",
+      "font_class": "cancel",
+      "unicode": "e664",
+      "unicode_decimal": 58980
+    },
+    {
       "icon_id": "1696643",
       "name": "卡牌",
       "font_class": "qiapai",
@@ -235,6 +270,13 @@
       "font_class": "dingdan",
       "unicode": "e645",
       "unicode_decimal": 58949
+    },
+    {
+      "icon_id": "3640203",
+      "name": "已完成",
+      "font_class": "yiwancheng",
+      "unicode": "e612",
+      "unicode_decimal": 58898
     },
     {
       "icon_id": "3876296",

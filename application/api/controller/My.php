@@ -9,6 +9,7 @@ namespace app\api\controller;
 use my\Sendsms;
 use my\Kuaidiniao;
 use think\Db;
+
 class My extends Base {
 
     //获取个人信息
@@ -225,7 +226,6 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
         } catch (\Exception $e) {
             return ajax($e->getMessage(), -1);
         }
-
         return ajax($data);
 
     }
@@ -526,10 +526,10 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
         checkPost($dir_data);
         $combo = input('post.combo',[]);
         try {
-            $combo = array_unique($combo);
             if(!is_array($combo) || empty($combo)) {
                 return ajax('invalid combo',-4);
             }
+            $combo = array_unique($combo);
             $time = time();
             $dir_data['uid'] = $this->myinfo['id'];
             $dir_data['total_num'] = 0;
@@ -581,22 +581,53 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
         }
         return ajax();
     }
+    //修改套餐目录名
+    public function dirnameModify() {
+        $val['dir_name'] = input('post.dir_name');
+        $val['dir_id'] = input('post.dir_id');
+        checkPost($val);
+        try {
+            $whereDir = [
+                ['id','=',$val['dir_id']],
+                ['uid','=',$this->myinfo['id']]
+            ];
+            $dir_exist = Db::table('mp_combo_dir')->where($whereDir)->find();
+            if(!$dir_exist) {
+                return ajax('invalid dir_id',-4);
+            }
+            $update_data = [
+                'dir_name'=>$val['dir_name']
+            ];
+            Db::table('mp_combo_dir')->where($whereDir)->update($update_data);
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+        return ajax();
+    }
     //套牌修改
     public function cardComboModify() {
-        $dir_data['dir_name'] = input('post.dir_name');
+        $dir_data['dir_id'] = input('post.dir_id');
         checkPost($dir_data);
         $combo = input('post.combo',[]);
+        $uid = $this->myinfo['id'];
         try {
-            $combo = array_unique($combo);
+            $whereDir = [
+                ['id','=',$dir_data['dir_id']],
+                ['uid','=',$uid]
+            ];
+            $dir_exist = Db::table('mp_combo_dir')->where($whereDir)->find();//判断目录是否存在
+            if(!$dir_exist) {
+                return ajax('invalid dir_id',-4);
+            }
             if(!is_array($combo) || empty($combo)) {
                 return ajax('invalid combo',-4);
             }
+            $combo = array_unique($combo);
+
             $time = time();
-            $dir_data['uid'] = $this->myinfo['id'];
             $dir_data['total_num'] = 0;
             $dir_data['main_num'] = 0;
             $dir_data['spare_num'] = 0;
-            $dir_data['create_time'] = $time;
             $dir_data['cover'] = '';
             $time_count = 0;
             foreach ($combo as $k=>$num) {//$k的格式 c_$card_id_$main
@@ -607,7 +638,7 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
                     ['id'=>$card_id]
                 ];
                 $card_exist = Db::table('mp_card')->where($whereCard)->find();
-                if(!$card_exist) { return ajax('非法参数card_id ' . $card_id,-4); }
+                if(!$card_exist) { return ajax('非法参数card_id ' . $card_id,-4); }//判断每一张卡牌是否存在
                 if($time_count === 0) { $dir_data['cover'] = $card_exist['cover']; }
                 $dir_data['total_num'] += $v['num'];
                 if($main == 1) {
@@ -617,16 +648,13 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
                 }
                 $time_count++;
             }
-
-            Db::startTrans();
-            $dir_id = Db::table('mp_combo_dir')->insertGetId($dir_data);
             $combo_data_all = [];
             foreach ($combo as $k=>$num) {
                 $v = explode('_',$k);
                 $card_id = $v[1];
                 $main = $v[2];
-                $combo_data['dir_id'] = $dir_id;
-                $combo_data['uid'] = $dir_data['uid'];
+                $combo_data['dir_id'] = $dir_data['dir_id'];
+                $combo_data['uid'] = $uid;
                 $combo_data['card_id'] = $card_id;
                 $combo_data['main'] = $main;//1.主牌 2.副牌
                 $combo_data['num'] = $num;
@@ -634,13 +662,20 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
                 $combo_data['create_time'] = $time;
                 $combo_data_all[] = $combo_data;
             }
-            Db::table('mp_card_combo')->insertAll($combo_data_all);
+            Db::startTrans();
+            $whereCombo = [
+                ['dir_id','=',$dir_data['dir_id']]
+            ];
+            Db::table('mp_card_combo')->where($whereCombo)->delete();//删除老的牌组
+            Db::table('mp_card_combo')->insertAll($combo_data_all);//添加新的牌组
+            Db::table('mp_combo_dir')->where($whereDir)->update($dir_data);//更新套牌目录信息
             Db::commit();
         } catch (\Exception $e) {
             Db::rollback();
             return ajax($e->getMessage(), -1);
         }
         return ajax();
+
     }
 
 

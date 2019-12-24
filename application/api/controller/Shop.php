@@ -375,6 +375,7 @@ class Shop extends Base {
             Db::startTrans();
             $order_id = Db::table('mp_order')->insertGetId($insert_data);//创建支付订单
 
+            $order_detail['uid'] = $this->myinfo['id'];
             $order_detail['order_id'] = $order_id;
             $order_detail['goods_id'] = $goods_exist['id'];
             $order_detail['goods_name'] = $goods_exist['name'];
@@ -454,6 +455,7 @@ class Shop extends Base {
                 $total_order_price += ($unit_price + $v['carriage']) * $v['num'];
                 $carriage += $v['carriage'] * $v['num'];
 
+                $insert_detail['uid'] = $this->myinfo['id'];
                 $insert_detail['goods_id'] = $v['goods_id'];
                 $insert_detail['goods_name'] = $v['name'];
                 $insert_detail['num'] = $v['num'];
