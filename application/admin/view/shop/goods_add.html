@@ -92,7 +92,7 @@
                 <input type="text" class="input-text" value="件" placeholder="单位:件" id="unit" name="unit" maxlength="10">
             </div>
         </div>
-        <div class="row cl">
+        <div class="row cl" id="row-stock">
             <label class="form-label col-xs-4 col-sm-2">库存：</label>
             <div class="formControls col-xs-8 col-sm-9">
                 <input type="number" class="input-text" value="1000" placeholder="输入数字" id="stock" name="stock" maxlength="8">
@@ -272,9 +272,11 @@
 
         $(document).on("change","#use_attr",function(){
             if($('#use_attr').is(':checked')) {
-                $("#attr_detail").show()
+                $("#row-stock").hide();
+                $("#attr_detail").show();
             }else {
-                $("#attr_detail").hide()
+                $("#row-stock").show();
+                $("#attr_detail").hide();
             }
         });
 
@@ -292,7 +294,7 @@
                 return false;
             }
             $("#attr_detail").append(
-                '<div class="row cl"><label class="form-label col-sm-2"><a style="text-decoration:none" class="ml-5" title="删除" onclick="javascript:$(this).parent().parent().remove();"><i class="Hui-iconfont">&#xe6e2;</i></a></label><div class="formControls col-sm-2"><input type="text" class="input-text" value="" name="attr1[]" maxlength="20"></div><div class="formControls col-sm-2"><input type="text" class="input-text" value="" name="attr2[]" onkeyup="onlyMoney(this)"></div><div class="formControls col-sm-2"><input type="number" class="input-text" value="" name="attr3[]" maxlength="8"></div></div>'
+                '<div class="row cl"><label class="form-label col-sm-2"><a style="text-decoration:none" class="ml-5" title="删除" onclick="javascript:$(this).parent().parent().remove();"><i class="Hui-iconfont">&#xe6e2;</i></a></label><div class="formControls col-sm-2"><input type="text" class="input-text" value="" name="attr1[]" maxlength="20"></div><div class="formControls col-sm-2"><input type="text" class="input-text" value="" name="attr2[]" onkeyup="onlyMoney(this)"></div><div class="formControls col-sm-2"><input type="text" class="input-text goods-stock" value="0" name="attr3[]" maxlength="6" onkeyup="value=value.replace(/[^\\d]/g,\'\')"></div></div>'
             );
         });
 
@@ -318,6 +320,7 @@
             });
             return false;
         }
+
 
     });
 </script>

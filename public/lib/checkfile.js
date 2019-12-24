@@ -80,5 +80,3 @@ function onlyMoney(obj){
     obj.value = obj.value.replace('.','$#$').replace(/\./g,'').replace('$#$','.');
 
 }
-
-

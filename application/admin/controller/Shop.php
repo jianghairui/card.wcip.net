@@ -107,6 +107,7 @@ class Shop extends Base {
 
         try {
             if($val['use_attr']) {
+                $val['stock'] = 0;
                 $attr1 = input('post.attr1',[]);
                 $attr2 = input('post.attr2',[]);
                 $attr3 = input('post.attr3',[]);
@@ -132,6 +133,7 @@ class Shop extends Base {
                     if(!if_int($v)) {
                         return ajax('规格库存必须为数字',-1);
                     }
+                    $val['stock'] += $v;
                 }
             }
 
@@ -198,6 +200,7 @@ class Shop extends Base {
         $image = input('post.pic_url',[]);
         try {
             if($val['use_attr']) {
+                $val['stock'] = 0;
                 $attr0 = input('post.attr0',[]);//attr_ids
                 $attr1 = input('post.attr1',[]);//属性值
                 $attr2 = input('post.attr2',[]);//金额
@@ -218,7 +221,9 @@ class Shop extends Base {
                 }
                 foreach ($attr3 as $v) {
                     if(!if_int($v)) {return ajax('规格库存必须为数字'.$v,-1);}
+                    $val['stock'] += $v;
                 }
+
             }
 
             $map = [
