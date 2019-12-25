@@ -1,5 +1,31 @@
 <nav class="breadcrumb"><i class="Hui-iconfont">&#xe67f;</i> 首页 <span class="c-gray en">&gt;</span> 场景码 <span class="c-gray en">&gt;</span> 粉丝列表 <a class="btn btn-success radius r" style="line-height:1.6em;margin-top:3px" href="javascript:location.replace(location.href);" title="刷新" ><i class="Hui-iconfont">&#xe68f;</i></a></nav>
 <div class="page-container">
+    <section id="formAjax">
+        <div class="text-c">
+            <button onclick="removeIframe()" class="btn btn-primary radius">关闭选项卡</button>
+            关注时间：
+            <input type="text" onfocus="WdatePicker({ maxDate:'#F{ $dp.$D(\'datemax\')||\'%y-%M-%d\' }' })" id="datemin" value="{$Think.get.datemin}" class="input-text Wdate" style="width:120px;">
+            -
+            <input type="text" onfocus="WdatePicker({ minDate:'#F{ $dp.$D(\'datemin\') }' })" id="datemax" value="{$Think.get.datemax}" class="input-text Wdate" style="width:120px;">
+            <span class="select-box inline" style="width: 120px;">
+                <select name="subscribe" id="subscribe" class="select">
+                    <option value="">全部状态</option>
+                    <option value="1" {if $param['subscribe'] === '1'}selected{/if}>已关注</option>
+                    <option value="0" {if $param['subscribe'] === '0'}selected{/if}>已取关</option>
+                </select>
+            </span>
+            <span class="select-box inline" style="width: 120px;">
+                <select name="subscribe" id="scene_id" class="select">
+                    <option value="">全部场景</option>
+                    {foreach $scene_list as $li}
+                    <option value="{$li.id}" {if $param['subscribe'] == $li['id']}selected{/if}>{$li.scene_name}</option>
+                    {/foreach}
+                </select>
+            </span>
+            <input type="text" name="search" value="{$param['search']}" id="search" placeholder="昵称" style="width:200px" class="input-text">
+            <button name="" id="search-btn" class="btn btn-success" type="button"><i class="Hui-iconfont">&#xe665;</i> 查找用户</button>
+        </div>
+    </section>
     <div class="cl pd-5 bg-1 bk-gray mt-20">
         <span class="l">
 
@@ -78,6 +104,33 @@
             }
         });
     }
+
+    $("#search-btn").click(function () {
+        var subscribe = $("#formAjax").find("#subscribe").val();
+        var scene_id = $("#formAjax").find("#scene_id").val();
+        var datemin = $("#formAjax").find("#datemin").val();
+        var datemax = $("#formAjax").find("#datemax").val();
+        var search = $("#formAjax").find("#search").val();
+
+        var str = '';
+        if(subscribe.length != '') {
+            str += '&subscribe=' + subscribe
+        }
+        if(scene_id.length != '') {
+            str += '&scene_id=' + scene_id
+        }
+        if(datemin.length != '') {
+            str += '&datemin=' + datemin
+        }
+        if(datemax.length != '') {
+            str += '&datemax=' + datemax
+        }
+        if(search.length != '') {
+            str += '&search=' + search
+        }
+        window.location.href = '{:url("Qrcode/userList")}' + '?' + str;
+    });
+
 
 
 

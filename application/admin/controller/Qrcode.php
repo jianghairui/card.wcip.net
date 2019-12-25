@@ -13,10 +13,33 @@ use wx\Jssdk;
 class Qrcode extends Base {
 
     public function userList() {
+        $param['subscribe'] = input('param.subscribe','');
+        $param['scene_id'] = input('param.scene_id','');
+        $param['datemin'] = input('param.datemin');
+        $param['datemax'] = input('param.datemax');
+        $param['search'] = input('param.search','');
         $curr_page = input('param.page',1);
         $perpage = input('param.perpage',10);
+
         $page['query'] = http_build_query(input('param.'));
         $whereUser = [];
+
+        if($param['subscribe'] !== '') {
+            $whereUser[] = ['u.subscribe','=',$param['subscribe']];
+        }
+        if($param['scene_id'] !== '') {
+            $whereUser[] = ['u.scene_id','=',$param['scene_id']];
+        }
+        if($param['datemin']) {
+            $whereUser[] = ['u.sub_time','>=',strtotime(date('Y-m-d 00:00:00',strtotime($param['datemin'])))];
+        }
+        if($param['datemax']) {
+            $whereUser[] = ['u.sub_time','<=',strtotime(date('Y-m-d 23:59:59',strtotime($param['datemax'])))];
+        }
+        if($param['search']) {
+            $whereUser[] = ['u.nickname','like',"%{$param['search']}%"];
+        }
+
         try {
             $count = Db::table('mp_scene_user')->alias('u')->where($whereUser)->count();
             $page['count'] = $count;
@@ -29,11 +52,14 @@ class Qrcode extends Base {
                 ->limit(($curr_page-1)*$perpage,$perpage)
                 ->order(['u.id'=>'DESC'])
                 ->select();
+            $scene_list = Db::table('mp_scene')->select();
         } catch (\Exception $e) {
             return ajax($e->getMessage(), -1);
         }
         $this->assign('list',$list);
         $this->assign('page',$page);
+        $this->assign('param',$param);
+        $this->assign('scene_list',$scene_list);
         return $this->fetch();
     }
 
