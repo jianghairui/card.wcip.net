@@ -7,7 +7,9 @@
  */
 namespace app\api\controller;
 use think\Db;
+
 class Shop extends Base {
+
     //商品分类
     public function cateList() {
         try {
@@ -22,9 +24,22 @@ class Shop extends Base {
         }
         return ajax($list);
     }
+
+    //商品版本
+    public function versionList() {
+        try {
+            $map = [];
+            $list = Db::table('mp_goods_version')->where($map)->select();
+        }catch (\Exception $e) {
+            return ajax($e->getMessage(),-1);
+        }
+        return ajax($list);
+    }
+
     //商品列表
     public function goodsList() {
         $cate_id = input('post.cate_id',0);
+        $version_id = input('post.version_id',0);
         $curr_page = input('post.page',1);
         $perpage = input('post.perpage',10);
 
@@ -35,6 +50,9 @@ class Shop extends Base {
         $order = ['g.id'=>'DESC'];
         if($cate_id) {
             $where[] = ['g.cate_id','=',$cate_id];
+        }
+        if($version_id) {
+            $where[] = ['g.version_id','=',$version_id];
         }
         try {
             $list = Db::table('mp_goods')->alias('g')

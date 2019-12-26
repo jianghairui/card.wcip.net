@@ -18,6 +18,17 @@
             </div>
         </div>
         <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">商品版本：</label>
+            <div class="formControls col-xs-4 col-sm-4"> <span class="select-box">
+				<select class="select" name="version_id" id="version_id">
+                    {foreach $version_list as $li}
+                    <option value="{$li.id}">{$li.version_name}</option>
+                    {/foreach}
+				</select>
+				</span>
+            </div>
+        </div>
+        <div class="row cl">
             <label class="form-label col-xs-4 col-sm-2"><span class="c-red">*</span>商品名：</label>
             <div class="formControls col-xs-8 col-sm-9">
                 <input type="text" class="input-text" value="" placeholder="" id="name" name="name" maxlength="50">
@@ -216,7 +227,7 @@
             focusCleanup:true,
             success:"valid",
             submitHandler:function(form){
-                if($("#cate_id").val() == null || $("#cate_id").val() == '') {
+                if(!$("#cate_id").val()) {
                     layer.msg('请选择一个分类',{icon:5,time:1000});
                     return false;
                 }
@@ -300,7 +311,7 @@
 
 
         function ajaxFileUpload() {
-            if(checkfile('multi-file') !== true) {
+            if(checkfile('multi-file',128) !== true) {
                 $("#pic_up").val('');
                 return false;
             }

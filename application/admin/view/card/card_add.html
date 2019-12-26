@@ -298,7 +298,7 @@
 
         $("#file").change(function(e){
             if ($("#file").val()) {
-                if(checkfile('file') !== true) {
+                if(checkfile('file',128) !== true) {
                     $("#file").val('');
                     $("#fileList").html('');
                     return false
@@ -317,7 +317,7 @@
 
         $("#file2").change(function(e){
             if ($("#file2").val()) {
-                if(checkfile('file2') !== true) {
+                if(checkfile('file2',128) !== true) {
                     $("#file2").val('');
                     $("#fileList2").html('');
                     return false
