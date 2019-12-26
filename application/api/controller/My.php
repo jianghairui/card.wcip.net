@@ -197,7 +197,7 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
                 ->where($where)
                 ->field("o.id,o.pay_order_sn,o.pay_price,o.total_price,o.carriage,o.receiver,o.tel,o.address,o.create_time,o.refund_apply,o.status,d.order_id,d.num,d.unit_price,d.goods_name,d.attr,g.pics")->select();
             if(!$list) {
-                return ajax('invalid order_id',4);
+                return ajax('invalid order_id',24);
             }
 
             $data = [];
@@ -243,7 +243,7 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
             ];
             $exist = Db::table('mp_order')->where($where)->find();
             if(!$exist) {
-                return ajax( 'invalid order_id',4);
+                return ajax( 'invalid order_id',24);
             }
             $update_data = [
                 'refund_apply' => 1,
@@ -268,7 +268,7 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
             ];
             $exist = Db::table('mp_order')->alias('o')->where($where)->find();
             if(!$exist) {
-                return ajax( 'invalid order_id',44);
+                return ajax( 'invalid order_id',24);
             }
             $update_data = [
                 'status' => 3,
@@ -293,7 +293,7 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
             ];
             $exist = Db::table('mp_order')->alias('o')->where($where)->find();
             if(!$exist) {
-                return ajax( 'invalid order_id',44);
+                return ajax( 'invalid order_id',24);
             }
             $update_data = [
                 'del' => 1
@@ -312,6 +312,37 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
         return ajax();
 
     }
+    //获取快递信息
+    public function getKdTrace() {
+        $data['order_id'] = input('post.order_id');
+        checkPost($data);
+        try {
+            $whereOrder = [
+                ['status','=',2],
+                ['id','=',$data['order_id']]
+            ];
+            $order_exist = Db::table('mp_order')->where($whereOrder)->find();
+            if(!$order_exist) {
+                return ajax('订单不存在或状态已改变',24);
+            }
+            $whereTracking = [
+                ['name','=',$order_exist['tracking_name']]
+            ];
+            $tracking_exist = Db::table('mp_tracking')->where($whereTracking)->find();
+            if(!$tracking_exist) {
+                return ajax('物流不存在',-4);
+            }
+            $tracking_code = $tracking_exist['code'];
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+        $kuaidi = new Kuaidiniao();
+        $result = $kuaidi->getOrderTracesByJson($tracking_code,$order_exist['tracking_num']);
+        $result['tracking_name'] = $order_exist['tracking_name'];
+        return ajax($result);
+    }
+
+
     /*------ 商品订单结束 END------*/
 
 
@@ -451,37 +482,6 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
     }
     /*------收货地址管理 END------*/
 
-
-
-    //获取快递信息
-    public function getKdTrace() {
-        $data['order_id'] = input('post.order_id');
-        checkPost($data);
-        try {
-            $whereOrder = [
-                ['status','=',2],
-                ['id','=',$data['order_id']]
-            ];
-            $order_exist = Db::table('mp_order')->where($whereOrder)->find();
-            if(!$order_exist) {
-                return ajax('订单不存在或状态已改变',4);
-            }
-            $whereTracking = [
-                ['name','=',$order_exist['tracking_name']]
-            ];
-            $tracking_exist = Db::table('mp_tracking')->where($whereTracking)->find();
-            if(!$tracking_exist) {
-                return ajax('物流不存在',-4);
-            }
-            $tracking_code = $tracking_exist['code'];
-        } catch (\Exception $e) {
-            return ajax($e->getMessage(), -1);
-        }
-        $kuaidi = new Kuaidiniao();
-        $result = $kuaidi->getOrderTracesByJson($tracking_code,$order_exist['tracking_num']);
-        $result['tracking_name'] = $order_exist['tracking_name'];
-        return ajax($result);
-    }
 
     //获取我的套牌列表
     public function myComboDir() {
