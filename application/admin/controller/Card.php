@@ -749,6 +749,13 @@ class Card extends Base {
                 if(!$type_exist) {
                     return ajax('非法参数',-1);
                 }
+                $whereCard = [
+                    ['type_id','=',$val['id']]
+                ];
+                $card_exist = Db::table('mp_card')->where($whereCard)->find();
+                if($card_exist) {
+                    return ajax('此类型下有卡牌,无法删除',-1);
+                }
                 Db::table('mp_card_type')->where($whereAttr)->delete();
             } catch (\Exception $e) {
                 return ajax($e->getMessage(), -1);
@@ -843,6 +850,13 @@ class Card extends Base {
                 $version_exist = Db::table('mp_card_version')->where($whereAttr)->find();
                 if(!$version_exist) {
                     return ajax('非法参数',-1);
+                }
+                $whereCard = [
+                    ['version_id','=',$val['id']]
+                ];
+                $card_exist = Db::table('mp_card')->where($whereCard)->find();
+                if($card_exist) {
+                    return ajax('此版本下有卡牌,无法删除',-1);
                 }
                 Db::table('mp_card_version')->where($whereAttr)->delete();
             } catch (\Exception $e) {
