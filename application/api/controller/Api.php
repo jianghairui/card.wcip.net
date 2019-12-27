@@ -28,6 +28,7 @@ class Api extends Base
         }
         return ajax($list);
     }
+
     //获取卡牌筛选条件
     public function cardParams() {
         try {
@@ -42,6 +43,7 @@ class Api extends Base
         }
         return ajax($data);
     }
+
     //卡牌列表
     public function cardList() {
 
@@ -85,6 +87,7 @@ class Api extends Base
        return ajax($list);
 
     }
+
     //卡牌详情
     public function cardDetail() {
         $val['id'] = input('post.id');
@@ -168,6 +171,7 @@ class Api extends Base
         }
         return ajax($info);
     }
+
     //公告列表
     public function articleList() {
         $curr_page = input('post.page',1);
@@ -190,6 +194,7 @@ class Api extends Base
         $ret['list'] = $list;
         return ajax($ret);
     }
+
     //公告详情
     public function articleDetail() {
         $val['id'] = input('post.id');
@@ -235,7 +240,7 @@ class Api extends Base
         }
         return ajax($list);
     }
-
+    //游戏规则
     public function gameRule() {
         $where = [
             ['id','=',1]
@@ -291,5 +296,12 @@ class Api extends Base
         }
         return ajax($val);
     }
+
+
+
+
+
+
+
 
 }
