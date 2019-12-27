@@ -6,9 +6,9 @@
  * Time: 16:00
  */
 namespace app\api\controller;
-use my\Sendsms;
 use my\Kuaidiniao;
 use think\Db;
+use EasyWeChat\Factory;
 
 class My extends Base {
 
@@ -677,6 +677,49 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
         return ajax();
 
     }
+
+
+    /*------ 裂变二维码 ------*/
+
+    public function getShareQrcode()
+    {
+        $uid = $this->myinfo['id'];
+        $uid = 1;
+        $app = Factory::miniProgram($this->mp_config);
+        $response = $app->app_code->getUnlimit($uid, [
+//            'page' => 'pages/index/index',
+            'width' => '450'
+        ]);
+        $png = $uid . '.png';
+        $save_path = 'shareqrcode/';
+        if ($response instanceof \EasyWeChat\Kernel\Http\StreamResponse) {
+            $filename = $response->saveAs($save_path, $png);
+        } else {
+            return ajax($response, -1);
+        }
+        return ajax($save_path . $png);
+    }
+
+    public function getInviteList()
+    {
+        try {
+            $where = [
+                ['i.inviter_id', '=', $this->myinfo['uid']]
+            ];
+            $list = Db::table('mp_user')->alias('u')
+                ->join("mp_invite i", "u.id=i.to_uid", "left")
+                ->where($where)
+                ->field("u.nickname,i.*")
+                ->select();
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+        $rule = "新手任务中有多个任务，好友需根据要求，完成所有任务并全部获得奖励后，才会被计算为一个有效好友。";
+        $data['list'] = $list;
+        $data['rule'] = $rule;
+        return ajax($data);
+    }
+
 
 
 

@@ -209,6 +209,49 @@ class Api extends Base
     }
 
 
+    //商品列表
+    public function recommendGoodsList() {
+        $curr_page = input('post.page',1);
+        $perpage = input('post.perpage',4);
+
+        $where = [
+            ['g.status','=',1],
+            ['g.del','=',0]
+        ];
+        $order = ['g.id'=>'DESC'];
+        try {
+            $list = Db::table('mp_goods')->alias('g')
+                ->join('mp_goods_cate c','g.cate_id=c.id','left')
+                ->where($where)
+                ->field("g.id,g.name,g.origin_price,g.price,g.sales,g.desc,g.pics,c.cate_name")
+                ->order($order)
+                ->limit(($curr_page-1)*$perpage,$perpage)->select();
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+        foreach ($list as &$v) {
+            $v['cover'] = unserialize($v['pics'])[0];
+            unset($v['pics']);
+        }
+        return ajax($list);
+    }
+
+    public function gameRule() {
+        $where = [
+            ['id','=',1]
+        ];
+        try {
+            $info = Db::table('mp_game_rule')->Where($where)->find();
+            if(!$info) {
+                return ajax('not found',-4);
+            }
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+        return ajax($info);
+    }
+
+
 
 
 
