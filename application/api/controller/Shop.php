@@ -42,6 +42,7 @@ class Shop extends Base {
         $version_id = input('post.version_id',0);
         $curr_page = input('post.page',1);
         $perpage = input('post.perpage',10);
+        $search = input('post.search','');
 
         $where = [
             ['g.status','=',1],
@@ -53,6 +54,9 @@ class Shop extends Base {
         }
         if($version_id) {
             $where[] = ['g.version_id','=',$version_id];
+        }
+        if($search) {
+            $where[] = ['g.name','like',"%{$search}%"];
         }
         try {
             $list = Db::table('mp_goods')->alias('g')

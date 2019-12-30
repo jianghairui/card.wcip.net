@@ -65,10 +65,10 @@ class Api extends Base
         ];
         $order = ['id'=>'DESC'];
         if(is_array($post['attr_id']) && !empty($post['attr_id'])) { $whereCard[] = ['attr_id','in',$post['attr_id']]; }
-        if(is_array($post['type_id']) && !empty($post['attr_id'])) { $whereCard[] = ['type_id','in',$post['type_id']]; }
-        if(is_array($post['camp_id']) && !empty($post['attr_id'])) { $whereCard[] = ['camp_id','in',$post['camp_id']]; }
-        if(is_array($post['ability_id']) && !empty($post['attr_id'])) { $whereCard[] = ['ability_id','in',$post['ability_id']]; }
-        if(is_array($post['version_id']) && !empty($post['attr_id'])) { $whereCard[] = ['version_id','in',$post['version_id']]; }
+        if(is_array($post['type_id']) && !empty($post['type_id'])) { $whereCard[] = ['type_id','in',$post['type_id']]; }
+        if(is_array($post['camp_id']) && !empty($post['camp_id'])) { $whereCard[] = ['camp_id','in',$post['camp_id']]; }
+        if(is_array($post['ability_id']) && !empty($post['ability_id'])) { $whereCard[] = ['ability_id','in',$post['ability_id']]; }
+        if(is_array($post['version_id']) && !empty($post['version_id'])) { $whereCard[] = ['version_id','in',$post['version_id']]; }
         if(is_array($post['resource']) && !empty($post['resource'])) {
             $resource_arr = $post['resource'];
             if(in_array(7,$resource_arr)) {
