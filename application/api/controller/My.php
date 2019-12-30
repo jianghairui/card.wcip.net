@@ -7,6 +7,7 @@
  */
 namespace app\api\controller;
 use my\Kuaidiniao;
+use Qiniu\Tests\DownloadTest;
 use think\Db;
 use EasyWeChat\Factory;
 
@@ -340,6 +341,42 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
         $result = $kuaidi->getOrderTracesByJson($tracking_code,$order_exist['tracking_num']);
         $result['tracking_name'] = $order_exist['tracking_name'];
         return ajax($result);
+    }
+
+    //订单评价
+    public function orderEvaluate() {
+        $val['order_detail_id'] = input('post.order_detail_id');
+        $val['comment'] = input('post.comment');
+        checkPost($val);
+        $val['uid'] = $this->myinfo['id'];
+        $val['create_time'] = time();
+        try {
+            $where_order_detail = [
+                ['uid','=',$this->myinfo['id']],
+                ['id','=',$val['order_detail_id']]
+            ];
+            $order_detail_exist = Db::table('mp_order_detail')->where($where_order_detail)->find();
+            if(!$order_detail_exist) {
+                return ajax('invalid order_detail_id',-4);
+            }
+            if($order_detail_exist['evaluate']) { return ajax('不可重复评价',25); }
+            $where_order = [
+                ['id','=',$order_detail_exist['order_id']]
+            ];
+            $order_exist = Db::table('mp_order')->where($where_order)->find();
+            if(!$order_exist) {
+                return ajax('invalid order_id',-4);
+            }
+            if($order_exist['status']) { return ajax('订单未完成,无法评价',26); }
+
+            $val['order_id'] = $order_exist['id'];
+            $val['goods_id'] = $order_detail_exist['goods_id'];
+            Db::table('mp_goods_comment')->insert($val);
+            Db::table('mp_order_detail')->where($where_order_detail)->update(['evaluate'=>1]);
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+        return ajax();
     }
 
 

@@ -125,13 +125,13 @@ class Api extends Base
             foreach ($card_version as $v) {$version[$v['id']] = $v['version_name'];}
 
             $info['type'] = isset($type[$info['type_id']]) ? $type[$info['type_id']] : '未知';
-            $info['camp'] = isset($type[$info['camp_id']]) ? $type[$info['camp_id']] : '未知';
+            $info['camp'] = isset($camp[$info['camp_id']]) ? $camp[$info['camp_id']] : '未知';
             $info['attr'] = isset($attr[$info['attr_id']]) ? $attr[$info['attr_id']] : '未知';
             $info['ability'] = isset($ability[$info['ability_id']]) ? $ability[$info['ability_id']] : '未知';
             $info['version'] = isset($version[$info['version_id']]) ? $version[$info['version_id']] : '未知';
             switch ($info['resource']) {
                 case -2:$info['resource'] = '资源-事件';break;
-                case -1:$info['resource'] = 'x';break;
+                case -1:$info['resource'] = 'X';break;
                 default:;
             }
             unset($info['type_id']);unset($info['camp_id']);unset($info['attr_id']);unset($info['ability_id']);unset($info['version_id']);
@@ -141,10 +141,10 @@ class Api extends Base
             ];
             $order = ['id'=>'DESC'];
             if(is_array($post['attr_id']) && !empty($post['attr_id'])) { $whereCardList[] = ['attr_id','in',$post['attr_id']]; }
-            if(is_array($post['type_id']) && !empty($post['attr_id'])) { $whereCardList[] = ['type_id','in',$post['type_id']]; }
-            if(is_array($post['camp_id']) && !empty($post['attr_id'])) { $whereCardList[] = ['camp_id','in',$post['camp_id']]; }
-            if(is_array($post['ability_id']) && !empty($post['attr_id'])) { $whereCardList[] = ['ability_id','in',$post['ability_id']]; }
-            if(is_array($post['version_id']) && !empty($post['attr_id'])) { $whereCardList[] = ['version_id','in',$post['version_id']]; }
+            if(is_array($post['type_id']) && !empty($post['type_id'])) { $whereCardList[] = ['type_id','in',$post['type_id']]; }
+            if(is_array($post['camp_id']) && !empty($post['camp_id'])) { $whereCardList[] = ['camp_id','in',$post['camp_id']]; }
+            if(is_array($post['ability_id']) && !empty($post['ability_id'])) { $whereCardList[] = ['ability_id','in',$post['ability_id']]; }
+            if(is_array($post['version_id']) && !empty($post['version_id'])) { $whereCardList[] = ['version_id','in',$post['version_id']]; }
             if(is_array($post['resource']) && !empty($post['resource'])) {
                 $resource_arr = $post['resource'];
                 if(in_array(7,$resource_arr)) {
@@ -166,11 +166,50 @@ class Api extends Base
             }
             $info['total_count'] = count($card_ids);
             $info['card_ids'] = $card_ids;
+
+            $whereCollection = [
+                ['uid','=',$this->myinfo['id']],
+                ['card_id','=',$val['id']]
+            ];
+            $collection_exist = Db::table('mp_card_collection')->where($whereCollection)->find();
+            if($collection_exist) {
+                $info['collect'] = true;
+            }else {
+                $info['collect'] = false;
+            }
         } catch (\Exception $e) {
             return ajax($e->getMessage(), -1);
         }
         return ajax($info);
     }
+
+    //收藏卡牌
+    public function cardCollect() {
+        $val['card_id'] = input('post.card_id');
+        checkPost($val);
+        $val['uid'] = $this->myinfo['id'];
+        $val['create_time'] = time();
+        try {
+            $card_exist = Db::table('mp_card')->where('id','=',$val['card_id'])->find();
+            if(!$card_exist) {
+                return ajax('invalid card_id',-4);
+            }
+            $whereCollection = [
+                ['uid','=',$val['uid']],
+                ['card_id','=',$val['card_id']]
+            ];
+            $collection_exist = Db::table('mp_card_collection')->where($whereCollection)->find();
+            if($collection_exist) {
+                Db::table('mp_card_collection')->where($whereCollection)->delete();
+                return ajax(false);
+            }
+            Db::table('mp_card_collection')->insert($val);
+        }catch (\Exception $e) {
+            return ajax($e->getMessage(),-1);
+        }
+        return ajax(true);
+    }
+
 
     //公告列表
     public function articleList() {
