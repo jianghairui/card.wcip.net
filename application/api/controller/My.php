@@ -721,7 +721,7 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
     public function getShareQrcode()
     {
         $uid = $this->myinfo['id'];
-        $uid = 1;
+//        $uid = 1;
         $app = Factory::miniProgram($this->mp_config);
         $response = $app->app_code->getUnlimit($uid, [
 //            'page' => 'pages/index/index',
@@ -751,7 +751,7 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
         } catch (\Exception $e) {
             return ajax($e->getMessage(), -1);
         }
-        $rule = "新手任务中有多个任务，好友需根据要求，完成所有任务并全部获得奖励后，才会被计算为一个有效好友。";
+        $rule = "商品详情生成分享二维码，用户扫码进入才会被计算为一个有效好友。";
         $data['list'] = $list;
         $data['rule'] = $rule;
         return ajax($data);
