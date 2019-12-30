@@ -517,6 +517,31 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
         }
         return ajax($info);
     }
+    //设置默认收货地址
+    public function setDetaultAddress() {
+        $val['id'] = input('post.id');
+        $uid = $this->myinfo['id'];
+        checkPost($val);
+        $where = [
+            ['id','=',$val['id']],
+            ['uid','=',$uid]
+        ];
+        try {
+            $info = Db::table('mp_address')->where($where)->find();
+            if(!$info) {
+                return ajax('invalid id',-4);
+            }
+            Db::table('mp_address')->where($where)->update(['default'=>1]);
+            $whereDefault = [
+                ['id','<>',$val['id']],
+                ['uid','=',$uid]
+            ];
+            Db::table('mp_address')->where($whereDefault)->update(['default'=>0]);
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+        return ajax();
+    }
     /*------收货地址管理 END------*/
 
 

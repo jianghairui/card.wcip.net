@@ -4,6 +4,7 @@
  * User: JHR
  * Date: 2019/4/18
  * Time: 15:49
+ * 公众号场景码
  */
 namespace app\admin\controller;
 
@@ -12,6 +13,7 @@ use wx\Jssdk;
 
 class Qrcode extends Base {
 
+    //用户列表
     public function userList() {
         $param['subscribe'] = input('param.subscribe','');
         $param['scene_id'] = input('param.scene_id','');
@@ -63,6 +65,7 @@ class Qrcode extends Base {
         return $this->fetch();
     }
 
+    //场景列表
     public function sceneList() {
         $curr_page = input('param.page',1);
         $perpage = input('param.perpage',10);
@@ -82,6 +85,7 @@ class Qrcode extends Base {
         return $this->fetch();
     }
 
+    //添加场景
     public function sceneAdd() {
         if(request()->isPost()) {
             $val['scene_name'] = input('post.scene_name');
@@ -119,6 +123,7 @@ class Qrcode extends Base {
         return $this->fetch();
     }
 
+    //场景详情
     public function sceneDetail() {
         $val['id'] = input('param.id');
         checkInput($val);
@@ -137,6 +142,7 @@ class Qrcode extends Base {
         return $this->fetch();
     }
 
+    //场景修改
     public function sceneMod() {
         if(request()->isPost()) {
             $val['scene_name'] = input('post.scene_name');
@@ -159,6 +165,8 @@ class Qrcode extends Base {
         }
     }
 
+
+    //刷新场景码
     public function refreshQrode() {
         if(request()->isPost()) {
             $val['id'] = input('post.id');
@@ -171,11 +179,12 @@ class Qrcode extends Base {
                 if(!$scene_exist) {
                     return ajax('非法参数',-1);
                 }
-                $this->genQrcode($scene_exist['qrcode_url'],$scene_exist['id']);
+                $new_qrcode = $this->genQrcode($scene_exist['qrcode_url'],$scene_exist['id']);
+                Db::table('mp_scene')->where($whereScene)->update(['qrcode'=>$new_qrcode]);
             } catch (\Exception $e) {
                 return ajax($e->getMessage(), -1);
             }
-            return ajax($scene_exist['qrcode'] . '?' . mt_rand(1,1000));
+            return ajax($new_qrcode . '?' . mt_rand(1,1000));
         }
     }
 
@@ -187,50 +196,12 @@ class Qrcode extends Base {
         $errorCorrectionLevel = "M"; // 纠错级别：L、M、Q、H
         $matrixPointSize = "6"; // 点的大小：1到10
         header('Content-Type:image/png');
-        $file_path = 'qrcode/'. md5($scene_id . config('qrcode_key')) .'.png';
+        $file_path = 'sceneqrcode/'. md5($scene_id . config('qrcode_key')) .'.png';
         \QRcode::png($str, $file_path, $errorCorrectionLevel, $matrixPointSize);
 //        exit;
-
         return $file_path;
     }
 
-
-
-    //生成带参数的二维码
-    private function getQrcodeWithParams() {
-        $val['scene_name'] = input('post.scene_name');
-        $val['desc'] = input('post.desc');
-        checkInput($val);
-        try {
-            $scene_id = Db::table('mp_scene')->insertGetId($val);
-
-            $data = [
-                'action_name' => 'QR_LIMIT_SCENE',
-                'action_info' => [
-                    'scene' => [
-                        'scene_id' => $scene_id
-                    ]
-                ]
-            ];
-            $jssdk = new Jssdk($this->config['appid'], $this->config['app_secret']);
-            $access_token = $jssdk->getAccessToken();
-
-            $url = 'https://api.weixin.qq.com/cgi-bin/qrcode/create?access_token=' . $access_token;
-            $result = curl_post_data($url,json_encode($data,JSON_UNESCAPED_UNICODE));
-            $obj = json_decode($result,true);
-            if(isset($obj['errcode'])) {
-                return ajax($obj['errmsg'],-1);
-            }
-            $update['qrcode_url'] = $obj['url'];
-            $update['qrcode'] = $this->genQrcode($obj['url'],$scene_id);
-            $whereScene = [['id','=',$scene_id]];
-            Db::table('mp_scene')->where($whereScene)->update($update);
-        } catch (\Exception $e) {
-            return ajax($e->getMessage(), -1);
-        }
-
-        return ajax();
-    }
 
     public function test() {
 
