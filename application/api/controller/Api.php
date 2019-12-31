@@ -42,6 +42,7 @@ class Api extends Base
             return ajax($e->getMessage(), -1);
         }
         return ajax($data);
+
     }
 
     //卡牌列表

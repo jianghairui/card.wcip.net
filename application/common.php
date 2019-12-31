@@ -373,6 +373,7 @@ function upload($k,$base_path = 'upload/admin/',$limitSize = 512) {
     $filepath = $path . "/" . $newname;
 
     return array('error'=>0,'data'=>$filepath);
+
 }
 //检验格式大小
 function checkfile($file,$limitSize = 512) {
@@ -401,6 +402,7 @@ function checkfile($file,$limitSize = 512) {
 }
 //接口上传图片
 function ajaxUpload($k,$maxsize=512) {
+
     $allowType = array(
         "image/gif",
         "image/jpeg",
@@ -410,13 +412,13 @@ function ajaxUpload($k,$maxsize=512) {
         "image/bmp"
     );
     if($_FILES[$k]["type"] == '') {
-        throw new HttpResponseException(ajax('图片存在中文名或超过2M',20));
+        throw new HttpResponseException(ajax('图片存在中文名或超过2M',27));
     }
     if(!in_array($_FILES[$k]["type"],$allowType)) {
-        throw new HttpResponseException(ajax('文件类型不符' . $_FILES[$k]["type"],21));
+        throw new HttpResponseException(ajax('文件类型不符' . $_FILES[$k]["type"],28));
     }
     if($_FILES[$k]["size"] > $maxsize*1024) {
-        throw new HttpResponseException(ajax('图片大小不超过'.$maxsize.'Kb',22));
+        throw new HttpResponseException(ajax('图片大小不超过'.$maxsize.'Kb',29));
     }
     if ($_FILES[$k]["error"] > 0) {
         throw new HttpResponseException(ajax("error: " . $_FILES[$k]["error"],-1));
@@ -432,6 +434,7 @@ function ajaxUpload($k,$maxsize=512) {
     move_uploaded_file($_FILES[$k]["tmp_name"], $path . $newname);
     $filepath = $path . $newname;
     return $filepath;
+
 }
 
 function rename_file($tmp,$path = '') {
