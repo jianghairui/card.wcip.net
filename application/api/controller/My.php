@@ -783,6 +783,57 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
 
     }
 
+    public function cardComboCopy() {
+        $val['dir_id'] = input('post.dir_id');
+        $val['dir_name'] = input('post.dir_name');
+        checkPost($val);
+        $uid = $this->myinfo['id'];
+        try {
+            $whereDir = [
+                ['id','=',$val['dir_id']],
+                ['uid','=',$uid]
+            ];
+            $dir_exist = Db::table('mp_combo_dir')->where($whereDir)->find();//判断目录是否存在
+            if(!$dir_exist) {
+                return ajax('invalid dir_id',-4);
+            }
+
+            $time = time();
+            $dir_data['uid'] = $uid;
+            $dir_data['total_num'] = $dir_exist['total_num'];
+            $dir_data['main_num'] = $dir_exist['main_num'];
+            $dir_data['spare_num'] = $dir_exist['spare_num'];
+            $dir_data['cover'] = $dir_exist['cover'];
+            $dir_data['dir_name'] = $val['dir_name'];
+            $dir_data['create_time'] = $time;
+
+            $whereCombo = [
+                ['dir_id','=',$val['dir_id']]
+            ];
+            $list = Db::table('mp_card_combo')->where($whereCombo)->select();
+
+            Db::startTrans();
+            $dir_id = Db::table('mp_comobo_dir')->insertGetId($dir_data);
+            $inser_data_all = [];
+            foreach ($list as $v) {
+                $insert_data['uid'] = $uid;
+                $insert_data['dir_id'] = $dir_id;
+                $insert_data['card_id'] = $v['card_id'];
+                $insert_data['main'] = $v['main'];
+                $insert_data['num'] = $v['num'];
+                $insert_data['create_time'] = $time;
+                $insert_data['combo_key'] = $v['combo_key'];
+                $inser_data_all[] = $insert_data;
+            }
+            Db::table('mp_card_combo')->insertAll($inser_data_all);
+            Db::commit();
+        } catch (\Exception $e) {
+            Db::rollback();
+            return ajax($e->getMessage(), -1);
+        }
+        return ajax();
+    }
+
     //套牌删除
     public function cardComboDel() {
         $val['dir_id'] = input('post.dir_id');
