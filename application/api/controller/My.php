@@ -46,7 +46,7 @@ class My extends Base {
                     $val['avatar'] = rename_file($avatar,$this->rename_base_path . 'avatar/');
                 }
             }else {
-                return ajax('',3);
+                return ajax('请传入图片',3);
             }
             $whereUser = [['id','=',$val['id']]];
             Db::table('mp_user')->where($whereUser)->update($val);
@@ -61,6 +61,31 @@ class My extends Base {
         }
         return ajax();
 
+    }
+
+    //卡牌列表
+    public function myCollectCardList() {
+        $curr_page = input('post.page',1);
+        $perpage = input('post.perpage',10);
+        $curr_page = $curr_page ? $curr_page : 1;
+        $perpage = $perpage ? $perpage : 10;
+
+        $whereCard = [
+            ['c.status','=',1]
+        ];
+        $order = ['co.create_time'=>'DESC'];
+        try {
+            $list = Db::table('mp_card_collection')->alias('co')
+                ->join('mp_card c','co.card_id=c.id','left')
+                ->where($whereCard)
+                ->order($order)
+                ->field('c.*')
+                ->limit(($curr_page-1)*$perpage,$perpage)
+                ->select();
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+        return ajax($list);
     }
 
     /*------ 商品订单管理 START------*/
@@ -574,8 +599,24 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
             $list = Db::table('mp_card_combo')->alias('c')
                 ->join('mp_card ca','c.card_id=ca.id','left')
                 ->where($whereCard)
-                ->field('c.*,ca.card_name,ca.cover')
+                ->field('c.*,ca.card_name,ca.cover,ca.type_id,ca.wushuang,ca.resource,ca.camp_id')
                 ->select();
+            $card_type = Db::table('mp_card_type')->select();
+            $card_camp = Db::table('mp_card_camp')->select();
+            $type = [];
+            $camp = [];
+            foreach ($card_type as $v) {$type[$v['id']] = $v['type_name'];}
+            foreach ($card_camp as $v) {$camp[$v['id']] = $v['camp_name'];}
+
+            foreach ($list as &$value) {
+                $value['type'] = isset($type[$value['type_id']]) ? $type[$value['type_id']] : '未知';
+                $value['camp'] = isset($camp[$value['camp_id']]) ? $camp[$value['camp_id']] : '未知';
+                switch ($value['resource']) {
+                    case -2:$value['resource'] = '资源-事件';break;
+                    case -1:$value['resource'] = 'X';break;
+                    default:;
+                }
+            }
             $info['list'] = $list;
         } catch (\Exception $e) {
             return ajax($e->getMessage(), -1);
@@ -586,12 +627,13 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
     public function createCardCombo() {
         $dir_data['dir_name'] = input('post.dir_name');
         checkPost($dir_data);
-        $combo = input('post.combo',[]);
+        $combo = input('post.combo','');
+
         try {
+            $combo = json_decode($combo,true);
             if(!is_array($combo) || empty($combo)) {
                 return ajax('invalid combo',-4);
             }
-            $combo = array_unique($combo);
             $time = time();
             $dir_data['uid'] = $this->myinfo['id'];
             $dir_data['total_num'] = 0;
@@ -605,16 +647,16 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
                 $card_id = $v[1];
                 $main = $v[2];
                 $whereCard = [
-                    ['id'=>$card_id]
+                    ['id','=',$card_id]
                 ];
                 $card_exist = Db::table('mp_card')->where($whereCard)->find();
                 if(!$card_exist) { return ajax('非法参数card_id ' . $card_id,-4); }
                 if($time_count === 0) { $dir_data['cover'] = $card_exist['cover']; }
-                $dir_data['total_num'] += $v['num'];
+                $dir_data['total_num'] += $num;
                 if($main == 1) {
-                    $dir_data['main_num'] += $v['num'];
+                    $dir_data['main_num'] += $num;
                 }else {
-                    $dir_data['spare_num'] += $v['num'];
+                    $dir_data['spare_num'] += $num;
                 }
                 $time_count++;
             }
@@ -641,7 +683,7 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
             Db::rollback();
             return ajax($e->getMessage(), -1);
         }
-        return ajax();
+        return ajax($dir_id);
     }
     //修改套餐目录名
     public function dirnameModify() {
@@ -670,9 +712,14 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
     public function cardComboModify() {
         $dir_data['dir_id'] = input('post.dir_id');
         checkPost($dir_data);
-        $combo = input('post.combo',[]);
+        $combo = input('post.combo','');
         $uid = $this->myinfo['id'];
         try {
+            $combo = json_decode($combo,true);
+            if(!is_array($combo) || empty($combo)) {
+                return ajax('invalid combo',-4);
+            }
+
             $whereDir = [
                 ['id','=',$dir_data['dir_id']],
                 ['uid','=',$uid]
@@ -681,10 +728,6 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
             if(!$dir_exist) {
                 return ajax('invalid dir_id',-4);
             }
-            if(!is_array($combo) || empty($combo)) {
-                return ajax('invalid combo',-4);
-            }
-            $combo = array_unique($combo);
 
             $time = time();
             $dir_data['total_num'] = 0;
@@ -697,7 +740,7 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
                 $card_id = $v[1];
                 $main = $v[2];
                 $whereCard = [
-                    ['id'=>$card_id]
+                    ['id','=',$card_id]
                 ];
                 $card_exist = Db::table('mp_card')->where($whereCard)->find();
                 if(!$card_exist) { return ajax('非法参数card_id ' . $card_id,-4); }//判断每一张卡牌是否存在
@@ -740,6 +783,33 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
 
     }
 
+    //套牌删除
+    public function cardComboDel() {
+        $val['dir_id'] = input('post.dir_id');
+        checkPost($val);
+        try {
+            $whereDir = [
+                ['id','=',$val['dir_id']],
+                ['uid','=',$this->myinfo['id']]
+            ];
+            $dir_exist = Db::table('mp_combo_dir')->where($whereDir)->find();
+            if(!$dir_exist) {
+                return ajax('invalid dir_id',-4);
+            }
+
+            Db::startTrans();
+            $whereCombo = [
+                ['dir_id','=',$val['dir_id']]
+            ];
+            Db::table('mp_card_combo')->where($whereCombo)->delete();
+            Db::table('mp_combo_dir')->where($whereDir)->delete();
+            Db::commit();
+        } catch (\Exception $e) {
+            Db::rollback();
+            return ajax($e->getMessage(), -1);
+        }
+        return ajax();
+    }
 
     /*------ 裂变二维码 ------*/
 
