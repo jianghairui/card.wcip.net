@@ -251,7 +251,7 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
                 $data_child['total_price'] = sprintf ( "%1\$.2f",($li['unit_price'] * $li['num']));
                 $data_child['attr'] = $li['attr'];
                 $data_child['evaluate'] = $li['evaluate'];
-                $data_child['cover'] = unserialize($li['pics'])[0];
+                $data_child['comment'] = Db::table('mp_goods_comment')->where('order_detail_id','=',$li['order_detail_id'])->value('comment');
                 $child[] = $data_child;
             }
             $data['child'] = $child;
