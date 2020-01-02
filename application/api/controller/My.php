@@ -398,7 +398,7 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
             if(!$order_exist) {
                 return ajax('invalid order_id',-4);
             }
-            if($order_exist['status']) { return ajax('订单未完成,无法评价',26); }
+            if($order_exist['status'] != 3) { return ajax('订单未完成,无法评价',26); }
 
             $val['order_id'] = $order_exist['id'];
             $val['goods_id'] = $order_detail_exist['goods_id'];
