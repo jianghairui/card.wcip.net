@@ -103,7 +103,7 @@ class My extends Base {
         }
         try {
             $list = Db::query("SELECT 
-`o`.`id`,`o`.`pay_order_sn`,`o`.`pay_price`,`o`.`total_price`,`o`.`carriage`,`o`.`create_time`,`o`.`refund_apply`,`o`.`status`,`o`.`refund_apply`,`d`.`order_id`,`d`.`goods_id`,`d`.`num`,`d`.`unit_price`,`d`.`goods_name`,`d`.`attr`,`g`.`pics` 
+`o`.`id`,`o`.`pay_order_sn`,`o`.`pay_price`,`o`.`total_price`,`o`.`carriage`,`o`.`create_time`,`o`.`refund_apply`,`o`.`status`,`o`.`refund_apply`,`d`.`order_id`,`d`.`goods_id`,`d`.`num`,`d`.`unit_price`,`d`.`goods_name`,`d`.`attr`,`d`.`evaluate`,`g`.`pics` 
 FROM (SELECT * FROM mp_order WHERE " . $where . $order ." LIMIT ".($curr_page-1)*$perpage.",".$perpage.") `o` 
 LEFT JOIN `mp_order_detail` `d` ON `o`.`id`=`d`.`order_id`
 LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
@@ -133,6 +133,7 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
                         $data_child['unit_price'] = $li['unit_price'];
                         $data_child['total_price'] = sprintf ( "%1\$.2f",($li['unit_price'] * $li['num']));
                         $data_child['attr'] = $li['attr'];
+                        $data_child['evaluate'] = $li['evaluate'];
                         $child[] = $data_child;
                     }
                 }
@@ -150,7 +151,7 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
         $curr_page = input('post.page',1);
         $perpage = input('post.perpage',10);
         $type = input('post.type',1);
-        if(!in_array($type,[1,2,3])) {
+        if(!in_array($type,[0,1,2,3])) {
             return ajax($type,-4);
         }
         $where = "del=0 AND uid=".$this->myinfo['id'];
@@ -221,7 +222,7 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
                 ->join("mp_order_detail d","o.id=d.order_id","left")
                 ->join("mp_goods g","d.goods_id=g.id","left")
                 ->where($where)
-                ->field("o.id,o.pay_order_sn,o.pay_price,o.total_price,o.carriage,o.receiver,o.tel,o.address,o.create_time,o.refund_apply,o.status,d.order_id,d.num,d.unit_price,d.goods_name,d.attr,g.pics")->select();
+                ->field("o.id,o.pay_order_sn,o.pay_price,o.total_price,o.carriage,o.receiver,o.tel,o.address,o.create_time,o.refund_apply,o.status,o.pay_time,o.tracking_name,o.tracking_num,d.id AS order_detail_id,d.order_id,d.num,d.unit_price,d.goods_name,d.attr,d.evaluate,g.pics")->select();
             if(!$list) {
                 return ajax('invalid order_id',24);
             }
@@ -239,12 +240,17 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
                 $data['create_time'] = date('Y-m-d H:i',$li['create_time']);
                 $data['refund_apply'] = $li['refund_apply'];
                 $data['status'] = $li['status'];
+                $data['pay_time'] = $li['pay_time'];
+                $data['tracking_name'] = $li['tracking_name'];
+                $data['tracking_num'] = $li['tracking_num'];
+                $data_child['order_detail_id'] = $li['order_detail_id'];
                 $data_child['cover'] = unserialize($li['pics'])[0];
                 $data_child['goods_name'] = $li['goods_name'];
                 $data_child['num'] = $li['num'];
                 $data_child['unit_price'] = $li['unit_price'];
                 $data_child['total_price'] = sprintf ( "%1\$.2f",($li['unit_price'] * $li['num']));
                 $data_child['attr'] = $li['attr'];
+                $data_child['evaluate'] = $li['evaluate'];
                 $data_child['cover'] = unserialize($li['pics'])[0];
                 $child[] = $data_child;
             }
@@ -685,6 +691,7 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
         }
         return ajax($dir_id);
     }
+
     //修改套餐目录名
     public function dirnameModify() {
         $val['dir_name'] = input('post.dir_name');
@@ -708,10 +715,13 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
         }
         return ajax();
     }
+
     //套牌修改
     public function cardComboModify() {
-        $dir_data['dir_id'] = input('post.dir_id');
-        checkPost($dir_data);
+
+        $val['dir_id'] = input('post.dir_id');
+        $val['dir_name'] = input('post.dir_name');
+        checkPost($val);
         $combo = input('post.combo','');
         $uid = $this->myinfo['id'];
         try {
@@ -721,7 +731,7 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
             }
 
             $whereDir = [
-                ['id','=',$dir_data['dir_id']],
+                ['id','=',$val['dir_id']],
                 ['uid','=',$uid]
             ];
             $dir_exist = Db::table('mp_combo_dir')->where($whereDir)->find();//判断目录是否存在
@@ -730,6 +740,7 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
             }
 
             $time = time();
+            $dir_data['dir_name'] = $val['dir_name'];
             $dir_data['total_num'] = 0;
             $dir_data['main_num'] = 0;
             $dir_data['spare_num'] = 0;
@@ -745,11 +756,11 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
                 $card_exist = Db::table('mp_card')->where($whereCard)->find();
                 if(!$card_exist) { return ajax('非法参数card_id ' . $card_id,-4); }//判断每一张卡牌是否存在
                 if($time_count === 0) { $dir_data['cover'] = $card_exist['cover']; }
-                $dir_data['total_num'] += $v['num'];
+                $dir_data['total_num'] += $num;
                 if($main == 1) {
-                    $dir_data['main_num'] += $v['num'];
+                    $dir_data['main_num'] += $num;
                 }else {
-                    $dir_data['spare_num'] += $v['num'];
+                    $dir_data['spare_num'] += $num;
                 }
                 $time_count++;
             }
@@ -758,7 +769,7 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
                 $v = explode('_',$k);
                 $card_id = $v[1];
                 $main = $v[2];
-                $combo_data['dir_id'] = $dir_data['dir_id'];
+                $combo_data['dir_id'] = $val['dir_id'];
                 $combo_data['uid'] = $uid;
                 $combo_data['card_id'] = $card_id;
                 $combo_data['main'] = $main;//1.主牌 2.副牌
@@ -769,7 +780,7 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
             }
             Db::startTrans();
             $whereCombo = [
-                ['dir_id','=',$dir_data['dir_id']]
+                ['dir_id','=',$val['dir_id']]
             ];
             Db::table('mp_card_combo')->where($whereCombo)->delete();//删除老的牌组
             Db::table('mp_card_combo')->insertAll($combo_data_all);//添加新的牌组
@@ -813,7 +824,7 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
             $list = Db::table('mp_card_combo')->where($whereCombo)->select();
 
             Db::startTrans();
-            $dir_id = Db::table('mp_comobo_dir')->insertGetId($dir_data);
+            $dir_id = Db::table('mp_combo_dir')->insertGetId($dir_data);
             $inser_data_all = [];
             foreach ($list as $v) {
                 $insert_data['uid'] = $uid;
@@ -831,7 +842,7 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
             Db::rollback();
             return ajax($e->getMessage(), -1);
         }
-        return ajax();
+        return ajax($dir_id);
     }
 
     //套牌删除
@@ -864,8 +875,7 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
 
     /*------ 裂变二维码 ------*/
 
-    public function getShareQrcode()
-    {
+    public function getShareQrcode() {
         $uid = $this->myinfo['id'];
 //        $uid = 1;
         $app = Factory::miniProgram($this->mp_config);
@@ -883,16 +893,23 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
         return ajax($save_path . $png);
     }
 
-    public function getInviteList()
-    {
+    //获取我邀请的人
+    public function getInviteList() {
+        $uid = input('post.uid','');
         try {
-            $where = [
-                ['i.inviter_id', '=', $this->myinfo['uid']]
-            ];
-            $list = Db::table('mp_user')->alias('u')
-                ->join("mp_invite i", "u.id=i.to_uid", "left")
+            if($uid) {
+                $where = [
+                    ['i.inviter_id','=',$uid]
+                ];
+            }else {
+                $where = [
+                    ['i.inviter_id','=',$this->myinfo['id']]
+                ];
+            }
+            $list = Db::table('mp_invite')->alias('i')
+                ->join("mp_user u", "i.to_uid=u.id", "left")
                 ->where($where)
-                ->field("u.nickname,i.*")
+                ->field("i.create_time,i.to_uid AS uid,u.nickname,u.avatar,u.spend")
                 ->select();
         } catch (\Exception $e) {
             return ajax($e->getMessage(), -1);

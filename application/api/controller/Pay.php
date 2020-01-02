@@ -30,8 +30,8 @@ class Pay extends Base {
             $result = $app->order->unify([
                 'body' => '掌控的历史',
                 'out_trade_no' => $pay_order_sn,
-//                'total_fee' => 1,
-                'total_fee' => floatval($order_exist['pay_price'])*100,
+                'total_fee' => 1,
+//                'total_fee' => floatval($order_exist['pay_price'])*100,
                 'notify_url' => $this->weburl . 'api/pay/order_notify',
                 'trade_type' => 'JSAPI',
                 'openid' => $this->myinfo['openid']

@@ -24,7 +24,6 @@ class Shop extends Base {
         }
         return ajax($list);
     }
-
     //商品版本
     public function versionList() {
         try {
@@ -35,7 +34,6 @@ class Shop extends Base {
         }
         return ajax($list);
     }
-
     //商品列表
     public function goodsList() {
         $cate_id = input('post.cate_id',0);
@@ -104,6 +102,37 @@ class Shop extends Base {
         }
         $info['pics'] = unserialize($info['pics']);
         return ajax($info);
+    }
+    //商品评论
+    public function goodsCommentList() {
+        $val['goods_id'] = input('post.goods_id');
+        checkPost($val);
+        try {
+            $whereGoods = [
+                ['id','=',$val['goods_id']]
+            ];
+            $goods_exist = Db::table('mp_goods')->where($whereGoods)->find();
+            if(!$goods_exist) {
+                return ajax('invalid goods_id',-4);
+            }
+            $curr_page = input('post.page',1);
+            $perpage = input('post.perpage',10);
+            $curr_page = $curr_page ? $curr_page : 1;
+            $perpage = $perpage ? $perpage : 10;
+            $whereComment = [
+                ['goods_id','=',$val['goods_id']]
+            ];
+            $list = Db::table('mp_goods_comment')->alias('c')
+                ->join('mp_user u','c.uid=u.id','left')
+                ->where($whereComment)
+                ->field('c.comment,c.create_time,u.nickname,u.avatar')
+                ->limit(($curr_page-1)*$perpage,$perpage)
+                ->order(['c.id'=>'DESC'])
+                ->select();
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+        return ajax($list);
     }
 
     //购物车列表
