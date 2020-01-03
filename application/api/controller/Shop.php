@@ -120,12 +120,13 @@ class Shop extends Base {
             $curr_page = $curr_page ? $curr_page : 1;
             $perpage = $perpage ? $perpage : 10;
             $whereComment = [
-                ['goods_id','=',$val['goods_id']]
+                ['c.goods_id','=',$val['goods_id']]
             ];
             $list = Db::table('mp_goods_comment')->alias('c')
                 ->join('mp_user u','c.uid=u.id','left')
+                ->join('mp_order_detail d','c.order_detail_id=d.id','left')
                 ->where($whereComment)
-                ->field('c.comment,c.create_time,u.nickname,u.avatar')
+                ->field('c.comment,c.create_time,u.nickname,u.avatar,d.attr')
                 ->limit(($curr_page-1)*$perpage,$perpage)
                 ->order(['c.id'=>'DESC'])
                 ->select();
@@ -284,12 +285,12 @@ class Shop extends Base {
                 ];
                 $attr_exist = Db::table('mp_goods_attr')->where($map_attr)->find();
                 if($cart_exist['num'] > $attr_exist['stock']) {
-                    return ajax('此规格库存不足',41);
+                    return ajax('此规格库存不足',30);
                 }
                 $price = $attr_exist['price'];
             }else {
                 if($cart_exist['num'] > $goods_exist['stock']) {
-                    return ajax('库存不足',39);
+                    return ajax('库存不足',15);
                 }
                 $price = $goods_exist['price'];
             }

@@ -71,7 +71,8 @@ class My extends Base {
         $perpage = $perpage ? $perpage : 10;
 
         $whereCard = [
-            ['c.status','=',1]
+            ['c.status','=',1],
+            ['co.uid','=',$this->myinfo['id']]
         ];
         $order = ['co.create_time'=>'DESC'];
         try {
@@ -222,7 +223,7 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
                 ->join("mp_order_detail d","o.id=d.order_id","left")
                 ->join("mp_goods g","d.goods_id=g.id","left")
                 ->where($where)
-                ->field("o.id,o.pay_order_sn,o.pay_price,o.total_price,o.carriage,o.receiver,o.tel,o.address,o.create_time,o.refund_apply,o.status,o.pay_time,o.tracking_name,o.tracking_num,d.id AS order_detail_id,d.order_id,d.num,d.unit_price,d.goods_name,d.attr,d.evaluate,g.pics")->select();
+                ->field("o.id,o.pay_order_sn,o.pay_price,o.total_price,o.carriage,o.receiver,o.tel,o.address,o.create_time,o.refund_apply,o.status,o.pay_time,o.tracking_name,o.tracking_num,d.goods_id AS goods_id,d.id AS order_detail_id,d.order_id,d.num,d.unit_price,d.goods_name,d.attr,d.evaluate,g.pics")->select();
             if(!$list) {
                 return ajax('invalid order_id',24);
             }
@@ -243,6 +244,7 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
                 $data['pay_time'] = $li['pay_time'];
                 $data['tracking_name'] = $li['tracking_name'];
                 $data['tracking_num'] = $li['tracking_num'];
+                $data_child['goods_id'] = $li['goods_id'];
                 $data_child['order_detail_id'] = $li['order_detail_id'];
                 $data_child['cover'] = unserialize($li['pics'])[0];
                 $data_child['goods_name'] = $li['goods_name'];
@@ -350,7 +352,7 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
         checkPost($data);
         try {
             $whereOrder = [
-                ['status','=',2],
+                ['status','IN',[2,3]],
                 ['id','=',$data['order_id']]
             ];
             $order_exist = Db::table('mp_order')->where($whereOrder)->find();

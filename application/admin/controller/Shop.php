@@ -611,7 +611,7 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
         $id = input('param.id');
         try {
             $whereOrder = [
-                ['status','=',2],
+                    ['status','IN',[2,3]],
                 ['id','=',$id]
             ];
             $order_exist = Db::table('mp_order')->where($whereOrder)->find();
@@ -860,8 +860,6 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
             return ajax();
         }
     }
-
-
     //删除版本
     public function versionDel() {
         if(request()->isPost()) {
