@@ -26,12 +26,12 @@ class Pay extends Base {
         try {
             $order_exist = Db::table('mp_order')->where($whereOrder)->find();
             if(!$order_exist) { return ajax('invalid pay_order_sn',-4); }
+//            $order_exist['pay_price'] = 0.1;
             $app = Factory::payment($this->mp_config);
             $result = $app->order->unify([
                 'body' => '掌控的历史',
                 'out_trade_no' => $pay_order_sn,
-                'total_fee' => 1,
-//                'total_fee' => floatval($order_exist['pay_price'])*100,
+                'total_fee' => floatval($order_exist['pay_price'])*100,
                 'notify_url' => $this->weburl . 'api/pay/order_notify',
                 'trade_type' => 'JSAPI',
                 'openid' => $this->myinfo['openid']
@@ -87,6 +87,11 @@ class Pay extends Base {
                             $whereGoods = [ ['id','=',$v['goods_id']] ];
                             Db::table('mp_goods')->where($whereGoods)->setInc('sales',$v['num']);
                         }
+                        //增加个人消费金额
+                        $whereUser = [
+                            ['id','=',$order_exist['uid']]
+                        ];
+                        Db::table('mp_user')->where($whereUser)->setInc('spend',$order_exist['total_price']);
                     }
                 }catch (\Exception $e) {
                     $this->excep($this->cmd,$e->getMessage());

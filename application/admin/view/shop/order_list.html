@@ -114,25 +114,28 @@
                 </td>
             </tr>
             <tr>
-                <td colspan="6">
+                <td colspan="6" style="padding-bottom: 0">
+                    <div style="display: flex;flex-wrap: wrap">
                     {foreach $li['child'] as $vv}
-                    <div style="display: inline-flex">
-                        <div id="cover" class="goods_pics" style="background-image: url('/{$vv.cover}');"></div>
-                        <div style="margin: 0 10px;">
-                            <div><span class="order-font-b">{$vv.goods_name}</span></div>
+                    <div style="width: 400px;flex-grow: 1;display: flex;margin-bottom: 8px">
+                        <div id="cover" class="goods_pics" style="flex-shrink:0;background-image: url('/{$vv.cover}');"></div>
+                        <div style="margin: 0 10px;flex-grow: 1;width: 0">
+                            <div style="width: 100%">
+                                <span class="order-font-b" title="{$vv.goods_name}" style="display: block;white-space: nowrap;text-overflow: ellipsis;overflow: hidden">{$vv.goods_name}</span></div>
                             <div>规格: <span class="order-font">{$vv.attr}</span></div>
                             <div>数量: <span class="order-font">{$vv.num}</span></div>
                             <div>小计: <span class="order-font">{$vv.total_price}元</span></div>
                         </div>
                     </div>
                     {/foreach}
+                    </div>
                 </td>
             </tr>
             <tr>
                 <td colspan="6">
                     <span style="margin-left: 15px;" onclick="mod_address(this,{$li.id},'{$li.address}')">收货地址: <b>{$li.address}</b></span> &nbsp;&nbsp;&nbsp;&nbsp;(收货人: <b>{$li.receiver}</b> | 手机号: <b>{$li.tel}</b> )
                     {if $li['status'] == 2 || $li['status'] == 3}
-                    <a data-title="物流信息"  onclick="layer_show('物流信息','{:url("Shop/traceInfo",array('id'=>$li['id']))}',600,500)" href="javascript:;" class="btn btn-link">查看物流</a>
+                    <a data-title="物流信息"  onclick="layer_show('物流信息','{:url("Shop/traceInfo",array('id'=>$li['id']))}',800,500)" href="javascript:;" class="btn btn-link">查看物流</a>
                     {/if}
                 </td>
             </tr>

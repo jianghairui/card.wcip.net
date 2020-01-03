@@ -120,7 +120,8 @@ class Shop extends Base {
             $curr_page = $curr_page ? $curr_page : 1;
             $perpage = $perpage ? $perpage : 10;
             $whereComment = [
-                ['c.goods_id','=',$val['goods_id']]
+                ['c.goods_id','=',$val['goods_id']],
+                ['c.status','=',1]
             ];
             $list = Db::table('mp_goods_comment')->alias('c')
                 ->join('mp_user u','c.uid=u.id','left')
@@ -414,7 +415,6 @@ class Shop extends Base {
             $insert_data = [
                 'uid' => $this->myinfo['id'],
                 'pay_order_sn' => $pay_order_sn,
-                'order_sn' => create_unique_number(''),
                 'total_price' => $total_price,
                 'pay_price' => $total_price,
                 'carriage' => $goods_exist['carriage'] * $data['num'],
@@ -521,7 +521,6 @@ class Shop extends Base {
             $order_data = [
                 'uid' => $this->myinfo['id'],
                 'pay_order_sn' => $pay_order_sn,
-                'order_sn' => create_unique_number(''),
                 'total_price' => $total_order_price,
                 'pay_price' => $total_order_price,
                 'carriage' => $carriage,
@@ -572,6 +571,8 @@ class Shop extends Base {
         return ajax($pay_order_sn);
 
     }
+
+
 
 
 

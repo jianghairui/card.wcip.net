@@ -83,6 +83,13 @@
       "unicode_decimal": 58885
     },
     {
+      "icon_id": "721703",
+      "name": "用户",
+      "font_class": "ai-user",
+      "unicode": "e60c",
+      "unicode_decimal": 58892
+    },
+    {
       "icon_id": "740886",
       "name": "积分规则管控",
       "font_class": "jifenguizeguankong",

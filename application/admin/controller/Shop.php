@@ -636,6 +636,7 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
         }else {
             $traces = [];
         }
+//        halt($result);
         $this->assign('list',$traces);
         $this->assign('tracking_name',$order_exist['tracking_name']);
         return $this->fetch();
@@ -693,10 +694,10 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
                 return ajax('订单不存在或状态已改变',-1);
             }
             $pay_order_sn = $exist['pay_order_sn'];
-            $exist['pay_price'] = 0.01;
+//            $exist['pay_price'] = 0.01;
             $arr = [
-                'appid' => $this->config['app_id'],
-                'mch_id'=> $this->config['mch_id'],
+                'appid' => $this->mp_config['appid'],
+                'mch_id'=> $this->mp_config['mch_id'],
                 'nonce_str'=>randomkeys(32),
                 'sign_type'=>'MD5',
                 'transaction_id'=> $exist['trans_id'],
@@ -886,6 +887,115 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
             }
             return ajax();
         }
+    }
+
+    public function commentList() {
+        $param['search'] = input('param.search');
+        $page['query'] = http_build_query(input('param.'));
+
+        $curr_page = input('param.page',1);
+        $perpage = input('param.perpage',10);
+        $where = [];
+        if($param['search']) {
+            $where[] = ['c.comment','like',"%{$param['search']}%"];
+        }
+
+        try {
+            $count = Db::table('mp_goods_comment')->alias('c')->where($where)->count();
+            $page['count'] = $count;
+            $page['curr'] = $curr_page;
+            $page['totalPage'] = ceil($count/$perpage);
+            $list = Db::table('mp_goods_comment')->alias('c')
+                ->join('mp_user u','c.uid=u.id','left')
+                ->join('mp_goods g','c.goods_id=g.id','left')
+                ->where($where)
+                ->order(['c.id'=>'DESC'])
+                ->field('c.*,g.name,u.nickname,u.avatar')
+                ->limit(($curr_page - 1)*$perpage,$perpage)->select();
+        }catch (\Exception $e) {
+            die('SQL错误: ' . $e->getMessage());
+        }
+        $this->assign('list',$list);
+        $this->assign('page',$page);
+        $this->assign('param',$param);
+        return $this->fetch();
+    }
+
+    public function comment() {
+        $param['goods_id'] = input('param.goods_id');
+        $page['query'] = http_build_query(input('param.'));
+
+        $curr_page = input('param.page',1);
+        $perpage = input('param.perpage',10);
+        $where = [
+            ['c.goods_id','=',$param['goods_id']]
+        ];
+        try {
+            $count = Db::table('mp_goods_comment')->alias('c')->where($where)->count();
+            $page['count'] = $count;
+            $page['curr'] = $curr_page;
+            $page['totalPage'] = ceil($count/$perpage);
+            $list = Db::table('mp_goods_comment')->alias('c')
+                ->join('mp_user u','c.uid=u.id','left')
+                ->where($where)
+                ->order(['c.id'=>'DESC'])
+                ->field('c.*,u.nickname,u.avatar')
+                ->limit(($curr_page - 1)*$perpage,$perpage)->select();
+        }catch (\Exception $e) {
+            die('SQL错误: ' . $e->getMessage());
+        }
+        $this->assign('list',$list);
+        $this->assign('page',$page);
+        $this->assign('param',$param);
+        return $this->fetch();
+    }
+
+    //删除资讯
+    public function commentDel() {
+        $val['id'] = input('post.id');
+        checkInput($val);
+        try {
+            $exist = Db::table('mp_goods_comment')->where('id','=',$val['id'])->find();
+            if(!$exist) {
+                return ajax('非法操作',-1);
+            }
+            Db::table('mp_goods_comment')->where('id','=',$val['id'])->delete();
+        }catch (\Exception $e) {
+            return ajax($e->getMessage(),-1);
+        }
+        return ajax([],1);
+    }
+
+    //停用新闻
+    public function commentHide()
+    {
+        $val['id'] = input('post.id');
+        checkInput($val);
+        try {
+            $exist = Db::table('mp_goods_comment')->where('id','=',$val['id'])->find();
+            if (!$exist) {
+                return ajax('非法操作', -1);
+            }
+            Db::table('mp_goods_comment')->where('id','=',$val['id'])->update(['status' => 0]);
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+        return ajax();
+    }
+    //启用新闻
+    public function commentShow() {
+        $val['id'] = input('post.id');
+        checkInput($val);
+        try {
+            $exist = Db::table('mp_goods_comment')->where('id','=',$val['id'])->find();
+            if(!$exist) {
+                return ajax('非法操作',-1);
+            }
+            Db::table('mp_goods_comment')->where('id','=',$val['id'])->update(['status'=>1]);
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+        return ajax();
     }
 
 
