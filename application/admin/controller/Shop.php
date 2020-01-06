@@ -672,7 +672,30 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
 
     //订单详情
     public function orderDetail() {
-        die('还没写');
+        $val['id'] = input('param.id');
+        try {
+            $whereOrder = [
+                ['id','=',$val['id']]
+            ];
+            $info = Db::table('mp_order')->where($whereOrder)->find();
+            if(!$info) {die('非法参数');}
+            $whereDetail = [
+                ['d.order_id','=',$val['id']]
+            ];
+            $order_detail = Db::table('mp_order_detail')->alias('d')
+                ->join('mp_goods g','d.goods_id=g.id','left')
+                ->where($whereDetail)
+                ->select();
+            foreach ($order_detail as &$v) {
+                $v['pics'] = unserialize($v['pics']);
+                $v['cover'] = $v['pics'][0];
+            }
+            $info['order_detail'] = $order_detail;
+        } catch (\Exception $e) {
+            die($e->getMessage());
+        }
+        $this->assign('info',$info);
+        return $this->fetch();
     }
 
     //订单修改
@@ -716,6 +739,7 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
             $res = curl_post_data($url,array2xml($arr),true);
 
             $result = xml2array($res);
+
             if($result && $result['return_code'] == 'SUCCESS') {
                 if($result['result_code'] == 'SUCCESS') {
                     $update_data = [
@@ -725,7 +749,7 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
                     Db::table('mp_order')->where($where)->update($update_data);
                     return ajax();
                 }else {
-                    return ajax($res['err_code_des'],-1);
+                    return ajax($result['err_code_des'],-1);
                 }
             }else {
                 return ajax('退款通知失败',-1);
@@ -740,7 +764,63 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
 
     }
 
-    public function modAdress() {
+    public function modReceiver() {
+        $val['receiver'] = input('post.receiver');
+        $val['id'] = input('post.id');
+        checkInput($val);
+        try {
+            $where = [
+                ['id','=',$val['id']]
+            ];
+            $exist = Db::table('mp_order')->where($where)->find();
+            if(!$exist) {
+                return ajax('订单不存在或状态已改变',-1);
+            }
+            if($exist['refund_apply'] == 2 || $exist['status'] == 3) {
+                return ajax('订单已结束,无法修改',-1);
+            }
+            if($exist['status'] == 2) {
+                return ajax('订单已发货,无法修改',-1);
+            }
+            $update_data = [
+                'receiver' => $val['receiver']
+            ];
+            Db::table('mp_order')->where($where)->update($update_data);
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+        return ajax();
+    }
+
+    public function modTel() {
+        $val['tel'] = input('post.tel');
+        $val['id'] = input('post.id');
+        checkInput($val);
+        try {
+            $where = [
+                ['id','=',$val['id']]
+            ];
+            $exist = Db::table('mp_order')->where($where)->find();
+            if(!$exist) {
+                return ajax('订单不存在或状态已改变',-1);
+            }
+            if($exist['refund_apply'] == 2 || $exist['status'] == 3) {
+                return ajax('订单已结束,无法修改',-1);
+            }
+            if($exist['status'] == 2) {
+                return ajax('订单已发货,无法修改',-1);
+            }
+            $update_data = [
+                'tel' => $val['tel']
+            ];
+            Db::table('mp_order')->where($where)->update($update_data);
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+        return ajax();
+    }
+
+    public function modAddress() {
         $val['address'] = input('post.address');
         $val['id'] = input('post.id');
         checkInput($val);
@@ -751,6 +831,12 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
             $exist = Db::table('mp_order')->where($where)->find();
             if(!$exist) {
                 return ajax('订单不存在或状态已改变',-1);
+            }
+            if($exist['refund_apply'] == 2 || $exist['status'] == 3) {
+                return ajax('订单已结束,无法修改',-1);
+            }
+            if($exist['status'] == 2) {
+                return ajax('订单已发货,无法修改',-1);
             }
             $update_data = [
                 'address' => $val['address']
@@ -773,6 +859,9 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
             $exist = Db::table('mp_order')->where($where)->find();
             if(!$exist) {
                 return ajax('订单不存在或状态已改变',-1);
+            }
+            if($exist['status'] != 0) {
+                return ajax('订单已支付,无法修改金额',-1);
             }
             $update_data = [
                 'pay_price' => $val['pay_price']

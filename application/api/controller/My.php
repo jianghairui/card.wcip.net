@@ -281,7 +281,8 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
             }
             $update_data = [
                 'refund_apply' => 1,
-                'reason' => $val['reason']
+                'reason' => $val['reason'],
+                'refund_apply_time' => time()
             ];
             Db::table('mp_order')->where($where)->update($update_data);
         } catch (\Exception $e) {

@@ -61,6 +61,38 @@ class User extends Base {
     }
 
     public function userDetail() {
+        $param['id'] = input('param.id');
+        try {
+            $where = [
+                ['id','=',$param['id']]
+            ];
+            $info = Db::table('mp_user')->where($where)->find();
+            if(!$info) {die('非法参数');}
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+        $this->assign('info',$info);
+        return $this->fetch();
+    }
+
+    public function shareAuthMod() {
+        $val['id'] = input('post.id');
+        try {
+            $whereUser = [
+                ['id','=',$val['id']]
+            ];
+            $user_exist = Db::table('mp_user')->where($whereUser)->find();
+            if(!$user_exist) {return ajax('非法参数',-1);}
+            if($user_exist['share_auth'] == 1) {
+                Db::table('mp_user')->where($whereUser)->update(['share_auth'=>0]);
+                return ajax(false);
+            }else {
+                Db::table('mp_user')->where($whereUser)->update(['share_auth'=>1]);
+                return ajax(true);
+            }
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
 
     }
 

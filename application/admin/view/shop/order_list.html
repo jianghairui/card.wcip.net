@@ -133,7 +133,7 @@
             </tr>
             <tr>
                 <td colspan="6">
-                    <span style="margin-left: 15px;" onclick="mod_address(this,{$li.id},'{$li.address}')">收货地址: <b>{$li.address}</b></span> &nbsp;&nbsp;&nbsp;&nbsp;(收货人: <b>{$li.receiver}</b> | 手机号: <b>{$li.tel}</b> )
+                    <span style="margin-left: 15px;" onclick="mod_address(this,{$li.id},'{$li.address}')">收货地址: <b>{$li.address}</b></span> &nbsp;&nbsp;&nbsp;&nbsp;<span  onclick="mod_receiver(this,{$li.id},'{$li.receiver}')">(收货人: <b>{$li.receiver}</b></span> | <span onclick="mod_tel(this,{$li.id},'{$li.tel}')">手机号: <b>{$li.tel}</b></span> )
                     {if $li['status'] == 2 || $li['status'] == 3}
                     <a data-title="物流信息"  onclick="layer_show('物流信息','{:url("Shop/traceInfo",array('id'=>$li['id']))}',800,500)" href="javascript:;" class="btn btn-link">查看物流</a>
                     {/if}
@@ -210,6 +210,76 @@
     /*发货*/
     function order_send(title,url,w,h){
         layer_show(title,url,w,h);
+    }
+    /*修改收货人*/
+    function mod_receiver(obj,id,old_receiver) {
+        layer.prompt({
+            formType: 3,
+            value: old_receiver,
+            title: '修改收货人地址(最多20个字)',
+            maxlength:20,
+        }, function(value, index, elem){
+            receiver = value;
+            layer.close(index);
+            if(click_lock) {
+                click_lock = false;
+                $.ajax({
+                    url:"{:url('Shop/modReceiver')}",
+                    type:'post',
+                    dataType:'json',
+                    data:{id:id,receiver:receiver},
+                    success:function(data) {
+                        console.log(data)
+                        if(data.code == 1) {
+                            $(obj).find("b").text(value);
+                            click_lock = true
+                        }else {
+                            layer.msg(data.data,{icon:2,time:1000})
+                        }
+                        click_lock = true
+                    },
+                    error:function(data) {
+                        layer.msg('请求失败!',{icon:5,time:1000})
+                        click_lock = true
+                    }
+                })
+            }
+        });
+    }
+    /*修改收货手机号*/
+    function mod_tel(obj,id,old_tel) {
+        layer.prompt({
+            formType: 3,
+            value: old_tel,
+            title: '修改收货手机号',
+            maxlength:15
+        }, function(value, index, elem){
+            tel = value;
+            layer.close(index);
+            if(click_lock) {
+                click_lock = false;
+                $.ajax({
+                    url:"{:url('Shop/modTel')}",
+                    type:'post',
+                    dataType:'json',
+                    data:{id:id,tel:tel},
+                    success:function(data) {
+                        console.log(data)
+                        if(data.code == 1) {
+                            $(obj).find("b").text(value);
+                            click_lock = true
+                        }else {
+                            layer.msg(data.data,{icon:2,time:1000})
+                        }
+                        click_lock = true
+                    },
+                    error:function(data) {
+                        layer.msg('请求失败!',{icon:5,time:1000})
+                        click_lock = true
+                    }
+                })
+            }
+        });
     }
     /*修改收货地址*/
     function mod_address(obj,id,old_address) {
@@ -295,7 +365,7 @@
                 dataType: 'json',
                 data:{id:id},
                 success: function(data){
-                    console.log(data);
+                    // console.log(data);return;
                     if(data.code == 1) {
                         $(obj).parents("tr").find("#refund-status").html('<span class="label label-danger radius">已退款</span>');
                         $(obj).parents("tr").find("#send-btn").remove();

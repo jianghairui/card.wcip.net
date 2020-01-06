@@ -33,10 +33,10 @@
             <th width="100">昵称</th>
             <th width="50">性别</th>
             <th width="120">手机号</th>
+            <th width="60">分享人数</th>
             <th width="100">消费金额</th>
             <th width="60">分享权限</th>
-            <th width="130">注册时间</th>
-            <th width="100">操作</th>
+            <th>注册时间</th>
         </tr>
         </thead>
         <tbody>
@@ -58,23 +58,17 @@
                     {/switch}
                 </td>
                 <td>{$li.tel}</td>
+                <td>{$li.invite_num}</td>
                 <td><b style="color: #0000ff;">￥：{$li.spend}</b></td>
                 <td>
-                    {switch $li['share_auth']}
-                    {case 0}
-                    <span class="label label-defaunt radius">无</span>{/case}
-                    {case 1}
-                    <span class="label label-success radius">有</span>{/case}
-                    {default /}
-                    {/switch}
+                    <input type="hidden" value="{$li.id}">
+                    <select class="select share_auth">
+                        <option value="0" {if $li['share_auth'] == 0}selected{/if}>无</option>
+                        <option value="1" {if $li['share_auth'] == 1}selected{/if}>有</option>
+                    </select>
                 </td>
                 <td>
                     {$li.create_time|date="Y-m-d H:i:s"}
-                </td>
-                <td class="td-manage">
-                    <a title="查看详情" href="javascript:;" onclick="user_detail('用户信息','{:url("User/userDetail",array("id"=>$li['id']))}')" class="ml-5" style="text-decoration:none">
-                        <i class="Hui-iconfont">&#xe6df;</i>
-                    </a>
                 </td>
             </tr>
             {/foreach}
@@ -139,6 +133,30 @@
             area:['100%','100%']
         });
     }
+
+    var click_lock = true;
+
+    $(document).on("change",".share_auth",function () {
+        var id = $(this).prev().val();
+        var share_auth = $(this).val();
+        if(click_lock) {
+            click_lock = false;
+            $.ajax({
+                url:"{:url('User/shareAuthMod')}",
+                type:"post",
+                data:{id:id,share_auth:share_auth},
+                success:function(data) {
+                    console.log(data);
+                    click_lock = true;
+                },
+                error: function(data) {
+                    console.log('system error');
+                    click_lock = true;
+                }
+            })
+        }
+
+    })
 
 
 </script>
