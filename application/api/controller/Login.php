@@ -29,14 +29,17 @@ class Login extends Base {
 
         try {
             $token = md5($ret['openid'] . time());
-            $exist = Db::table('mp_user')->where('openid',$ret['openid'])->find();
+            $whereUser = [
+                ['openid','=',$ret['openid']]
+            ];
+            $exist = Db::table('mp_user')->where($whereUser)->find();
             if($exist) {
                 $update_data = [
                     'last_login_time'=>time(),
                     'token'=>$token,
                     'session_key'=>$ret['session_key']
                 ];
-                Db::table('mp_user')->where('openid',$ret['openid'])->update($update_data);
+                Db::table('mp_user')->where($whereUser)->update($update_data);
                 $uid = $exist['id'];
             }else {
                 $insert_data = [
@@ -69,6 +72,7 @@ class Login extends Base {
                 }
             }
         }catch (\Exception $e) {
+            $this->tlog($this->cmd,$e->getMessage());
             return ajax($e->getMessage(),-1);
         }
         $json['token'] = $token;
