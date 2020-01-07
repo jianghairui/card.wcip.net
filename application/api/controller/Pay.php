@@ -78,14 +78,14 @@ class Pay extends Base {
                         ];
                         Db::table('mp_order')->where($whereorder)->update($update_data);
 
-                        //变更商品销量
+                        //todo 库存销量修改
                         $whereDetail = [
                             ['order_id','=',$order_exist['id']]
                         ];
-                        $order_detail = Db::table('mp_order_detail')->where($whereDetail)->field('id,goods_id,num')->select();
+                        $order_detail = Db::table('mp_order_detail')->where($whereDetail)->field('goods_id,num')->select();
                         foreach ($order_detail as $v) {
-                            $whereGoods = [ ['id','=',$v['goods_id']] ];
-                            Db::table('mp_goods')->where($whereGoods)->setInc('sales',$v['num']);
+                            Db::table('mp_goods')->where('id','=',$v['goods_id'])->setDec('stock',$v['num']);
+                            Db::table('mp_goods')->where('id','=',$v['goods_id'])->setInc('sales',$v['num']);
                         }
                         //增加个人消费金额
                         $whereUser = [

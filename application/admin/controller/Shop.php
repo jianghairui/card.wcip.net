@@ -747,6 +747,15 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
                         'refund_time' => time()
                     ];
                     Db::table('mp_order')->where($where)->update($update_data);
+                    //todo 库存销量修改
+                    $whereDetail = [
+                        ['order_id','=',$val['id']]
+                    ];
+                    $order_detail = Db::table('mp_order_detail')->where($whereDetail)->field('goods_id,num')->select();
+                    foreach ($order_detail as $v) {
+                        Db::table('mp_goods')->where('id','=',$v['goods_id'])->setInc('stock',$v['num']);
+                        Db::table('mp_goods')->where('id','=',$v['goods_id'])->setDec('sales',$v['num']);
+                    }
                     return ajax();
                 }else {
                     return ajax($result['err_code_des'],-1);
