@@ -311,8 +311,6 @@ class Api extends Base
             if(!$info) {
                 return ajax('data not exists',-1);
             }
-            $info['blood1'] = 'static/card/blood1.jpg';
-            $info['blood2'] = 'static/card/blood2.jpg';
         } catch (\Exception $e) {
             return ajax($e->getMessage(), -1);
         }

@@ -84,7 +84,6 @@ class Pay extends Base {
                         ];
                         $order_detail = Db::table('mp_order_detail')->where($whereDetail)->field('goods_id,num')->select();
                         foreach ($order_detail as $v) {
-                            Db::table('mp_goods')->where('id','=',$v['goods_id'])->setDec('stock',$v['num']);
                             Db::table('mp_goods')->where('id','=',$v['goods_id'])->setInc('sales',$v['num']);
                         }
                         //增加个人消费金额

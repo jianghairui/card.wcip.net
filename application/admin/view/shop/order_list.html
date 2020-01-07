@@ -59,7 +59,8 @@
                 <td><span class="order-font-price">{$li.total_price}</span>元 (运费:<span style="color: green">{$li.carriage}</span>元)</td>
                 <td>{$li.create_time|date="Y-m-d H:i:s"}</td>
                 <td class="td-status">
-                    <span id="pay-status">
+                    <span class="pay-status">
+                        {if !$li['refund_apply']}
                         {switch $li['status']}
                         {case 0}
                             <span class="label label-defaunt radius">待付款</span>
@@ -75,8 +76,9 @@
                         {/case}
                         {default /}
                         {/switch}
+                        {/if}
                     </span>
-                    <span id="refund-status">
+                    <span class="refund-status">
                         {switch $li['refund_apply']}
                         {case 1}
                             <span class="label label-danger radius">申请退款</span>
@@ -87,7 +89,6 @@
                         {default /}
                         {/switch}
                     </span>
-
                 </td>
                 <td class="td-manage" rowspan="3">
                     <span>
@@ -95,7 +96,7 @@
                         <i class="Hui-iconfont">&#xe6df;</i>
                         </a>
                     </span>
-                    <span id="send-btn">
+                    <span class="send-btn">
                         {if $li['status'] == 1 && $li['refund_apply'] == 0}
                         <a title="发货" href="javascript:;" onclick="order_send('订单发货','{:url("Shop/orderSend",array("id"=>$li["id"]))}','600','400')"">
                         <i class="Hui-iconfont">&#xe669;</i>
@@ -367,8 +368,9 @@
                 success: function(data){
                     // console.log(data);return;
                     if(data.code == 1) {
-                        $(obj).parents("tr").find("#refund-status").html('<span class="label label-danger radius">已退款</span>');
-                        $(obj).parents("tr").find("#send-btn").remove();
+                        $(obj).parents("tr").find(".refund-status").html('<span class="label label-danger radius">已退款</span>');
+                        $(obj).parents("tr").find(".pay-status").remove();
+                        $(obj).parents("tr").find(".send-btn").remove();
                         $(obj).remove();
                         layer.msg('已退款!',{icon:1,time:1000});
                     }else {

@@ -393,16 +393,16 @@ class Shop extends Base {
         $val['cate_name'] = input('post.cate_name');
         checkInput($val);
         try {
-            if(isset($_FILES['file'])) {
-                $info = upload('file',$this->upload_base_path . 'goodscate/');
-                if($info['error'] === 0) {
-                    $val['icon'] = $info['data'];
-                }else {
-                    return ajax($info['msg'],-1);
-                }
-            }else {
-                return ajax('请上传ICON',-1);
-            }
+//            if(isset($_FILES['file'])) {
+//                $info = upload('file',$this->upload_base_path . 'goodscate/');
+//                if($info['error'] === 0) {
+//                    $val['icon'] = $info['data'];
+//                }else {
+//                    return ajax($info['msg'],-1);
+//                }
+//            }else {
+//                return ajax('请上传ICON',-1);
+//            }
             Db::table('mp_goods_cate')->insert($val);
         }catch (\Exception $e) {
             if(isset($val['icon'])) {
@@ -440,14 +440,14 @@ class Shop extends Base {
             if(!$cate_exist) {
                 return ajax('非法参数',-1);
             }
-            if(isset($_FILES['file'])) {
-                $info = upload('file',$this->upload_base_path . 'goodscate/');
-                if($info['error'] === 0) {
-                    $val['icon'] = $info['data'];
-                }else {
-                    return ajax($info['msg'],-1);
-                }
-            }
+//            if(isset($_FILES['file'])) {
+//                $info = upload('file',$this->upload_base_path . 'goodscate/');
+//                if($info['error'] === 0) {
+//                    $val['icon'] = $info['data'];
+//                }else {
+//                    return ajax($info['msg'],-1);
+//                }
+//            }
             Db::table('mp_goods_cate')->where($whereCate)->update($val);
         }catch (\Exception $e) {
             if(isset($val['icon'])) {
@@ -710,6 +710,7 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
         try {
             $where = [
                 ['id','=',$val['id']],
+                ['refund_apply','=',1],
                 ['status','in',[1,2,3]]
             ];
             $exist = Db::table('mp_order')->where($where)->find();
@@ -751,8 +752,11 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
                     $whereDetail = [
                         ['order_id','=',$val['id']]
                     ];
-                    $order_detail = Db::table('mp_order_detail')->where($whereDetail)->field('goods_id,num')->select();
+                    $order_detail = Db::table('mp_order_detail')->where($whereDetail)->field('goods_id,num,attr_id')->select();
                     foreach ($order_detail as $v) {
+                        if($v['attr_id']) {
+                            Db::table('mp_goods_attr')->where('id','=',$v['attr_id'])->setInc('stock',$v['num']);
+                        }
                         Db::table('mp_goods')->where('id','=',$v['goods_id'])->setInc('stock',$v['num']);
                         Db::table('mp_goods')->where('id','=',$v['goods_id'])->setDec('sales',$v['num']);
                     }

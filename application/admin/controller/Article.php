@@ -58,16 +58,16 @@ class Article extends Base {
         $val['admin_id'] = session('admin_id');
 
         try {
-            if(isset($_FILES['file'])) {
-                $info = upload('file',$this->upload_base_path . 'article/');
-                if($info['error'] === 0) {
-                    $val['pic'] = $info['data'];
-                }else {
-                    return ajax($info['msg'],-1);
-                }
-            }else {
-                return ajax('请上传封面图',-1);
-            }
+//            if(isset($_FILES['file'])) {
+//                $info = upload('file',$this->upload_base_path . 'article/');
+//                if($info['error'] === 0) {
+//                    $val['pic'] = $info['data'];
+//                }else {
+//                    return ajax($info['msg'],-1);
+//                }
+//            }else {
+//                return ajax('请上传封面图',-1);
+//            }
             Db::table('mp_article')->insert($val);
         }catch (\Exception $e) {
             if(isset($val['pic'])) {
@@ -110,14 +110,14 @@ class Article extends Base {
             if(!$exist) {
                 return ajax('非法参数',-1);
             }
-            if(isset($_FILES['file'])) {
-                $info = upload('file',$this->upload_base_path . 'article/');
-                if($info['error'] === 0) {
-                    $val['pic'] = $info['data'];
-                }else {
-                    return ajax($info['msg'],-1);
-                }
-            }
+//            if(isset($_FILES['file'])) {
+//                $info = upload('file',$this->upload_base_path . 'article/');
+//                if($info['error'] === 0) {
+//                    $val['pic'] = $info['data'];
+//                }else {
+//                    return ajax($info['msg'],-1);
+//                }
+//            }
 
             Db::table('mp_article')->where($where)->update($val);
         }catch (\Exception $e) {

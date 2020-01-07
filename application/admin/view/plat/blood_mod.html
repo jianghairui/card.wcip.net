@@ -1,0 +1,167 @@
+<style>
+    .thumbnail{ width:200px}
+</style>
+<nav class="breadcrumb"><i class="Hui-iconfont">&#xe67f;</i> 首页 <span class="c-gray en">&gt;</span> 平台设置 <span class="c-gray en">&gt;</span> 其他图片<a class="btn btn-success radius r" style="line-height:1.6em;margin-top:3px" href="javascript:location.replace(location.href);" title="刷新" ><i class="Hui-iconfont">&#xe68f;</i></a></nav>
+<article class="page-container" style="width: 100%">
+    <form class="form form-horizontal" id="form-article-add">
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2"><span class="c-red">*</span></label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <span style="font-size: 16px">
+                    (建议尺寸: 662 * 375)
+                </span>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">
+                <span class="btn btn-primary btn-upload radius ml-10" title="blood1">计血器图一</span>
+            </label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <div class="uploader-thum-container">
+                    <div class="uploader-list">
+                        <img class="thumbnail" src="/{$info.blood1}">
+                        <input type="hidden" name="blood1" id="blood1" value="{$info.blood1}">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2"><span class="c-red">*</span></label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <span style="font-size: 16px">
+                    (建议尺寸: 662 * 375)
+                </span>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">
+                <span class="btn btn-primary btn-upload radius ml-10" title="blood2">计血器图二</span>
+            </label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <div class="uploader-thum-container">
+                    <div class="uploader-list">
+                        <img class="thumbnail" src="/{$info.blood2}">
+                        <input type="hidden" name="blood2" id="blood2" value="{$info.blood2}">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2"><span class="c-red">*</span></label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <span style="font-size: 16px">
+                    (建议尺寸: 750 * 897)
+                </span>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">
+                <span class="btn btn-primary btn-upload radius ml-10" title="card_bg">卡牌背景图</span>
+            </label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <div class="uploader-thum-container">
+                    <div class="uploader-list">
+                        <img class="thumbnail" src="/{$info.card_bg}">
+                        <input type="hidden" name="card_bg" id="card_bg" value="{$info.card_bg}">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row cl">
+            <div class="col-xs-8 col-sm-9 col-xs-offset-4 col-sm-offset-2">
+                <button class="btn btn-primary radius" type="submit"><i class="Hui-iconfont">&#xe632;</i> 保存</button>
+            </div>
+        </div>
+    </form>
+    <input type="file" name="file" id="filecontainer" style="display: none;">
+</article>
+
+<script type="text/javascript" src="/lib/jquery.validation/1.14.0/jquery.validate.js"></script>
+<script type="text/javascript" src="/lib/jquery.validation/1.14.0/validate-methods.js"></script>
+<script type="text/javascript" src="/lib/jquery.validation/1.14.0/messages_zh.js"></script>
+
+<script type="text/javascript" src="/lib/checkfile.js"></script>
+<script type="text/javascript" src="/lib/ajaxfileupload.js"></script>
+
+<script type="text/javascript">
+    $(function(){
+
+        var isclick = true;
+        //表单验证
+        $("#form-article-add").validate({
+            rules:{},
+            focusCleanup:false,
+            success:"valid",
+            submitHandler:function(form){
+                if(isclick === true) {
+                    isclick = false;
+                    $(form).ajaxSubmit({
+                        type: 'post',
+                        url: "{:url('Plat/bloodMod')}" ,
+                        success: function(data){
+                            // console.log(data);isclick=true;return;
+                            if(data.code == 1) {
+                                console.log('SUCCESS');
+                                layer.msg('保存成功!',{icon:1,time:1000},function () {
+                                    // window.location.reload();
+                                });
+                            }else {
+                                layer.msg(data.data,{icon:2,time:1000});
+                            }
+                            isclick = true
+
+                        },
+                        error: function(XmlHttpRequest, textStatus, errorThrown){
+                            layer.msg('接口请求失败!',{icon:5,time:1000});
+                            isclick = true
+                        }
+                    });
+                }
+
+            }
+        });
+
+        var file_id = '';
+
+        $(".btn-upload").click(function () {
+            file_id = $(this).attr('title');
+            $("#filecontainer").click();
+        });
+
+        $(document).on("change","#filecontainer",function(){
+            if($("#filecontainer").val() != '') {
+                ajaxFileUpload("filecontainer",file_id);
+            }else {
+                console.log('未选择图片')
+            }
+        });
+
+        function ajaxFileUpload(file_container,fileId) {
+            if(checkfile(file_container,128) !== true) {
+                $("#"+file_container).val('');
+                return false;
+            }
+            $.ajaxFileUpload({
+                url: '{:url("Index/uploadImage")}', //用于文件上传的服务器端请求地址
+                secureuri: false, //是否需要安全协议，一般设置为false
+                fileElementId: file_container, //文件上传域的ID
+                dataType: 'json', //返回值类型 一般设置为json
+                success: function (data)  //服务器成功响应处理函数
+                {
+                    // console.log(data.data);
+                    var src = data.data.path;
+                    $("#"+fileId).val(src);
+                    $("#"+fileId).prev().attr("src","/"+src);
+                },
+                error: function (e) {
+                    console.log(e);
+                }
+            });
+            return false;
+        }
+
+
+
+    });
+</script>

@@ -267,5 +267,64 @@ class Plat extends Base {
         return $this->fetch();
     }
 
+    public function bloodMod() {
+        $whereHome = [
+            ['id','=',1]
+        ];
+        if(request()->isPost()) {
+            $pic['blood1'] = input('post.blood1');
+            $pic['blood2'] = input('post.blood2');
+            $pic['card_bg'] = input('post.card_bg');
+            try {
+                $exist = Db::table('mp_plat')->where($whereHome)->find();
+                if(!$exist) {
+                    return ajax('非法操作',-1);
+                }
+                if(!file_exists($pic['blood1'])) {
+                    return ajax('请上传计血器图一',-1);
+                }
+                if(!file_exists($pic['blood2'])) {
+                    return ajax('请上传计血器图二',-1);
+                }
+                if(!file_exists($pic['card_bg'])) {
+                    return ajax('请上传卡牌背景图',-1);
+                }
+                $val = [];
+                foreach ($pic as $k=>$v) {
+                    if ($v != $exist[$k]) {
+                        $val[$k] = rename_file($v,$this->upload_base_path . 'plat/');
+                    }else {
+                        $val[$k] = $v;
+                    }
+                }
+                Db::table('mp_plat')->where($whereHome)->update($val);
+            }catch (\Exception $e) {
+                foreach ($pic as $k=>$v) {
+                    if ($v != $exist[$k]) {
+                        @unlink($v);
+                    }
+                }
+                return ajax($e->getMessage(),-1);
+            }
+            foreach ($pic as $k=>$v) {
+                if ($v != $exist[$k]) {
+                    @unlink($exist[$k]);
+                }
+            }
+            return ajax();
+        }
+
+        try {
+            $exist = Db::table('mp_plat')->where($whereHome)->find();
+            if (!$exist) {
+                die('NOTHING FOUND');
+            }
+        } catch (\Exception $e) {
+            die($e->getMessage());
+        }
+        $this->assign('info',$exist);
+        return $this->fetch();
+    }
+
 
 }

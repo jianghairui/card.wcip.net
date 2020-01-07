@@ -66,7 +66,7 @@
         </div>
         <div class="row cl">
             <label class="form-label col-xs-4 col-sm-3">退款状态：</label>
-            <div class="formControls col-xs-8 col-sm-9">
+            <div class="formControls col-xs-8 col-sm-9" id="refund-status">
                 {switch $info['refund_apply']}
                 {case 0}
                 <span class="label label-defaunt radius">无退款</span>{/case}
@@ -78,6 +78,20 @@
                 {/switch}
             </div>
         </div>
+        {if $info['refund_apply']}
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-3">申请退款时间：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <span class="">{if $info['refund_apply_time']}{$info.refund_apply_time|date='Y-m-d H:i:s'}{/if}</span>
+            </div>
+        </div>
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-3">退款时间：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <span class="">{if $info['refund_time']}{$info.refund_time|date='Y-m-d H:i:s'}{/if}</span>
+            </div>
+        </div>
+        {/if}
         <div class="row cl">
             <label class="form-label col-xs-4 col-sm-3">退款理由：</label>
             <div class="formControls col-xs-8 col-sm-9">
@@ -115,18 +129,6 @@
             </div>
         </div>
         <div class="row cl">
-            <label class="form-label col-xs-4 col-sm-3">申请退款时间：</label>
-            <div class="formControls col-xs-8 col-sm-9">
-                <span class="">{if $info['refund_apply_time']}{$info.refund_apply_time|date='Y-m-d H:i:s'}{/if}</span>
-            </div>
-        </div>
-        <div class="row cl">
-            <label class="form-label col-xs-4 col-sm-3">退款时间：</label>
-            <div class="formControls col-xs-8 col-sm-9">
-                <span class="">{if $info['refund_time']}{$info.refund_time|date='Y-m-d H:i:s'}{/if}</span>
-            </div>
-        </div>
-        <div class="row cl">
             <label class="form-label col-xs-4 col-sm-3">快递类型：</label>
             <div class="formControls col-xs-8 col-sm-9">
                 <span class="">{$info.tracking_name}</span>
@@ -159,6 +161,9 @@
         </div>
         <div class="row cl">
             <div class="col-xs-8 col-sm-9 col-xs-offset-4 col-sm-offset-3">
+                {if $info['refund_apply'] == 1}
+                <button onClick="order_refund(this,'{$info.id}');" class="btn btn-danger radius" type="button">&nbsp;&nbsp;退款&nbsp;&nbsp;</button>
+                {/if}
                 <input class="btn btn-primary radius" onclick="layer_close()" type="submit" value="&nbsp;&nbsp;关闭选项卡&nbsp;&nbsp;">
             </div>
         </div>
@@ -173,7 +178,37 @@
 <script type="text/javascript" src="/lib/jquery.validation/1.14.0/messages_zh.js"></script>
 <script type="text/javascript">
 
-    $(function(){})
+    $(function(){});
+
+    var click_lock = true;
+
+    function order_refund(obj,id) {
+        layer.confirm('确认要退款吗？',function(index){
+            if(click_lock) {
+                click_lock = false;
+                $.ajax({
+                    url: "{:url('Shop/orderRefund')}",
+                    type: 'POST',
+                    dataType: 'json',
+                    data:{id:id},
+                    success: function(data){
+                        // console.log(data);return;
+                        if(data.code == 1) {
+                            $("#refund-status").html('<span class="label label-success radius">已退款</span>');
+                            $(obj).remove();
+                            layer.msg('已退款!',{icon:1,time:1000});
+                        }else {
+                            layer.msg(data.data,{icon:2,time:1000});
+                        }
+                    },
+                    error:function(data) {
+                        layer.msg('接口请求失败',{icon:5,time:1000});
+                    }
+                });
+            }
+
+        });
+    }
 
 
 </script>
