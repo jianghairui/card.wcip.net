@@ -411,7 +411,12 @@ class Shop extends Base {
                 $order_detail['attr'] = '默认';
             }
 
-            $total_price = ($unit_price + $goods_exist['carriage']) * $data['num'];
+            $total_carriage = $goods_exist['carriage'];
+            if($data['num'] > 1) {
+                $total_carriage = 0;
+            }
+
+            $total_price = $unit_price * $data['num'] + $total_carriage;
             $insert_data = [
                 'uid' => $this->myinfo['id'],
                 'pay_order_sn' => $pay_order_sn,
@@ -433,7 +438,7 @@ class Shop extends Base {
             $order_detail['goods_name'] = $goods_exist['name'];
             $order_detail['num'] = $data['num'];
             $order_detail['unit_price'] = $unit_price;
-            $order_detail['total_price'] = ($unit_price + $goods_exist['carriage']) * $data['num'];
+            $order_detail['total_price'] = $unit_price * $data['num'] + $goods_exist['carriage'];
             $order_detail['carriage'] = $goods_exist['carriage'] * $data['num'];
             $order_detail['create_time'] = $time;
 
@@ -478,7 +483,6 @@ class Shop extends Base {
 
             $card_delete_ids = [];//库存不足的商品,从购物车中删除
             $total_order_price = 0;//订单总金额
-            $carriage = 0;//运费总金额
             $insert_detail_all = [];//商品详情表数据
 
             foreach ($cart_list as $v) {
@@ -504,26 +508,37 @@ class Shop extends Base {
                     $insert_detail['attr_id'] = 0;
                     $insert_detail['attr'] = '默认';
                 }
-                $total_order_price += ($unit_price + $v['carriage']) * $v['num'];
-                $carriage += $v['carriage'] * $v['num'];
+
+                $carriage = $v['carriage'];
+
+                if($v['num'] > 1) {
+                    $carriage = 0;
+                }
+
+                $total_order_price += $unit_price * $v['num'];
 
                 $insert_detail['uid'] = $this->myinfo['id'];
                 $insert_detail['goods_id'] = $v['goods_id'];
                 $insert_detail['goods_name'] = $v['name'];
                 $insert_detail['num'] = $v['num'];
                 $insert_detail['unit_price'] = $unit_price;
-                $insert_detail['total_price'] = ($unit_price + $v['carriage']) * $v['num'];
+                $insert_detail['total_price'] = $unit_price * $v['num'] + $carriage;
                 $insert_detail['carriage'] = $v['carriage'] * $v['num'];
                 $insert_detail['create_time'] = $time;
                 $insert_detail_all[] = $insert_detail;
             }
 
+            $total_carriage = $carriage;
+            if(count($cart_ids) > 1) {
+                $total_carriage = 0;
+            }
+
             $order_data = [
                 'uid' => $this->myinfo['id'],
                 'pay_order_sn' => $pay_order_sn,
-                'total_price' => $total_order_price,
-                'pay_price' => $total_order_price,
-                'carriage' => $carriage,
+                'total_price' => $total_order_price + $total_carriage,
+                'pay_price' => $total_order_price + $total_carriage,
+                'carriage' => $total_carriage,
                 'receiver' => $val['receiver'],
                 'tel' => $val['tel'],
                 'address' => $val['address'],

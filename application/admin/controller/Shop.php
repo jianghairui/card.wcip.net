@@ -877,7 +877,8 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
                 return ajax('订单已支付,无法修改金额',-1);
             }
             $update_data = [
-                'pay_price' => $val['pay_price']
+                'pay_price' => $val['pay_price'],
+                'pay_order_sn' => create_unique_number('')
             ];
             Db::table('mp_order')->where($where)->update($update_data);
         } catch (\Exception $e) {
