@@ -129,6 +129,7 @@
         <thead>
         <tr class="text-c">
             <th width="25">#</th>
+            <th width="50">排序</th>
             <th width="80">图片</th>
             <th width="150">卡牌名</th>
             <th width="44">属性</th>
@@ -146,6 +147,7 @@
             {foreach $list as $li}
             <tr class="text-c userinfo">
                 <td>{$li.id}</td>
+                <td><input type="text" class="input-text text-c sort" value="{$li.sort}"></td>
                 <td>
                     <div style="width: 80px;height: 120px;background-image: url('/{$li.pic}');background-position: center;background-repeat: no-repeat;background-size: 100%"></div>
                 </td>
@@ -280,6 +282,32 @@
             }
             window.location.href = '{:url("Excel/cardToExcel")}' + '?' + str;
         });
+
+
+
+        $(".sort").bind('input propertychange', function() {
+            var id = $(this).parent().prev().text();
+            var sort = $(this).val();
+            var rule = /^[0-9]{0,10}$/;
+            if(!rule.test(sort)) {
+                // $(this).val('')
+                alert('排序必须为数字,且不超过10位');
+                return;
+            }
+            $.ajax({
+                url:"{:url('Card/sortCard')}",
+                type:"post",
+                data:{id:id,sort:sort},
+                success:function(data) {
+                    console.log(data);
+                },
+                error: function(data) {
+                    console.log('接口请求失败!');
+                }
+            })
+        });
+
+
     });
 
 
