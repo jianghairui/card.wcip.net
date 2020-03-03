@@ -64,7 +64,7 @@ class Api extends Base
         $whereCard = [
             ['status','=',1]
         ];
-        $order = ['id'=>'DESC'];
+        $order = ['sort' => 'ASC', 'id' => 'DESC'];
         if(is_array($post['attr_id']) && !empty($post['attr_id'])) { $whereCard[] = ['attr_id','in',$post['attr_id']]; }
         if(is_array($post['type_id']) && !empty($post['type_id'])) { $whereCard[] = ['type_id','in',$post['type_id']]; }
         if(is_array($post['camp_id']) && !empty($post['camp_id'])) { $whereCard[] = ['camp_id','in',$post['camp_id']]; }
