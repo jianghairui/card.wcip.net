@@ -28,7 +28,7 @@ class Card extends Base {
         $whereCard = [
             ['status','=',1]
         ];
-        $order = ['id'=>'DESC'];
+        $order = ['sort' => 'ASC', 'id' => 'DESC'];
         if($param['attr_id'] !== '') { $whereCard[] = ['attr_id','in',explode(',',$param['attr_id'])]; }
         if($param['type_id'] !== '') { $whereCard[] = ['type_id','in',explode(',',$param['type_id'])]; }
         if($param['camp_id'] !== '') { $whereCard[] = ['camp_id','in',explode(',',$param['camp_id'])]; }
@@ -866,6 +866,18 @@ class Card extends Base {
         }
     }
 
+    //商品排序
+    public function sortCard() {
+        $val['id'] = input('post.id');
+        $val['sort'] = input('post.sort');
+        checkInput($val);
+        try {
+            Db::table('mp_card')->update($val);
+        }catch (\Exception $e) {
+            return ajax($e->getMessage(),-1);
+        }
+        return ajax($val);
+    }
 
 
 

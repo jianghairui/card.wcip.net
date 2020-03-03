@@ -11,7 +11,8 @@ class Test extends Base {
 
 
     public function index() {
-
+        nl2br('');
+        htmlspecialchars('');
     }
 
 
