@@ -46,7 +46,7 @@ class Shop extends Base {
             ['g.status','=',1],
             ['g.del','=',0]
         ];
-        $order = ['g.id'=>'DESC'];
+        $order = ['g.sort'=>'ASC','g.id'=>'DESC'];
         if($cate_id) {
             $where[] = ['g.cate_id','=',$cate_id];
         }

@@ -263,7 +263,7 @@ class Api extends Base
             ['g.status','=',1],
             ['g.del','=',0]
         ];
-        $order = ['g.id'=>'DESC'];
+        $order = ['g.sort'=>'ASC','g.id'=>'DESC'];
         try {
             $list = Db::table('mp_goods')->alias('g')
                 ->join('mp_goods_cate c','g.cate_id=c.id','left')
