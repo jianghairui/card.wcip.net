@@ -78,7 +78,7 @@ class Api extends Base
                 $whereCard[] = ['resource','in',$resource_arr];
             }
         }
-        if($post['search']) { $whereCard[] = ['card_name','like',"%{$post['search']}%"]; }
+        if($post['search']) { $whereCard[] = ['card_name|desc','like',"%{$post['search']}%"]; }
 
         try {
             $list = Db::table('mp_card')->where($whereCard)->limit(($curr_page-1)*$perpage,$perpage)->order($order)->select();
@@ -140,7 +140,7 @@ class Api extends Base
             $whereCardList = [
                 ['status','=',1]
             ];
-            $order = ['id'=>'DESC'];
+            $order = ['sort' => 'ASC', 'id' => 'DESC'];
             if(is_array($post['attr_id']) && !empty($post['attr_id'])) { $whereCardList[] = ['attr_id','in',$post['attr_id']]; }
             if(is_array($post['type_id']) && !empty($post['type_id'])) { $whereCardList[] = ['type_id','in',$post['type_id']]; }
             if(is_array($post['camp_id']) && !empty($post['camp_id'])) { $whereCardList[] = ['camp_id','in',$post['camp_id']]; }
@@ -154,14 +154,13 @@ class Api extends Base
                     $whereCardList[] = ['resource','in',$resource_arr];
                 }
             }
-            if($post['search']) { $whereCardList[] = ['card_name','like',"%{$post['search']}%"]; }
+            if($post['search']) { $whereCardList[] = ['card_name|desc','like',"%{$post['search']}%"]; }
             $card_ids = Db::table('mp_card')->where($whereCardList)->order($order)->column('id');
             $offset = array_search($val['id'],$card_ids);
             if($offset !== false) {
                 $info['prev_card_id'] = isset($card_ids[$offset-1]) ? $card_ids[$offset-1] : null;
                 $info['next_card_id'] = isset($card_ids[$offset+1]) ? $card_ids[$offset+1] : null;
                 $info['page'] = $offset + 1;
-
             }else {
                 $info['page'] = null;
             }

@@ -730,7 +730,7 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
                 'total_fee'=> floatval($exist['pay_price'])*100,
                 'refund_fee'=> floatval($exist['pay_price'])*100,
                 'refund_fee_type'=> 'CNY',
-                'refund_desc'=> '商品无货',
+                'refund_desc'=> $exist['reason'],
                 'notify_url'=> $_SERVER['REQUEST_SCHEME'] . '://'.$_SERVER['HTTP_HOST'].'/wxRefundNotify',
                 'refund_account' => 'REFUND_SOURCE_UNSETTLED_FUNDS'
             ];

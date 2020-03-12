@@ -82,7 +82,7 @@ class Shop extends Base {
             ];
             $info = Db::table('mp_goods')
                 ->where($where)
-                ->field("id,name,detail,origin_price,price,pics,carriage,stock,sales,use_attr,attr,hot,limit")
+                ->field("id,name,detail,origin_price,price,pics,carriage,stock,sales,use_attr,attr,hot,limit,service")
                 ->find();
             if(!$info) {
                 return ajax($val['id'],-4);
