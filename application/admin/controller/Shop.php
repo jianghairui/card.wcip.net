@@ -90,6 +90,7 @@ class Shop extends Base {
 //添加商品POST
     public function goodsAddPost() {
         $val['cate_id'] = input('post.cate_id');
+        $val['version_id'] = input('post.version_id');
         $val['name'] = input('post.name');
         $val['origin_price'] = input('post.origin_price');
         $val['price'] = input('post.price');
@@ -183,6 +184,7 @@ class Shop extends Base {
 //修改商品POST
     public function goodsMod() {
         $val['cate_id'] = input('post.cate_id');
+        $val['version_id'] = input('post.version_id');
         $val['name'] = input('post.name');
         $val['origin_price'] = input('post.origin_price');
         $val['price'] = input('post.price');
@@ -227,7 +229,6 @@ class Shop extends Base {
                     if(!if_int($v)) {return ajax('规格库存必须为数字'.$v,-1);}
                     $val['stock'] += $v;
                 }
-
             }
 
             $map = [
@@ -748,7 +749,7 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
                         'refund_time' => time()
                     ];
                     Db::table('mp_order')->where($where)->update($update_data);
-                    //todo 库存销量修改
+                    //todo 库存销量修改,减去花费金额
                     $whereDetail = [
                         ['order_id','=',$val['id']]
                     ];
@@ -760,6 +761,10 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
                         Db::table('mp_goods')->where('id','=',$v['goods_id'])->setInc('stock',$v['num']);
                         Db::table('mp_goods')->where('id','=',$v['goods_id'])->setDec('sales',$v['num']);
                     }
+                    $whereUser = [
+                        ['id','=',$exist['uid']]
+                    ];
+                    Db::table('mp_user')->where($whereUser)->setDec('spend',$exist['pay_price']);
                     return ajax();
                 }else {
                     return ajax($result['err_code_des'],-1);

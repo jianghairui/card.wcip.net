@@ -48,6 +48,7 @@ class Base extends Controller {
     private function checkSession() {
         $noneed = [
             'Test',
+            'Plan',
             'Login/login',
             'Pay/order_notify',
         ];
@@ -125,7 +126,7 @@ class Base extends Controller {
         }
     }
 
-    protected function tlog($cmd,$str,$file = LOG_PATH . '/common.log') {
+    protected function runlog($cmd,$str,$file = LOG_PATH . '/common.log') {
         create_dir($file);
         $text='[Time ' . date('Y-m-d H:i:s') ."]\ncmd:" .$cmd. "\n" .$str. "\n---END---" . "\n";
         if(false !== fopen($file,'a+')){
@@ -134,9 +135,6 @@ class Base extends Controller {
             echo '创建失败';
         }
     }
-
-
-
 
     //小程序验证文本内容是否违规
     protected function msgSecCheck($msg) {

@@ -7,7 +7,6 @@
  */
 namespace app\api\controller;
 use my\Kuaidiniao;
-use Qiniu\Tests\DownloadTest;
 use think\Db;
 use EasyWeChat\Factory;
 
@@ -17,7 +16,7 @@ class My extends Base {
     public function mydetail() {
         return ajax($this->myinfo);
     }
-    //修改头像
+    //修改个人信息
     public function modMyInfo() {
         $user = $this->myinfo;
         $val['nickname'] = input('post.nickname');
@@ -621,7 +620,7 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
                 $value['type'] = isset($type[$value['type_id']]) ? $type[$value['type_id']] : '未知';
                 $value['camp'] = isset($camp[$value['camp_id']]) ? $camp[$value['camp_id']] : '未知';
                 switch ($value['resource']) {
-                    case -2:$value['resource'] = '资源-事件';break;
+                    case -2:$value['resource'] = '无';break;
                     case -1:$value['resource'] = 'X';break;
                     default:;
                 }

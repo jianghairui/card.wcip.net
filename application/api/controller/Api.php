@@ -131,7 +131,7 @@ class Api extends Base
             $info['ability'] = isset($ability[$info['ability_id']]) ? $ability[$info['ability_id']] : '未知';
             $info['version'] = isset($version[$info['version_id']]) ? $version[$info['version_id']] : '未知';
             switch ($info['resource']) {
-                case -2:$info['resource'] = '资源-事件';break;
+                case -2:$info['resource'] = '无';break;
                 case -1:$info['resource'] = 'X';break;
                 default:;
             }

@@ -12,6 +12,7 @@ class User extends Base {
 
 
     public function userList() {
+        $param['inviter_id'] = input('param.inviter_id','');
         $param['share_auth'] = input('param.share_auth','');
         $param['datemin'] = input('param.datemin');
         $param['datemax'] = input('param.datemax');
@@ -23,6 +24,10 @@ class User extends Base {
         $perpage = input('param.perpage',10);
 
         $where = [];
+
+        if($param['inviter_id'] !== '') {
+            $where[] = ['inviter_id','=',$param['inviter_id']];
+        }
 
         if($param['share_auth'] !== '') {
             $where[] = ['share_auth','=',$param['share_auth']];
