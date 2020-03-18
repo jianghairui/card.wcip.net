@@ -72,7 +72,7 @@ class Login extends Base {
                 }
             }
         }catch (\Exception $e) {
-            $this->tlog($this->cmd,$e->getMessage());
+            $this->excep($this->cmd,$e->getMessage());
             return ajax($e->getMessage(),-1);
         }
         $json['token'] = $token;

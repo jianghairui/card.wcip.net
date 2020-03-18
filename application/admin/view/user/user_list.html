@@ -13,6 +13,7 @@
             -
             <input type="text" onfocus="WdatePicker({ minDate:'#F{ $dp.$D(\'datemin\') }' })" id="datemax" value="{$Think.get.datemax}" class="input-text Wdate" style="width:120px;">
             <input type="text" name="search" value="{$Think.get.search}" id="search" placeholder=" 用户昵称或手机号" style="width:250px" class="input-text">
+            <input type="text" name="search" value="{$Think.get.inviter_id}" id="inviter_id" placeholder="邀请认ID" style="width:80px" class="input-text" maxlength="10" onkeyup="onlyNumber(this)">
             <button name="" id="search-btn" class="btn btn-success" type="button"><i class="Hui-iconfont">&#xe665;</i> 查找用户</button>
             <span class="select-box inline" style="width: 120px;">
                 <select name="share_auth" id="share_auth" class="select">
@@ -83,6 +84,7 @@
 <script type="text/javascript" src="/lib/My97DatePicker/4.8/WdatePicker.js"></script>
 <script type="text/javascript" src="/lib/datatables/1.10.0/jquery.dataTables.min.js"></script>
 <script type="text/javascript" src="/lib/laypage/1.2/laypage.js"></script>
+<script type="text/javascript" src="/lib/checkfile.js?123"></script>
 <script type="text/javascript">
 
     var url = '{:url("User/userList")}' + '?<?php echo $page["query"];?>';
@@ -108,6 +110,7 @@
         var datemax = $("#formAjax").find("#datemax").val();
         var search = $("#formAjax").find("#search").val();
         var share_auth = $("#formAjax").find("#share_auth").val();
+        var inviter_id = $("#formAjax").find("#inviter_id").val();
         var str = '';
         if(datemin.length != '') {
             str += '&datemin=' + datemin
@@ -120,6 +123,9 @@
         }
         if(share_auth.length != '') {
             str += '&share_auth=' + share_auth
+        }
+        if(inviter_id.length != '') {
+            str += '&inviter_id=' + inviter_id
         }
         window.location.href = '{:url("User/userList")}' + '?' + str;
     });
