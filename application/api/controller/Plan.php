@@ -4,10 +4,9 @@ namespace app\api\controller;
 use think\Db;
 class Plan extends Base {
 
-
-    public function index() {
-        halt($_SERVER);
-    }
+//    public function index() {
+//        halt($_SERVER);
+//    }
 
     //取消订单
     public function orderCancel() {
