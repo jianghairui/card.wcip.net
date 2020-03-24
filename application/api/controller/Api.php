@@ -48,12 +48,12 @@ class Api extends Base
     //卡牌列表
     public function cardList() {
 
-        $post['attr_id'] = input('post.attr_id',[]);
-        $post['resource'] = input('post.resource',[]);
-        $post['type_id'] = input('post.type_id',[]);
         $post['camp_id'] = input('post.camp_id',[]);
+        $post['type_id'] = input('post.type_id',[]);
+        $post['attr_id'] = input('post.attr_id',[]);
         $post['ability_id'] = input('post.ability_id',[]);
         $post['version_id'] = input('post.version_id',[]);
+        $post['resource'] = input('post.resource',[]);
         $post['search'] = input('post.search');
 
         $curr_page = input('post.page',1);
@@ -61,27 +61,65 @@ class Api extends Base
         $curr_page = $curr_page ? $curr_page : 1;
         $perpage = $perpage ? $perpage : 10;
 
-        $whereCard = [
-            ['status','=',1]
-        ];
-        $order = ['sort' => 'ASC', 'id' => 'DESC'];
-        if(is_array($post['attr_id']) && !empty($post['attr_id'])) { $whereCard[] = ['attr_id','in',$post['attr_id']]; }
-        if(is_array($post['type_id']) && !empty($post['type_id'])) { $whereCard[] = ['type_id','in',$post['type_id']]; }
-        if(is_array($post['camp_id']) && !empty($post['camp_id'])) { $whereCard[] = ['camp_id','in',$post['camp_id']]; }
-        if(is_array($post['ability_id']) && !empty($post['ability_id'])) { $whereCard[] = ['ability_id','in',$post['ability_id']]; }
-        if(is_array($post['version_id']) && !empty($post['version_id'])) { $whereCard[] = ['version_id','in',$post['version_id']]; }
+        $whereCard = " `status`=1 ";
+
+        $order = " `sort` ASC,`id` DESC ";
+
+        if(is_array($post['camp_id']) && !empty($post['camp_id'])) {
+            $camp_ids = $post['camp_id'];
+            $whereCard .= " AND (0 ";
+            foreach ($camp_ids as $v) {
+                $whereCard .= " OR FIND_IN_SET(".$v.",camp_id) ";
+            }
+            $whereCard .= ") ";
+        }
+
+        if(is_array($post['type_id']) && !empty($post['type_id'])) {
+            $type_ids = $post['type_id'];
+            $whereCard .= " AND (0 ";
+            foreach ($type_ids as $v) {
+                $whereCard .= " OR FIND_IN_SET(".$v.",type_id) ";
+            }
+            $whereCard .= ") ";
+        }
+
+        if(is_array($post['attr_id']) && !empty($post['attr_id'])) {
+            $attr_ids = $post['attr_id'];
+            $whereCard .= " AND (0 ";
+            foreach ($attr_ids as $v) {
+                $whereCard .= " OR FIND_IN_SET(".$v.",attr_id) ";
+            }
+            $whereCard .= ") ";
+        }
+
+        if(is_array($post['ability_id']) && !empty($post['ability_id'])) {
+            $ability_ids = $post['ability_id'];
+            $whereCard .= " AND (0 ";
+            foreach ($ability_ids as $v) {
+                $whereCard .= " OR FIND_IN_SET(".$v.",ability_id) ";
+            }
+            $whereCard .= ") ";
+        }
+
+        if(is_array($post['version_id']) && !empty($post['version_id'])) {
+            $whereCard .= " AND version_id IN (" . implode(',',$post['version_id']) . ")";
+        }
+
         if(is_array($post['resource']) && !empty($post['resource'])) {
             $resource_arr = $post['resource'];
             if(in_array(7,$resource_arr)) {
-                $whereCard[] = ['resource','in',array_merge($resource_arr,range(8,20))];
-            }else {
-                $whereCard[] = ['resource','in',$resource_arr];
+                $resource_arr = array_merge($resource_arr,range(8,20));
             }
+            $whereCard .= " AND resource IN (" . implode(',',$resource_arr) . " ) ";
         }
-        if($post['search']) { $whereCard[] = ['card_name|desc','like',"%{$post['search']}%"]; }
+
+        if($post['search']) {
+            $whereCard .= " AND card_name LIKE \"%".$post['search']."%\"";
+        }
 
         try {
-            $list = Db::table('mp_card')->where($whereCard)->limit(($curr_page-1)*$perpage,$perpage)->order($order)->select();
+            $query_sql = "SELECT * FROM mp_card WHERE " . $whereCard . " ORDER BY " . $order . " LIMIT " . (($curr_page-1)*$perpage) . "," . $perpage;
+            $list = Db::query($query_sql);
         } catch (\Exception $e) {
             return ajax($e->getMessage(), -1);
         }
@@ -125,10 +163,37 @@ class Api extends Base
             foreach ($card_ability as $v) {$ability[$v['id']] = $v['ability_name'];}
             foreach ($card_version as $v) {$version[$v['id']] = $v['version_name'];}
 
-            $info['type'] = isset($type[$info['type_id']]) ? $type[$info['type_id']] : '未知';
-            $info['camp'] = isset($camp[$info['camp_id']]) ? $camp[$info['camp_id']] : '未知';
-            $info['attr'] = isset($attr[$info['attr_id']]) ? $attr[$info['attr_id']] : '未知';
-            $info['ability'] = isset($ability[$info['ability_id']]) ? $ability[$info['ability_id']] : '未知';
+            $info['type'] = [];
+            $type_ids = explode(',',$info['type_id']);
+            foreach ($type_ids as $v) {
+                if(isset($type[$v])) {
+                    $info['type'][] = $type[$v];
+                }
+            }
+            $info['camp'] = [];
+            $camp_ids = explode(',',$info['camp_id']);
+            foreach ($camp_ids as $v) {
+                if(isset($camp[$v])) {
+                    $info['camp'][] = $camp[$v];
+                }
+            }
+
+            $info['attr'] = [];
+            $attr_ids = explode(',',$info['attr_id']);
+            foreach ($attr_ids as $v) {
+                if(isset($attr[$v])) {
+                    $info['attr'][] = $attr[$v];
+                }
+            }
+
+            $info['ability'] = [];
+            $ability_ids = explode(',',$info['ability_id']);
+            foreach ($ability_ids as $v) {
+                if(isset($ability[$v])) {
+                    $info['ability'][] = $ability[$v];
+                }
+            }
+
             $info['version'] = isset($version[$info['version_id']]) ? $version[$info['version_id']] : '未知';
             switch ($info['resource']) {
                 case -2:$info['resource'] = '无';break;
@@ -136,27 +201,71 @@ class Api extends Base
                 default:;
             }
             unset($info['type_id']);unset($info['camp_id']);unset($info['attr_id']);unset($info['ability_id']);unset($info['version_id']);
+
             //卡牌在列表中位置
-            $whereCardList = [
-                ['status','=',1]
-            ];
-            $order = ['sort' => 'ASC', 'id' => 'DESC'];
-            if(is_array($post['attr_id']) && !empty($post['attr_id'])) { $whereCardList[] = ['attr_id','in',$post['attr_id']]; }
-            if(is_array($post['type_id']) && !empty($post['type_id'])) { $whereCardList[] = ['type_id','in',$post['type_id']]; }
-            if(is_array($post['camp_id']) && !empty($post['camp_id'])) { $whereCardList[] = ['camp_id','in',$post['camp_id']]; }
-            if(is_array($post['ability_id']) && !empty($post['ability_id'])) { $whereCardList[] = ['ability_id','in',$post['ability_id']]; }
-            if(is_array($post['version_id']) && !empty($post['version_id'])) { $whereCardList[] = ['version_id','in',$post['version_id']]; }
+            $whereCard = " `status`=1 ";
+
+            $order = " `sort` ASC,`id` DESC ";
+
+            if(is_array($post['camp_id']) && !empty($post['camp_id'])) {
+                $camp_ids = $post['camp_id'];
+                $whereCard .= " AND (0 ";
+                foreach ($camp_ids as $v) {
+                    $whereCard .= " OR FIND_IN_SET(".$v.",camp_id) ";
+                }
+                $whereCard .= ") ";
+            }
+
+            if(is_array($post['type_id']) && !empty($post['type_id'])) {
+                $type_ids = $post['type_id'];
+                $whereCard .= " AND (0 ";
+                foreach ($type_ids as $v) {
+                    $whereCard .= " OR FIND_IN_SET(".$v.",type_id) ";
+                }
+                $whereCard .= ") ";
+            }
+
+            if(is_array($post['attr_id']) && !empty($post['attr_id'])) {
+                $attr_ids = $post['attr_id'];
+                $whereCard .= " AND (0 ";
+                foreach ($attr_ids as $v) {
+                    $whereCard .= " OR FIND_IN_SET(".$v.",attr_id) ";
+                }
+                $whereCard .= ") ";
+            }
+
+            if(is_array($post['ability_id']) && !empty($post['ability_id'])) {
+                $ability_ids = $post['ability_id'];
+                $whereCard .= " AND (0 ";
+                foreach ($ability_ids as $v) {
+                    $whereCard .= " OR FIND_IN_SET(".$v.",ability_id) ";
+                }
+                $whereCard .= ") ";
+            }
+
+            if(is_array($post['version_id']) && !empty($post['version_id'])) {
+                $whereCard .= " AND version_id IN (" . implode(',',$post['version_id']) . ")";
+            }
+
             if(is_array($post['resource']) && !empty($post['resource'])) {
                 $resource_arr = $post['resource'];
                 if(in_array(7,$resource_arr)) {
-                    $whereCardList[] = ['resource','in',array_merge($resource_arr,range(8,20))];
-                }else {
-                    $whereCardList[] = ['resource','in',$resource_arr];
+                    $resource_arr = array_merge($resource_arr,range(8,20));
                 }
+                $whereCard .= " AND resource IN (" . implode(',',$resource_arr) . " ) ";
             }
-            if($post['search']) { $whereCardList[] = ['card_name|desc','like',"%{$post['search']}%"]; }
-            $card_ids = Db::table('mp_card')->where($whereCardList)->order($order)->column('id');
-            $offset = array_search($val['id'],$card_ids);
+
+            if($post['search']) {
+                $whereCard .= " AND card_name LIKE \"%".$post['search']."%\"";
+            }
+
+            $query_sql = "SELECT id FROM mp_card WHERE " . $whereCard . " ORDER BY " . $order;
+            $result = Db::query($query_sql);
+            $card_ids = [];
+            foreach ($result as $v) {
+                $card_ids[] = $v['id'];
+            }
+            $offset = array_search(intval($val['id']),$card_ids);
             if($offset !== false) {
                 $info['prev_card_id'] = isset($card_ids[$offset-1]) ? $card_ids[$offset-1] : null;
                 $info['next_card_id'] = isset($card_ids[$offset+1]) ? $card_ids[$offset+1] : null;
@@ -299,7 +408,7 @@ class Api extends Base
         $whereRule = [
             ['status','=',1]
         ];
-        $order = ['sort'=>'ASC','id'=>'DESC'];
+        $order = ['sort'=>'ASC'];
         try {
             $list = Db::table('mp_game_rule')->where($whereRule)->field('id,title,create_time')->order($order)->select();
         } catch (\Exception $e) {

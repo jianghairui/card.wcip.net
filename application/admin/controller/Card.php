@@ -13,10 +13,10 @@ class Card extends Base {
     //卡牌列表
     public function cardList() {
 
-        $param['attr_id'] = input('param.attr_id','');
         $param['resource'] = input('param.resource','');
-        $param['type_id'] = input('param.type_id','');
         $param['camp_id'] = input('param.camp_id','');
+        $param['type_id'] = input('param.type_id','');
+        $param['attr_id'] = input('param.attr_id','');
         $param['ability_id'] = input('param.ability_id','');
         $param['version_id'] = input('param.version_id','');
         $param['search'] = input('param.search');
@@ -25,41 +25,80 @@ class Card extends Base {
         $curr_page = input('param.page',1);
         $perpage = input('param.perpage',10);
 
-        $whereCard = [
-            ['status','=',1]
-        ];
-        $order = ['sort' => 'ASC', 'id' => 'DESC'];
-        if($param['attr_id'] !== '') { $whereCard[] = ['attr_id','in',explode(',',$param['attr_id'])]; }
-        if($param['type_id'] !== '') { $whereCard[] = ['type_id','in',explode(',',$param['type_id'])]; }
-        if($param['camp_id'] !== '') { $whereCard[] = ['camp_id','in',explode(',',$param['camp_id'])]; }
-        if($param['ability_id'] !== '') { $whereCard[] = ['ability_id','in',explode(',',$param['ability_id'])]; }
-        if($param['version_id'] !== '') { $whereCard[] = ['version_id','in',explode(',',$param['version_id'])]; }
+        $whereCard = " `status`=1 ";
+
+        $order = " `sort` ASC,`id` DESC ";
+
+        if($param['camp_id'] !== '') {
+            $camp_ids = explode(',',$param['camp_id']);
+            $whereCard .= " AND (0 ";
+            foreach ($camp_ids as $v) {
+                $whereCard .= " OR FIND_IN_SET(".$v.",camp_id) ";
+            }
+            $whereCard .= ") ";
+        }
+
+        if($param['type_id'] !== '') {
+            $type_ids = explode(',',$param['type_id']);
+            $whereCard .= " AND (0 ";
+            foreach ($type_ids as $v) {
+                $whereCard .= " OR FIND_IN_SET(".$v.",type_id) ";
+            }
+            $whereCard .= ") ";
+        }
+        if($param['attr_id'] !== '') {
+            $attr_ids = explode(',',$param['attr_id']);
+            $whereCard .= " AND (0 ";
+            foreach ($attr_ids as $v) {
+                $whereCard .= " OR FIND_IN_SET(".$v.",attr_id) ";
+            }
+            $whereCard .= ") ";
+        }
+        if($param['ability_id'] !== '') {
+            $ability_ids = explode(',',$param['ability_id']);
+            $whereCard .= " AND (0 ";
+            foreach ($ability_ids as $v) {
+                $whereCard .= " OR FIND_IN_SET(".$v.",ability_id) ";
+            }
+            $whereCard .= ") ";
+        }
+        if($param['version_id'] !== '') {
+            $whereCard .= " AND version_id IN (" .$param['version_id'] . ") ";
+        }
         if($param['resource'] !== '') {
             $resource_arr = explode(',',$param['resource']);
             if(in_array(7,$resource_arr)) {
-                $whereCard[] = ['resource','in',array_merge($resource_arr,range(8,20))];
-            }else {
-                $whereCard[] = ['resource','in',$resource_arr];
+                $resource_arr = array_merge($resource_arr,range(8,20));
             }
+            $whereCard .= " AND resource IN (" . implode(',',$resource_arr) . ") ";
         }
-        if($param['search']) { $whereCard[] = ['card_name','like',"%{$param['search']}%"]; }
+        if($param['search']) {
+            $whereCard .= " AND card_name LIKE \"%".$param['search']."%\"";
+        }
 
+        $query_sql = "SELECT * FROM mp_card WHERE " . $whereCard . " ORDER BY " . $order . " LIMIT " . (($curr_page-1)*$perpage) . "," . $perpage;
+        $count_sql = "SELECT COUNT(`id`) AS `count` FROM mp_card WHERE " . $whereCard;
         try {
-            $count = Db::table('mp_card')->where($whereCard)->count();
+            $list = Db::query($query_sql);
+            $count_result = Db::query($count_sql);
+            $count = $count_result[0]['count'];
             $page['count'] = $count;
             $page['curr'] = $curr_page;
             $page['totalPage'] = ceil($count/$perpage);
-            $list = Db::table('mp_card')->where($whereCard)->limit(($curr_page-1)*$perpage,$perpage)->order($order)->select();
+
             $card_type = Db::table('mp_card_type')->select();
             $card_camp = Db::table('mp_card_camp')->select();
             $card_attr = Db::table('mp_card_attr')->select();
             $card_ability = Db::table('mp_card_ability')->select();
             $card_version = Db::table('mp_card_version')->select();
+
+
             $type = [];
             $camp = [];
             $attr = [];
             $ability = [];
             $version = [];
+
             foreach ($card_type as $v) {$type[$v['id']] = $v['type_name'];}
             foreach ($card_camp as $v) {$camp[$v['id']] = [
                 'camp_name' => $v['camp_name'],
@@ -98,11 +137,7 @@ class Card extends Base {
     public function cardAdd() {
         if(request()->isPost()) {
             $val['card_name'] = input('post.card_name');
-            $val['attr_id'] = input('post.attr_id');
             $val['resource'] = input('post.resource');
-            $val['type_id'] = input('post.type_id');
-            $val['camp_id'] = input('post.camp_id');
-            $val['ability_id'] = input('post.ability_id');
             $val['version_id'] = input('post.version_id');
             checkInput($val);
             $val['desc'] = input('post.desc');
@@ -114,6 +149,21 @@ class Card extends Base {
             $val['qa_show'] = input('post.qa_show');
             $val['create_time'] = time();
             $val['update_time'] = $val['create_time'];
+
+            $val['camp_id'] = input('post.camp_id',[]);
+            $val['type_id'] = input('post.type_id',[]);
+            $val['attr_id'] = input('post.attr_id',[]);
+            $val['ability_id'] = input('post.ability_id',[]);
+
+            if(!is_array($val['camp_id']) || empty($val['camp_id'])) { return ajax('至少选择一个阵营'); }
+            if(!is_array($val['type_id']) || empty($val['type_id'])) { return ajax('至少选择一个类型'); }
+            if(!is_array($val['attr_id']) || empty($val['attr_id'])) { return ajax('至少选择一个属性'); }
+            if(!is_array($val['ability_id']) || empty($val['ability_id'])) { return ajax('至少选择一个能力'); }
+
+            $val['camp_id'] = implode(',',$val['camp_id']);
+            $val['type_id'] = implode(',',$val['type_id']);
+            $val['attr_id'] = implode(',',$val['attr_id']);
+            $val['ability_id'] = implode(',',$val['ability_id']);
 
             try {
                 if(isset($_FILES['file'])) {
@@ -183,6 +233,11 @@ class Card extends Base {
             $card_version = Db::table('mp_card_version')->select();
             $card_ability = Db::table('mp_card_ability')->select();
             $card_resource = config('card.resource');
+
+            $camp_ids = explode(',',$card_exist['camp_id']);
+            $type_ids = explode(',',$card_exist['type_id']);
+            $attr_ids = explode(',',$card_exist['attr_id']);
+            $ability_ids = explode(',',$card_exist['ability_id']);
         } catch (\Exception $e) {
             return ajax($e->getMessage(), -1);
         }
@@ -193,16 +248,16 @@ class Card extends Base {
         $this->assign('card_version',$card_version);
         $this->assign('card_ability',$card_ability);
         $this->assign('card_resource',$card_resource);
+        $this->assign('camp_ids',$camp_ids);
+        $this->assign('type_ids',$type_ids);
+        $this->assign('attr_ids',$attr_ids);
+        $this->assign('ability_ids',$ability_ids);
         return $this->fetch();
     }
 
     public function cardMod() {
         $val['card_name'] = input('post.card_name');
-        $val['attr_id'] = input('post.attr_id');
         $val['resource'] = input('post.resource');
-        $val['type_id'] = input('post.type_id');
-        $val['camp_id'] = input('post.camp_id');
-        $val['ability_id'] = input('post.ability_id');
         $val['version_id'] = input('post.version_id');
         $val['id'] = input('post.id');
         checkInput($val);
@@ -215,6 +270,21 @@ class Card extends Base {
         $val['qa_show'] = input('post.qa_show');
         $val['create_time'] = time();
         $val['update_time'] = $val['create_time'];
+
+        $val['camp_id'] = input('post.camp_id',[]);
+        $val['type_id'] = input('post.type_id',[]);
+        $val['attr_id'] = input('post.attr_id',[]);
+        $val['ability_id'] = input('post.ability_id',[]);
+
+        if(!is_array($val['camp_id']) || empty($val['camp_id'])) { return ajax('至少选择一个阵营'); }
+        if(!is_array($val['type_id']) || empty($val['type_id'])) { return ajax('至少选择一个类型'); }
+        if(!is_array($val['attr_id']) || empty($val['attr_id'])) { return ajax('至少选择一个属性'); }
+        if(!is_array($val['ability_id']) || empty($val['ability_id'])) { return ajax('至少选择一个能力'); }
+
+        $val['camp_id'] = implode(',',$val['camp_id']);
+        $val['type_id'] = implode(',',$val['type_id']);
+        $val['attr_id'] = implode(',',$val['attr_id']);
+        $val['ability_id'] = implode(',',$val['ability_id']);
 
         try {
             $whereCard = [

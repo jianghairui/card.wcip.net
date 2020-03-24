@@ -5,16 +5,14 @@
     <form class="form form-horizontal" id="form-article-add">
         <div class="row cl">
             <label class="form-label col-xs-4 col-sm-2">所属阵营：</label>
-            <div class="formControls col-xs-4 col-sm-4">
-                <span class="select-box">
-                    <select class="select" name="camp_id" id="camp_id">
-                        {foreach $card_camp as $li}
-                        <option value="{$li.id}" {if $info['camp_id'] == $li['id']}selected{/if}>{$li.camp_name}</option>
-                        {/foreach}
-                    </select>
-                </span>
+            <div class="formControls col-xs-8 col-sm-8">
+                {foreach $card_camp as $li}
+                <label title="{$li.camp_name}" style="display:inline-block;width: 120px;">
+                    <input type="checkbox" value="{$li.id}" name="camp_id[]" {if in_array($li['id'],$camp_ids)}checked{/if}>
+                    {$li.camp_name}
+                </label>
+                {/foreach}
             </div>
-            <div class="col-3"></div>
         </div>
         <div class="row cl">
             <label class="form-label col-xs-4 col-sm-2">消耗资源：</label>
@@ -30,18 +28,21 @@
             <div class="col-3">
             </div>
         </div>
+
         <div class="row cl">
             <label class="form-label col-xs-4 col-sm-2">卡牌类型：</label>
-            <div class="formControls col-xs-4 col-sm-4">
-                <span class="select-box">
-                    <select class="select" name="type_id" id="type_id">
-                        <option value="0" >请选择类型</option>
-                        {foreach $card_type as $li}
-                        <option value="{$li.id}" {if $info['type_id'] == $li['id']}selected{/if}>{$li.type_name}</option>
-                        {/foreach}
-                    </select>
-                </span>
+            <div class="formControls col-xs-8 col-sm-8">
+                {foreach $card_type as $li}
+                <label title="{$li.type_name}" style="display:inline-block;width: 120px;">
+                    <input type="checkbox" value="{$li.id}" name="type_id[]" {if in_array($li['id'],$type_ids)}checked{/if}>
+                    {$li.type_name}
+                </label>
+                {/foreach}
             </div>
+        </div>
+
+        <div class="row cl">
+            <label class="form-label col-xs-4 col-sm-2">是否无双：</label>
             <div class="formControls col-xs-4 col-sm-4">
                 <span class="select-box">
                     <select class="select" name="wushuang" id="wushuang">
@@ -50,32 +51,29 @@
                     </select>
                 </span>
             </div>
+            <div class="col-3"></div>
         </div>
         <div class="row cl">
             <label class="form-label col-xs-4 col-sm-2">卡牌属性：</label>
-            <div class="formControls col-xs-4 col-sm-4">
-                <span class="select-box">
-                    <select class="select" name="attr_id" id="attr_id">
-                        {foreach $card_attr as $li}
-                        <option value="{$li.id}" {if $info['attr_id'] == $li['id']}selected{/if}>{$li.attr_name}</option>
-                        {/foreach}
-                    </select>
-                </span>
+            <div class="formControls col-xs-8 col-sm-8">
+                {foreach $card_attr as $li}
+                <label title="{$li.attr_name}" style="display:inline-block;width: 120px;">
+                    <input type="checkbox" value="{$li.id}" name="attr_id[]" {if in_array($li['id'],$attr_ids)}checked{/if}>
+                    {$li.attr_name}
+                </label>
+                {/foreach}
             </div>
-            <div class="col-3"></div>
         </div>
         <div class="row cl">
             <label class="form-label col-xs-4 col-sm-2">卡牌能力：</label>
-            <div class="formControls col-xs-4 col-sm-4">
-                <span class="select-box">
-                    <select class="select" name="ability_id" id="ability_id">
-                        {foreach $card_ability as $li}
-                        <option value="{$li.id}" {if $info['ability_id'] == $li['id']}selected{/if}>{$li.ability_name}</option>
-                        {/foreach}
-                    </select>
-                </span>
+            <div class="formControls col-xs-8 col-sm-8">
+                {foreach $card_ability as $li}
+                <label title="{$li.ability_name}" style="display:inline-block;width: 120px;">
+                    <input type="checkbox" value="{$li.id}" name="ability_id[]" {if in_array($li['id'],$ability_ids)}checked{/if}>
+                    {$li.ability_name}
+                </label>
+                {/foreach}
             </div>
-            <div class="col-3"></div>
         </div>
         <div class="row cl">
             <label class="form-label col-xs-4 col-sm-2">卡牌版本：</label>
