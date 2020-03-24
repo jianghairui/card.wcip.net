@@ -295,6 +295,36 @@ class Api extends Base
         return ajax($info);
     }
 
+    public function ruleList() {
+        $whereRule = [
+            ['status','=',1]
+        ];
+        $order = ['sort'=>'ASC','id'=>'DESC'];
+        try {
+            $list = Db::table('mp_game_rule')->where($whereRule)->field('id,title,create_time')->order($order)->select();
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+        return ajax($list);
+    }
+
+    public function ruleDetail() {
+        $val['id'] = input('post.id');
+        checkPost($val);
+        $where = [
+            ['id','=',$val['id']]
+        ];
+        try {
+            $info = Db::table('mp_game_rule')->where($where)->find();
+            if(!$info) {
+                return ajax('invalid id',-4);
+            }
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+        return ajax($info);
+    }
+
 
 
 
