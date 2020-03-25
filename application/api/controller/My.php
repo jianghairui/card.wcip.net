@@ -617,8 +617,16 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
             foreach ($card_camp as $v) {$camp[$v['id']] = $v['camp_name'];}
 
             foreach ($list as &$value) {
-                $value['type'] = isset($type[$value['type_id']]) ? $type[$value['type_id']] : '未知';
-                $value['camp'] = isset($camp[$value['camp_id']]) ? $camp[$value['camp_id']] : '未知';
+                $value['type'] = [];
+                $value['camp'] = [];
+                $type_ids = explode(',',$value['type_id']);
+                $camp_ids = explode(',',$value['camp_id']);
+                foreach ($type_ids as $v) {
+                    if(isset($type[$v])) { $value['type'][] = $type[$v]; }
+                }
+                foreach ($camp_ids as $v) {
+                    if(isset($camp[$v])) { $value['camp'][] = $camp[$v]; }
+                }
                 switch ($value['resource']) {
                     case -2:$value['resource'] = '无';break;
                     case -1:$value['resource'] = 'X';break;
