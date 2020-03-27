@@ -379,6 +379,7 @@ class Shop extends Base {
         }
         try {
             $time = time();
+            $deadline = $time + config('order_deadline');
             $pay_order_sn = create_unique_number('');
             $whereGoods = [
                 ['id', '=',$data['goods_id']]
@@ -427,6 +428,7 @@ class Shop extends Base {
                 'tel' => $data['tel'],
                 'address' => $data['address'],
                 'create_time' => $time,
+                'deadline' => $deadline
             ];
 
             Db::startTrans();
@@ -467,6 +469,7 @@ class Shop extends Base {
         if(array_unique($cart_ids) !== $cart_ids) { return ajax($cart_ids,-4);}
         try {
             $time = time();
+            $deadline = $time + config('order_deadline');
             $whereCart = [
                 ['c.id','IN',$cart_ids],
                 ['c.uid','=',$this->myinfo['id']]
@@ -525,6 +528,7 @@ class Shop extends Base {
                 $insert_detail['total_price'] = $unit_price * $v['num'] + $carriage;
                 $insert_detail['carriage'] = $v['carriage'] * $v['num'];
                 $insert_detail['create_time'] = $time;
+                $insert_detail['deadline'] = $deadline;
                 $insert_detail_all[] = $insert_detail;
             }
 

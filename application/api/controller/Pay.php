@@ -26,6 +26,9 @@ class Pay extends Base {
         try {
             $order_exist = Db::table('mp_order')->where($whereOrder)->find();
             if(!$order_exist) { return ajax('invalid pay_order_sn',-4); }
+            if(($order_exist['deadline'] - time() - config('order_deadline')/2) <= 0) {
+                return ajax('订单已失效',31);
+            }
 //            $order_exist['pay_price'] = 0.1;
             $app = Factory::payment($this->mp_config);
             $result = $app->order->unify([

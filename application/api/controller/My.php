@@ -103,7 +103,7 @@ class My extends Base {
         }
         try {
             $list = Db::query("SELECT 
-`o`.`id`,`o`.`pay_order_sn`,`o`.`pay_price`,`o`.`total_price`,`o`.`carriage`,`o`.`create_time`,`o`.`refund_apply`,`o`.`status`,`o`.`refund_apply`,`d`.`order_id`,`d`.`goods_id`,`d`.`num`,`d`.`unit_price`,`d`.`goods_name`,`d`.`attr`,`d`.`evaluate`,`g`.`pics` 
+`o`.`id`,`o`.`pay_order_sn`,`o`.`pay_price`,`o`.`total_price`,`o`.`carriage`,`o`.`create_time`,`o`.`deadline`,`o`.`refund_apply`,`o`.`status`,`o`.`refund_apply`,`d`.`order_id`,`d`.`goods_id`,`d`.`num`,`d`.`unit_price`,`d`.`goods_name`,`d`.`attr`,`d`.`evaluate`,`g`.`pics` 
 FROM (SELECT * FROM mp_order WHERE " . $where . $order ." LIMIT ".($curr_page-1)*$perpage.",".$perpage.") `o` 
 LEFT JOIN `mp_order_detail` `d` ON `o`.`id`=`d`.`order_id`
 LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
@@ -126,6 +126,7 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
                         $data['status'] = $li['status'];
                         $data['refund_apply'] = $li['refund_apply'];
                         $data['create_time'] = date('Y-m-d H:i',$li['create_time']);
+                        $data['deadline'] = $li['deadline'] - time() - config('order_deadline')/2;
                         $data_child['goods_id'] = $li['goods_id'];
                         $data_child['cover'] = unserialize($li['pics'])[0];
                         $data_child['goods_name'] = $li['goods_name'];
@@ -222,7 +223,7 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
                 ->join("mp_order_detail d","o.id=d.order_id","left")
                 ->join("mp_goods g","d.goods_id=g.id","left")
                 ->where($where)
-                ->field("o.id,o.pay_order_sn,o.pay_price,o.total_price,o.carriage,o.receiver,o.tel,o.address,o.create_time,o.refund_apply,o.status,o.pay_time,o.tracking_name,o.tracking_num,d.goods_id AS goods_id,d.id AS order_detail_id,d.order_id,d.num,d.unit_price,d.goods_name,d.attr,d.evaluate,g.pics")->select();
+                ->field("o.id,o.pay_order_sn,o.pay_price,o.total_price,o.carriage,o.receiver,o.tel,o.address,o.create_time,o.deadline,o.refund_apply,o.status,o.pay_time,o.tracking_name,o.tracking_num,d.goods_id AS goods_id,d.id AS order_detail_id,d.order_id,d.num,d.unit_price,d.goods_name,d.attr,d.evaluate,g.pics")->select();
             if(!$list) {
                 return ajax('invalid order_id',24);
             }
@@ -238,6 +239,7 @@ LEFT JOIN `mp_goods` `g` ON `d`.`goods_id`=`g`.`id`
                 $data['carriage'] = $li['carriage'];
                 $data['amount'] = $li['total_price'] - $data['carriage'];
                 $data['create_time'] = date('Y-m-d H:i',$li['create_time']);
+                $data['deadline'] = $li['deadline'] - time() - config('order_deadline')/2;
                 $data['refund_apply'] = $li['refund_apply'];
                 $data['status'] = $li['status'];
                 $data['pay_time'] = $li['pay_time'];

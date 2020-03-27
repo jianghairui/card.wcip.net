@@ -1,9 +1,36 @@
-<style>
+<style xmlns="http://www.w3.org/1999/html">
     .goods_pics{ width:80px;height: 80px;background-size: cover;background-position: center}
     .order-font{color: #d9534f;}
     .order-font-b{color:#363636;font-weight: bold}
     .order-font-price{color:blue;font-weight: bold}
 </style>
+<script>
+    function create_timer (time_diff,clock) {
+        if(time_diff <= 0) {
+            document.getElementById(clock).innerHTML = ' 订单已失效';
+            return;
+        }
+        document.getElementById(clock).innerHTML=' 失效时间' + getCountTime(time_diff+8*3600);
+        var timer = setInterval(function(){
+            if(time_diff > 0) {
+                time_diff--;
+                document.getElementById(clock).innerHTML=' 失效时间' + getCountTime(time_diff+8*3600)
+            }else {
+                window.clearInterval(timer);
+                document.getElementById(clock).innerHTML = ' 订单已失效';
+            }
+        },1000);
+    }
+
+    function getCountTime(timestamp) {
+        var mydate = new Date(timestamp * 1000);
+        var str = '';
+        str += (Array(2).join('0') + mydate.getMinutes()).slice(-2) + "m";
+        str += (Array(2).join('0') + mydate.getSeconds()).slice(-2) + "s";
+        return str;
+    }
+
+</script>
 <nav class="breadcrumb"><i class="Hui-iconfont">&#xe67f;</i> 首页 <span class="c-gray en">&gt;</span> 商城管理 <span class="c-gray en">&gt;</span> 订单列表 <a class="btn btn-success radius r" style="line-height:1.6em;margin-top:3px" href="javascript:location.replace(location.href);" title="刷新" ><i class="Hui-iconfont">&#xe68f;</i></a></nav>
 <div class="page-container">
     <section id="formAjax">
@@ -40,11 +67,11 @@
         <thead>
         <tr class="text-c">
             <th width="40">#</th>
-            <th width="220">订单号</th>
+            <th width="200">订单号</th>
             <th width="260">微信端单号</th>
             <th width="80">实际支付</th>
-            <th>订单总价</th>
-            <th width="150">下单时间</th>
+            <th width="120">订单总价</th>
+            <th>下单时间</th>
             <th width="50">订单状态</th>
             <th width="120">操作</th>
         </tr>
@@ -58,7 +85,12 @@
                 <td>{$li.trans_id}</td>
                 <td><span class="order-font-price" onclick="mod_price(this,{$li.id},{$li.pay_price})">{$li.pay_price}</span>元</td>
                 <td><span class="order-font-price">{$li.total_price}</span>元 (运费:<span style="color: green">{$li.carriage}</span>元)</td>
-                <td>{$li.create_time|date="Y-m-d H:i:s"}</td>
+                <td>{$li.create_time|date="Y-m-d H:i:s"}   <span id="clock{$li.id}" style="color: grey;font-weight: bold"></span></td>
+                {if $li['status'] == 0}
+                <script>
+                    create_timer({$li.deadline},'clock{$li.id}');
+                </script>
+                {/if}
                 <td class="td-status">
                     <span class="pay-status">
                         {if !$li['refund_apply']}
@@ -93,7 +125,7 @@
                 </td>
                 <td class="td-manage" rowspan="3">
                     <span>
-                        <a title="查看详情" href="javascript:;" onclick="detail('订单详情','{:url("Shop/orderDetail",array("id"=>$li["id"]))}')">
+                        <a title="查看详情" href="javascript:;" onclick="pagefull('订单详情','{:url("Shop/orderDetail",array("id"=>$li["id"]))}')">
                         <i class="Hui-iconfont">&#xe6df;</i>
                         </a>
                     </span>
@@ -409,6 +441,9 @@
             });
         });
     }
+
+
+
 
 
 </script>
