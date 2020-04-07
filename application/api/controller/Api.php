@@ -32,10 +32,14 @@ class Api extends Base
     //获取卡牌筛选条件
     public function cardParams() {
         try {
-            $data['card_type'] = Db::table('mp_card_type')->select();
+            $order = [
+                'sort' => 'ASC',
+                'id' => 'DESC'
+            ];
+            $data['card_type'] = Db::table('mp_card_type')->order($order)->select();
             $data['card_camp'] = Db::table('mp_card_camp')->select();
             $data['card_attr'] = Db::table('mp_card_attr')->select();
-            $data['card_ability'] = Db::table('mp_card_ability')->select();
+            $data['card_ability'] = Db::table('mp_card_ability')->order($order)->select();
             $data['card_version'] = Db::table('mp_card_version')->select();
             $data['resource'] = config('card.resource');
         } catch (\Exception $e) {

@@ -86,10 +86,11 @@ class Card extends Base {
             $page['curr'] = $curr_page;
             $page['totalPage'] = ceil($count/$perpage);
 
-            $card_type = Db::table('mp_card_type')->select();
+            $orderParam = ['sort'=>'ASC','id'=>'DESC'];
+            $card_type = Db::table('mp_card_type')->order($orderParam)->select();
             $card_camp = Db::table('mp_card_camp')->select();
             $card_attr = Db::table('mp_card_attr')->select();
-            $card_ability = Db::table('mp_card_ability')->select();
+            $card_ability = Db::table('mp_card_ability')->order($orderParam)->select();
             $card_version = Db::table('mp_card_version')->select();
 
 
@@ -478,13 +479,17 @@ class Card extends Base {
         $curr_page = input('param.page',1);
         $perpage = input('param.perpage',10);
         $page['query'] = http_build_query(input('param.'));
-        $whereAttr = [];
+        $whereAbility = [];
+        $order = [
+            'sort' => 'ASC',
+            'id' => 'DESC'
+        ];
         try {
-            $count = Db::table('mp_card_ability')->where($whereAttr)->count();
+            $count = Db::table('mp_card_ability')->where($whereAbility)->count();
             $page['count'] = $count;
             $page['curr'] = $curr_page;
             $page['totalPage'] = ceil($count/$perpage);
-            $list = Db::table('mp_card_ability')->where($whereAttr)->limit(($curr_page-1)*$perpage,$perpage)->select();
+            $list = Db::table('mp_card_ability')->where($whereAbility)->limit(($curr_page-1)*$perpage,$perpage)->order($order)->select();
         } catch (\Exception $e) {
             return ajax($e->getMessage(), -1);
         }
@@ -739,13 +744,17 @@ class Card extends Base {
         $curr_page = input('param.page',1);
         $perpage = input('param.perpage',10);
         $page['query'] = http_build_query(input('param.'));
-        $whereAttr = [];
+        $whereType = [];
+        $order = [
+            'sort' => 'ASC',
+            'id' => 'DESC'
+        ];
         try {
-            $count = Db::table('mp_card_type')->where($whereAttr)->count();
+            $count = Db::table('mp_card_type')->where($whereType)->count();
             $page['count'] = $count;
             $page['curr'] = $curr_page;
             $page['totalPage'] = ceil($count/$perpage);
-            $list = Db::table('mp_card_type')->where($whereAttr)->limit(($curr_page-1)*$perpage,$perpage)->select();
+            $list = Db::table('mp_card_type')->where($whereType)->limit(($curr_page-1)*$perpage,$perpage)->order($order)->select();
         } catch (\Exception $e) {
             return ajax($e->getMessage(), -1);
         }
@@ -936,13 +945,39 @@ class Card extends Base {
         }
     }
 
-    //商品排序
+    //卡牌排序
     public function sortCard() {
         $val['id'] = input('post.id');
         $val['sort'] = input('post.sort');
         checkInput($val);
         try {
             Db::table('mp_card')->update($val);
+        }catch (\Exception $e) {
+            return ajax($e->getMessage(),-1);
+        }
+        return ajax($val);
+    }
+
+    //卡牌能力排序
+    public function sortAbility() {
+        $val['id'] = input('post.id');
+        $val['sort'] = input('post.sort');
+        checkInput($val);
+        try {
+            Db::table('mp_card_ability')->update($val);
+        }catch (\Exception $e) {
+            return ajax($e->getMessage(),-1);
+        }
+        return ajax($val);
+    }
+
+    //卡牌类型排序
+    public function sortType() {
+        $val['id'] = input('post.id');
+        $val['sort'] = input('post.sort');
+        checkInput($val);
+        try {
+            Db::table('mp_card_type')->update($val);
         }catch (\Exception $e) {
             return ajax($e->getMessage(),-1);
         }
