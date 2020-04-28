@@ -52,6 +52,7 @@ class Article extends Base {
     public function articleAddPost() {
         $val['title'] = input('post.title');
         $val['desc'] = input('post.desc');
+        $val['status'] = input('post.status');
         checkInput($val);
         $val['content'] = input('post.content');
         $val['create_time'] = input('post.create_time',date('Y-m-d H:i:s'));
@@ -97,6 +98,7 @@ class Article extends Base {
     public function articleMod() {
         $val['title'] = input('post.title');
         $val['desc'] = input('post.desc');
+        $val['status'] = input('post.status');
         $val['id'] = input('post.id');
         checkInput($val);
         $val['content'] = input('post.content');

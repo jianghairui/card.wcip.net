@@ -185,11 +185,28 @@
                     {/foreach}
                 </td>
                 <td>{if isset($version[$li['version_id']])}{$version[$li['version_id']]}{/if}</td>
-                <td>{$li.status}</td>
+                <td class="td-status">
+                    {if $li['status'] == 1}
+                    <span class="label label-success radius">已显示</span>
+                    {else /}
+                    <span class="label label-defaunt radius">已隐藏</span>
+                    {/if}
+                </td>
                 <td>
                     <span>
+                        {if $li['status'] == '1'}
+                        <a style="text-decoration:none" onClick="card_hide(this,{$li.id})" href="javascript:;" title="隐藏">
+                            <i class="Hui-iconfont">&#xe6de;</i>
+                        </a>
+                        {else /}
+                        <a style="text-decoration:none" onClick="card_show(this,{$li.id})" href="javascript:;" title="显示">
+                            <i class="Hui-iconfont">&#xe603;</i>
+                        </a>
+                        {/if}
+                    </span>
+                    <span>
                         <a title="编辑" href="javascript:;" class="ml-5" style="text-decoration:none" onclick="pagefull('卡牌详情','{:url("Card/cardDetail",array("id"=>$li["id"]))}')">
-                    <i class="Hui-iconfont">&#xe6df;</i>
+                            <i class="Hui-iconfont">&#xe6df;</i>
                         </a>
                     </span>
                 </td>
@@ -316,8 +333,58 @@
             })
         });
 
-
     });
+
+    /*下架*/
+    function card_hide(obj,id){
+        layer.confirm('确认要隐藏吗？',function(index){
+            $.ajax({
+                url:"{:url('Card/cardHide')}",
+                type:'post',
+                dataType:'json',
+                data:{id:id},
+                success:function(data) {
+                    // console.log(data);
+                    if(data.code == 1) {
+                        $(obj).parents("tr").find(".td-status").html('<span class="label label-defaunt radius">已隐藏</span>');
+                        $(obj).parent().html('<a style="text-decoration:none" onClick="card_show(this,'+id+')" href="javascript:;" title="显示"><i class="Hui-iconfont">&#xe603;</i></a>');
+                        layer.msg('已隐藏!',{icon: 1,time:1000});
+                    }else {
+                        layer.msg(data.data,{icon:2,time:1000})
+                    }
+                },
+                error:function(data) {
+                    layer.msg('请求失败!',{icon:5,time:1000})
+                }
+            })
+
+        });
+    }
+    /*上架*/
+    function card_show(obj,id){
+        layer.confirm('确认要显示吗？',function(index){
+            $.ajax({
+                url:"{:url('Card/cardShow')}",
+                type:'post',
+                dataType:'json',
+                data:{id:id},
+                success:function(data) {
+                    // console.log(data);
+                    if(data.code == 1) {
+                        $(obj).parents("tr").find(".td-status").html('<span class="label label-success radius">已显示</span>');
+                        $(obj).parent().html('<a style="text-decoration:none" onClick="card_hide(this,'+id+')" href="javascript:;" title="隐藏"><i class="Hui-iconfont">&#xe6de;</i></a>');
+                        layer.msg('已显示!',{icon: 1,time:1000});
+                    }else {
+                        layer.msg(data.data,{icon:2,time:1000})
+                    }
+                },
+                error:function(data) {
+                    layer.msg('请求失败!',{icon:5,time:1000})
+                }
+            })
+
+        });
+    }
 
 
 

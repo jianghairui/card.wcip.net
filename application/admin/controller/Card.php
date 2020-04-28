@@ -25,7 +25,7 @@ class Card extends Base {
         $curr_page = input('param.page',1);
         $perpage = input('param.perpage',10);
 
-        $whereCard = " `status`=1 ";
+        $whereCard = " `del`=0 ";
 
         $order = " `sort` ASC,`id` DESC ";
 
@@ -140,6 +140,7 @@ class Card extends Base {
             $val['card_name'] = input('post.card_name');
             $val['resource'] = input('post.resource');
             $val['version_id'] = input('post.version_id');
+            $val['status'] = input('post.status');
             checkInput($val);
             $val['desc'] = input('post.desc');
             $val['origin'] = input('post.origin');
@@ -260,6 +261,7 @@ class Card extends Base {
         $val['card_name'] = input('post.card_name');
         $val['resource'] = input('post.resource');
         $val['version_id'] = input('post.version_id');
+        $val['status'] = input('post.status');
         $val['id'] = input('post.id');
         checkInput($val);
         $val['desc'] = input('post.desc');
@@ -331,11 +333,33 @@ class Card extends Base {
     }
 
     public function cardHide() {
-
+        $val['id'] = input('post.id');
+        checkInput($val);
+        try {
+            $exist = Db::table('mp_card')->where('id','=',$val['id'])->find();
+            if (!$exist) {
+                return ajax('非法操作', -1);
+            }
+            Db::table('mp_card')->where('id','=',$val['id'])->update(['status' => 0]);
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+        return ajax();
     }
 
     public function cardShow() {
-
+        $val['id'] = input('post.id');
+        checkInput($val);
+        try {
+            $exist = Db::table('mp_card')->where('id','=',$val['id'])->find();
+            if(!$exist) {
+                return ajax('非法操作',-1);
+            }
+            Db::table('mp_card')->where('id','=',$val['id'])->update(['status'=>1]);
+        } catch (\Exception $e) {
+            return ajax($e->getMessage(), -1);
+        }
+        return ajax();
     }
 
     public function cardDel() {
