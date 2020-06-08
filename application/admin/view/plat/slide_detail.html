@@ -119,7 +119,7 @@
                 $("#file").val('');
                 var src = '';
             }else {
-                if(checkfile('file') !== true) {
+                if(checkfile('file',256) !== true) {
                     $("#file").val('');
                     $("#fileList").html('');
                     return false
