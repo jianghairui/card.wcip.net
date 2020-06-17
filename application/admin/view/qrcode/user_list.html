@@ -24,6 +24,7 @@
             </span>
             <input type="text" name="search" value="{$param['search']}" id="search" placeholder="昵称" style="width:200px" class="input-text">
             <button name="" id="search-btn" class="btn btn-success" type="button"><i class="Hui-iconfont">&#xe665;</i> 查找用户</button>
+            <button name="" id="toExcel" class="btn btn-primary" type="button"><i class="Hui-iconfont">&#xe665;</i> 导出Excel</button>
         </div>
     </section>
     <div class="cl pd-5 bg-1 bk-gray mt-20">
@@ -129,6 +130,32 @@
             str += '&search=' + search
         }
         window.location.href = '{:url("Qrcode/userList")}' + '?' + str;
+    });
+
+    $("#toExcel").click(function () {
+        var subscribe = $("#formAjax").find("#subscribe").val();
+        var scene_id = $("#formAjax").find("#scene_id").val();
+        var datemin = $("#formAjax").find("#datemin").val();
+        var datemax = $("#formAjax").find("#datemax").val();
+        var search = $("#formAjax").find("#search").val();
+
+        var str = '';
+        if(subscribe.length != '') {
+            str += '&subscribe=' + subscribe
+        }
+        if(scene_id.length != '') {
+            str += '&scene_id=' + scene_id
+        }
+        if(datemin.length != '') {
+            str += '&datemin=' + datemin
+        }
+        if(datemax.length != '') {
+            str += '&datemax=' + datemax
+        }
+        if(search.length != '') {
+            str += '&search=' + search
+        }
+        window.location.href = '{:url("Excel/fansList")}' + '?' + str;
     });
 
 

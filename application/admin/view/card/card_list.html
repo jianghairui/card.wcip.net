@@ -15,72 +15,6 @@
             <br>
             <br>
             <div class="text-l formControls">
-                <div class="attr-prefix">卡牌属性：</div>
-                <div class="attr-prefix-item" id="attr_id">
-                    <?php $attr_id_arr=explode(',',$param['attr_id']);?>
-                    {foreach $card_attr as $v}
-                    <div class="radio-box">
-                        <input type="checkbox" value="{$v.id}" name="attr_id[]" id="attr-{$v.id}" {if in_array(strval($v['id']),$attr_id_arr,true)}checked{/if}>
-                        <label for="attr-{$v.id}"><img class="card-attr-icon" src="/{$v.icon}" alt="" title="{$v.attr_name}"></label>
-                    </div>
-                    {/foreach}
-                </div>
-            </div>
-            <div class="text-l formControls">
-                <div class="attr-prefix">消耗资源：</div>
-                <div class="attr-prefix-item" id="resource">
-                    <?php $resource_arr=explode(',',$param['resource']);?>
-                    <div class="radio-box">
-                        <input type="checkbox" value="-1" name="resource[]" id="resource--1">
-                        <label for="resource--1">x</label>
-                    </div>
-                    <div class="radio-box">
-                        <input type="checkbox" value="0" name="resource[]" id="resource-0">
-                        <label for="resource-0">0</label>
-                    </div>
-                    <div class="radio-box">
-                        <input type="checkbox" value="1" name="resource[]" id="resource-1">
-                        <label for="resource-1">1</label>
-                    </div>
-                    <div class="radio-box">
-                        <input type="checkbox" value="2" name="resource[]" id="resource-2">
-                        <label for="resource-2">2</label>
-                    </div>
-                    <div class="radio-box">
-                        <input type="checkbox" value="3" name="resource[]" id="resource-3">
-                        <label for="resource-3">3</label>
-                    </div>
-                    <div class="radio-box">
-                        <input type="checkbox" value="4" name="resource[]" id="resource-4">
-                        <label for="resource-4">4</label>
-                    </div>
-                    <div class="radio-box">
-                        <input type="checkbox" value="5" name="resource[]" id="resource-5">
-                        <label for="resource-5">5</label>
-                    </div>
-                    <div class="radio-box">
-                        <input type="checkbox" value="6" name="resource[]" id="resource-6">
-                        <label for="resource-6">6</label>
-                    </div>
-                    <div class="radio-box">
-                        <input type="checkbox" value="7" name="resource[]" id="resource-7">
-                        <label for="resource-7">7+</label>
-                    </div>
-                </div>
-            </div>
-            <div class="text-l formControls">
-                <div class="attr-prefix">卡牌类型：</div>
-                <div class="attr-prefix-item" id="type_id">
-                    <?php $type_id_arr=explode(',',$param['type_id']);?>
-                    {foreach $card_type as $v}
-                    <div class="radio-box">
-                        <input type="checkbox" value="{$v.id}" name="type_id[]" id="type-{$v.id}" {if in_array(strval($v['id']),$type_id_arr,true)}checked{/if}>
-                        <label for="type-{$v.id}">{$v.type_name}</label>
-                    </div>
-                    {/foreach}
-                </div>
-            </div>
-            <div class="text-l formControls">
                 <div class="attr-prefix">所属阵营：</div>
                 <div class="attr-prefix-item" id="camp_id">
                     <?php $camp_id_arr=explode(',',$param['camp_id']);?>
@@ -93,6 +27,18 @@
                 </div>
             </div>
             <div class="text-l formControls">
+                <div class="attr-prefix">卡牌属性：</div>
+                <div class="attr-prefix-item" id="attr_id">
+                    <?php $attr_id_arr=explode(',',$param['attr_id']);?>
+                    {foreach $card_attr as $v}
+                    <div class="radio-box">
+                        <input type="checkbox" value="{$v.id}" name="attr_id[]" id="attr-{$v.id}" {if in_array(strval($v['id']),$attr_id_arr,true)}checked{/if}>
+                        <label for="attr-{$v.id}"><img class="card-attr-icon" src="/{$v.icon}" alt="" title="{$v.attr_name}"></label>
+                    </div>
+                    {/foreach}
+                </div>
+            </div>
+            <div class="text-l formControls">
                 <div class="attr-prefix">卡牌能力：</div>
                 <div class="attr-prefix-item" id="ability_id">
                     <?php $ability_id_arr=explode(',',$param['ability_id']);?>
@@ -100,6 +46,51 @@
                     <div class="radio-box">
                         <input type="checkbox" value="{$v.id}" name="ability_id[]" id="ability-{$v.id}" {if in_array(strval($v['id']),$ability_id_arr,true)}checked{/if}>
                         <label for="ability-{$v.id}"><img class="card-ability-icon" src="/{$v.icon}" alt="" title="{$v.ability_name}"></label>
+                    </div>
+                    {/foreach}
+                </div>
+            </div>
+            <div class="text-l formControls">
+                <div class="attr-prefix">消耗资源：</div>
+                <div class="attr-prefix-item" id="resource">
+                    <?php $resource_arr=explode(',',$param['resource']);?>
+                    <div class="radio-box">
+                        <input type="checkbox" value="-1" name="resource[]" id="resource--1" {if in_array('-1',$resource_arr)}checked{/if}><label for="resource--1">x</label>
+                    </div>
+                    <div class="radio-box">
+                        <input type="checkbox" value="0" name="resource[]" id="resource-0" {if in_array('0',$resource_arr)}checked{/if}><label for="resource-0">0</label>
+                    </div>
+                    <div class="radio-box">
+                        <input type="checkbox" value="1" name="resource[]" id="resource-1" {if in_array('1',$resource_arr)}checked{/if}><label for="resource-1">1</label>
+                    </div>
+                    <div class="radio-box">
+                        <input type="checkbox" value="2" name="resource[]" id="resource-2" {if in_array('2',$resource_arr)}checked{/if}><label for="resource-2">2</label>
+                    </div>
+                    <div class="radio-box">
+                        <input type="checkbox" value="3" name="resource[]" id="resource-3" {if in_array('3',$resource_arr)}checked{/if}><label for="resource-3">3</label>
+                    </div>
+                    <div class="radio-box">
+                        <input type="checkbox" value="4" name="resource[]" id="resource-4" {if in_array('4',$resource_arr)}checked{/if}><label for="resource-4">4</label>
+                    </div>
+                    <div class="radio-box">
+                        <input type="checkbox" value="5" name="resource[]" id="resource-5" {if in_array('5',$resource_arr)}checked{/if}><label for="resource-5">5</label>
+                    </div>
+                    <div class="radio-box">
+                        <input type="checkbox" value="6" name="resource[]" id="resource-6" {if in_array('6',$resource_arr)}checked{/if}><label for="resource-6">6</label>
+                    </div>
+                    <div class="radio-box">
+                        <input type="checkbox" value="7" name="resource[]" id="resource-7" {if in_array('7',$resource_arr)}checked{/if}><label for="resource-7">7+</label>
+                    </div>
+                </div>
+            </div>
+            <div class="text-l formControls">
+                <div class="attr-prefix">卡牌类型：</div>
+                <div class="attr-prefix-item" id="type_id">
+                    <?php $type_id_arr=explode(',',$param['type_id']);?>
+                    {foreach $card_type as $v}
+                    <div class="radio-box">
+                        <input type="checkbox" value="{$v.id}" name="type_id[]" id="type-{$v.id}" {if in_array(strval($v['id']),$type_id_arr,true)}checked{/if}>
+                        <label for="type-{$v.id}">{$v.type_name}</label>
                     </div>
                     {/foreach}
                 </div>
@@ -132,11 +123,11 @@
             <th width="50">排序</th>
             <th width="80">图片</th>
             <th width="150">卡牌名</th>
-            <th width="44">属性</th>
-            <th width="120">资源值</th>
-            <th width="80">类型</th>
-            <th width="44">阵营</th>
-            <th width="100">能力</th>
+            <th width="132">属性</th>
+            <th width="50">资源值</th>
+            <th width="132">类型</th>
+            <th width="132">阵营</th>
+            <th width="180">能力</th>
             <th>版本</th>
             <th width="80">状态</th>
             <th width="130">操作</th>
@@ -153,9 +144,12 @@
                 </td>
                 <td>{$li.card_name}</td>
                 <td>
-                    {if isset($attr[$li['attr_id']])}
-                    <div style="width: 44px;height: 44px;background-image: url('/{$attr[$li['attr_id']]['icon']}');background-position: center;background-repeat: no-repeat;background-size: 100%"></div>
+                    <?php $attr_id_arr=explode(',',$li['attr_id']);?>
+                    {foreach $attr_id_arr as $v}
+                    {if isset($attr[$v])}
+                    <div style="width: 33px;height: 33px;background-image: url('/{$attr[$v]['icon']}');background-position: center;background-repeat: no-repeat;background-size: 100%;display: inline-flex"></div>
                     {/if}
+                    {/foreach}
                 </td>
                 <td>
                     {switch $li['resource']}
@@ -164,23 +158,55 @@
                     {default /}{$li['resource']}
                     {/switch}
                 </td>
-                <td>{if isset($type[$li['type_id']])}{$type[$li['type_id']]}{/if}</td>
-                <td>
-                    {if isset($camp[$li['camp_id']])}
-                    <div style="width: 44px;height: 44px;background-image: url('/{$camp[$li['camp_id']]['icon']}');background-position: center;background-repeat: no-repeat;background-size: 100%"></div>
-                    {/if}
-                </td>
-                <td>
-                    {if isset($ability[$li['ability_id']])}
-                    <div style="width: 100px;height: 38px;background-image: url('/{$ability[$li['ability_id']]['icon']}');background-position: center;background-repeat: no-repeat;background-size: 100%"></div>
-                    {/if}
-                </td>
-                <td>{if isset($version[$li['version_id']])}{$version[$li['version_id']]}{/if}</td>
-                <td>{$li.status}</td>
                 <td>
                     <span>
+                        <?php $type_id_arr=explode(',',$li['type_id']);?>
+                        {foreach $type_id_arr as $v}
+                        {if isset($type[$v])}
+                            |{$type[$v]}
+                        {/if}
+                        {/foreach}|
+                    </span>
+                </td>
+                <td>
+                    <?php $camp_id_arr=explode(',',$li['camp_id']);?>
+                    {foreach $camp_id_arr as $v}
+                    {if isset($camp[$v])}
+                    <div style="width: 33px;height: 33px;background-image: url('/{$camp[$v]['icon']}');background-position: center;background-repeat: no-repeat;background-size: 100%;display: inline-flex"></div>
+                    {/if}
+                    {/foreach}
+                </td>
+                <td>
+                    <?php $ability_id_arr=explode(',',$li['ability_id']);?>
+                    {foreach $ability_id_arr as $v}
+                    {if isset($ability[$v])}
+                    <div style="width: 75px;height: 30px;background-image: url('/{$ability[$v]['icon']}');background-position: center;background-repeat: no-repeat;background-size: 100%;display: inline-flex"></div>
+                    {/if}
+                    {/foreach}
+                </td>
+                <td>{if isset($version[$li['version_id']])}{$version[$li['version_id']]}{/if}</td>
+                <td class="td-status">
+                    {if $li['status'] == 1}
+                    <span class="label label-success radius">已显示</span>
+                    {else /}
+                    <span class="label label-defaunt radius">已隐藏</span>
+                    {/if}
+                </td>
+                <td>
+                    <span>
+                        {if $li['status'] == '1'}
+                        <a style="text-decoration:none" onClick="card_hide(this,{$li.id})" href="javascript:;" title="隐藏">
+                            <i class="Hui-iconfont">&#xe6de;</i>
+                        </a>
+                        {else /}
+                        <a style="text-decoration:none" onClick="card_show(this,{$li.id})" href="javascript:;" title="显示">
+                            <i class="Hui-iconfont">&#xe603;</i>
+                        </a>
+                        {/if}
+                    </span>
+                    <span>
                         <a title="编辑" href="javascript:;" class="ml-5" style="text-decoration:none" onclick="pagefull('卡牌详情','{:url("Card/cardDetail",array("id"=>$li["id"]))}')">
-                    <i class="Hui-iconfont">&#xe6df;</i>
+                            <i class="Hui-iconfont">&#xe6df;</i>
                         </a>
                     </span>
                 </td>
@@ -307,8 +333,58 @@
             })
         });
 
-
     });
+
+    /*下架*/
+    function card_hide(obj,id){
+        layer.confirm('确认要隐藏吗？',function(index){
+            $.ajax({
+                url:"{:url('Card/cardHide')}",
+                type:'post',
+                dataType:'json',
+                data:{id:id},
+                success:function(data) {
+                    // console.log(data);
+                    if(data.code == 1) {
+                        $(obj).parents("tr").find(".td-status").html('<span class="label label-defaunt radius">已隐藏</span>');
+                        $(obj).parent().html('<a style="text-decoration:none" onClick="card_show(this,'+id+')" href="javascript:;" title="显示"><i class="Hui-iconfont">&#xe603;</i></a>');
+                        layer.msg('已隐藏!',{icon: 1,time:1000});
+                    }else {
+                        layer.msg(data.data,{icon:2,time:1000})
+                    }
+                },
+                error:function(data) {
+                    layer.msg('请求失败!',{icon:5,time:1000})
+                }
+            })
+
+        });
+    }
+    /*上架*/
+    function card_show(obj,id){
+        layer.confirm('确认要显示吗？',function(index){
+            $.ajax({
+                url:"{:url('Card/cardShow')}",
+                type:'post',
+                dataType:'json',
+                data:{id:id},
+                success:function(data) {
+                    // console.log(data);
+                    if(data.code == 1) {
+                        $(obj).parents("tr").find(".td-status").html('<span class="label label-success radius">已显示</span>');
+                        $(obj).parent().html('<a style="text-decoration:none" onClick="card_hide(this,'+id+')" href="javascript:;" title="隐藏"><i class="Hui-iconfont">&#xe6de;</i></a>');
+                        layer.msg('已显示!',{icon: 1,time:1000});
+                    }else {
+                        layer.msg(data.data,{icon:2,time:1000})
+                    }
+                },
+                error:function(data) {
+                    layer.msg('请求失败!',{icon:5,time:1000})
+                }
+            })
+
+        });
+    }
 
 
 

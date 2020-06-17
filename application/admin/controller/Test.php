@@ -11,9 +11,20 @@ class Test extends Base {
 
 
     public function index() {
-        nl2br('');
-        htmlspecialchars('');
+        $arr = [];
+        if(is_array($arr)) {
+            echo 'yes';
+        }else {
+            echo 'no';
+        }
+//        nl2br('');
+//        htmlspecialchars('');
     }
+
+//https://sub.xinjie.eu.org/link/W48kjPuWDSRoaN8U?mu=18348
+//https://sub.xinjie.eu.org/link/W48kjPuWDSRoaN8U?mu=824
+
+
 
 
 
