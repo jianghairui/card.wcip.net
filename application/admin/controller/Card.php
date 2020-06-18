@@ -73,7 +73,7 @@ class Card extends Base {
             $whereCard .= " AND resource IN (" . implode(',',$resource_arr) . ") ";
         }
         if($param['search']) {
-            $whereCard .= " AND card_name LIKE \"%".$param['search']."%\"";
+            $whereCard .= " AND (`card_name` LIKE \"%".$param['search']."%\" OR `desc` LIKE \"%".$param['search']."%\") ";
         }
 
         $query_sql = "SELECT * FROM mp_card WHERE " . $whereCard . " ORDER BY " . $order . " LIMIT " . (($curr_page-1)*$perpage) . "," . $perpage;
