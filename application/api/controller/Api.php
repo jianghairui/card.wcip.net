@@ -106,7 +106,7 @@ class Api extends Base
         }
 
         if(is_array($post['version_id']) && !empty($post['version_id'])) {
-            $whereCard .= " AND version_id IN (" . implode(',',$post['version_id']) . ")";
+            $whereCard .= " AND `version_id` IN (" . implode(',',$post['version_id']) . ")";
         }
 
         if(is_array($post['resource']) && !empty($post['resource'])) {
@@ -114,17 +114,19 @@ class Api extends Base
             if(in_array(7,$resource_arr)) {
                 $resource_arr = array_merge($resource_arr,range(8,20));
             }
-            $whereCard .= " AND resource IN (" . implode(',',$resource_arr) . " ) ";
+            $whereCard .= " AND `resource` IN (" . implode(',',$resource_arr) . " ) ";
         }
 
         if($post['search']) {
-            $whereCard .= " AND card_name LIKE \"%".$post['search']."%\"";
+//            $whereCard .= " AND card_name LIKE \"%".$post['search']."%\"";
+            $whereCard .= " AND (`card_name` LIKE \"%".$post['search']."%\" OR `desc` LIKE \"%".$post['search']."%\") ";
         }
 
         try {
             $query_sql = "SELECT * FROM mp_card WHERE " . $whereCard . " ORDER BY " . $order . " LIMIT " . (($curr_page-1)*$perpage) . "," . $perpage;
             $list = Db::query($query_sql);
         } catch (\Exception $e) {
+            $this->excep($this->cmd,$query_sql);
             return ajax($e->getMessage(), -1);
         }
        return ajax($list);
