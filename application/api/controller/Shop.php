@@ -528,7 +528,6 @@ class Shop extends Base {
                 $insert_detail['total_price'] = $unit_price * $v['num'] + $carriage;
                 $insert_detail['carriage'] = $v['carriage'] * $v['num'];
                 $insert_detail['create_time'] = $time;
-                $insert_detail['deadline'] = $deadline;
                 $insert_detail_all[] = $insert_detail;
             }
 
@@ -547,6 +546,7 @@ class Shop extends Base {
                 'tel' => $val['tel'],
                 'address' => $val['address'],
                 'create_time' => $time,
+                'deadline' => $deadline
             ];
 
             //有库存不足的商品清除购物车库存不足部分
@@ -585,6 +585,7 @@ class Shop extends Base {
             Db::commit();
         } catch (\Exception $e) {
             Db::rollback();
+            $this->excep($this->cmd,$e->getMessage());
             return ajax($e->getMessage(), -1);
         }
         return ajax($pay_order_sn);
